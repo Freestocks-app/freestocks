@@ -15,13 +15,13 @@ This branch is **not** FOMO / RH Chain. Exit rail = Privy embedded Solana wallet
 
 ## P0 — finish completely first (dev)
 
-| ID | Item | Notes |
-|----|------|-------|
-| P0-1 | Branch + feature flag | `UNLOCK_RAIL=solana` on this branch; keep better-auth for app login |
-| P0-2 | **Privy Unlock UI** | Email field **fixed / greyed out** (= session email). Tap → OTP to that email only. Mismatch rejected |
-| P0-3 | **Privy Unlock impl** | OTP success → embedded Solana wallet created/linked → store address on redeem |
-| P0-4 | Demo credit → redeem → treasury send | One working send to Privy wallet address; tx link in UI/control. No gas sponsorship product yet |
-| P0-5 | Copy alignment (this branch) | Remove "Coming soon" / Terms "not yet available" / FOMO+RH Chain receive framing. Story = earn → Solana wallet stocks |
+| ID | Item | Notes | Status |
+|----|------|-------|--------|
+| P0-1 | Branch + feature flag | `UNLOCK_RAIL=solana` on this branch; keep better-auth for app login | ✅ Done |
+| P0-2 | **Privy Unlock UI** | Email field **fixed / greyed out** (= session email). Tap → OTP to that email only. Mismatch rejected | ✅ Done |
+| P0-3 | **Privy Unlock impl** | OTP success → embedded Solana wallet created/linked → store address on redeem | ✅ Done |
+| P0-4 | Demo credit → redeem → treasury send | One working send to Privy wallet address; tx link in UI/control. No gas sponsorship product yet | 🔲 Next |
+| P0-5 | Copy alignment (this branch) | Remove "Coming soon" / Terms "not yet available" / FOMO+RH Chain receive framing. Story = earn → Solana wallet stocks | ✅ Done |
 
 ## P1 — polish that wins
 

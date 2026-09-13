@@ -33,7 +33,8 @@ export default async function UnlockPage() {
     .limit(5);
 
   const hasPendingRequest = pendingRequests.some((r: RedeemRequest) => r.status === "pending");
-  const fomoReferralUrl = process.env.FOMO_REFERRAL_URL;
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  const sessionEmail = session.user.email;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] pb-24 md:pb-6">
@@ -120,7 +121,8 @@ export default async function UnlockPage() {
         ) : (
           <RedeemFlow 
             balanceCents={balanceCents} 
-            fomoReferralUrl={fomoReferralUrl}
+            sessionEmail={sessionEmail}
+            privyAppId={privyAppId}
           />
         )}
 

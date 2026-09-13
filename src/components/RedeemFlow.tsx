@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
   ArrowRight,
   ArrowLeft,
   CheckCircle,
-  ExternalLink,
   Wallet,
   AlertCircle,
   Loader2,
-  Copy,
   Check,
+  Settings,
 } from "lucide-react";
-
-// TODO(privy): Remove referral URL placeholder once Privy OTP flow is implemented
-const REFERRAL_URL_PLACEHOLDER = "https://freestocks.app";
+import { PrivyProvider } from "./PrivyProvider";
+import { PrivyUnlockFlow } from "./PrivyUnlockFlow";
 
 interface Stock {
   symbol: string;
@@ -32,38 +30,49 @@ const STOCKS: Stock[] = [
   { symbol: "MSFT", name: "Microsoft" },
 ];
 
-type Step = "stock" | "verify" | "wallet";
+type Step = "stock" | "verify" | "confirm";
 
 interface RedeemFlowProps {
   balanceCents: number;
-  fomoReferralUrl?: string;
+  sessionEmail: string;
+  privyAppId?: string;
 }
 
-export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
+function PrivyNotConfigured() {
+  return (
+    <div className="card p-6 text-center border-border">
+      <div className="w-14 h-14 rounded-xl bg-elevated border border-border flex items-center justify-center mx-auto mb-4">
+        <Settings className="w-7 h-7 text-muted" />
+      </div>
+      <h3 className="font-semibold text-sm mb-2">Wallet Verification Not Configured</h3>
+      <p className="text-xs text-muted mb-4 max-w-xs mx-auto">
+        The Privy integration required for wallet verification is not configured. Please contact support or try again later.
+      </p>
+      <div className="p-3 rounded-lg bg-elevated border border-border text-left">
+        <p className="text-[10px] text-muted mb-1">For developers:</p>
+        <code className="text-[10px] text-cta">NEXT_PUBLIC_PRIVY_APP_ID</code>
+        <p className="text-[10px] text-muted mt-1">must be set in environment variables</p>
+      </div>
+    </div>
+  );
+}
+
+function RedeemFlowInner({ balanceCents, sessionEmail, privyAppId }: RedeemFlowProps) {
   const [step, setStep] = useState<Step>("stock");
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
-  const [hasVerifiedEmail, setHasVerifiedEmail] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [copied, setCopied] = useState(false);
 
-  const referralUrl = fomoReferralUrl || REFERRAL_URL_PLACEHOLDER;
-  // TODO(privy): Replace 0x validation with Solana base58 address validation
-  const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress) || /^0x[a-fA-F0-9]{40}$/.test(walletAddress);
   const MIN_UNLOCK_CENTS = 500;
   const canUnlock = balanceCents >= MIN_UNLOCK_CENTS;
+  const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress);
 
-  async function handleCopyReferral() {
-    try {
-      await navigator.clipboard.writeText(referralUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard API failed
-    }
-  }
+  const handleWalletReady = useCallback((address: string) => {
+    setWalletAddress(address);
+    setStep("confirm");
+  }, []);
 
   async function handleSubmit() {
     if (!selectedStock || !isValidAddress) return;
@@ -72,7 +81,6 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
     setError(null);
 
     try {
-      // TODO(privy): Use Privy-created wallet address instead of manual input
       const res = await fetch("/api/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,7 +129,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted">Solana Wallet</span>
-            <span className="text-xs font-mono text-muted">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+            <span className="text-xs font-mono text-cta">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
           </div>
         </div>
         <p className="text-[10px] text-muted">
@@ -156,22 +164,26 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
     );
   }
 
+  if (!privyAppId) {
+    return <PrivyNotConfigured />;
+  }
+
   return (
     <div className="space-y-4">
       {/* Progress indicator */}
       <div className="flex items-center gap-2 mb-2">
-        {(["stock", "verify", "wallet"] as Step[]).map((s, i) => (
+        {(["stock", "verify", "confirm"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center">
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
                 step === s
                   ? "bg-cta text-cta-ink"
-                  : (["stock", "verify", "wallet"].indexOf(step) > i)
+                  : (["stock", "verify", "confirm"].indexOf(step) > i)
                   ? "bg-gain text-cta-ink"
                   : "bg-elevated border border-border text-muted"
               }`}
             >
-              {(["stock", "verify", "wallet"].indexOf(step) > i) ? (
+              {(["stock", "verify", "confirm"].indexOf(step) > i) ? (
                 <Check className="w-4 h-4" />
               ) : (
                 i + 1
@@ -180,7 +192,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             {i < 2 && (
               <div
                 className={`w-8 h-0.5 mx-1 ${
-                  (["stock", "verify", "wallet"].indexOf(step) > i) ? "bg-gain" : "bg-border"
+                  (["stock", "verify", "confirm"].indexOf(step) > i) ? "bg-gain" : "bg-border"
                 }`}
               />
             )}
@@ -189,7 +201,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
         <span className="text-xs text-muted ml-2">
           {step === "stock" && "Pick stock"}
           {step === "verify" && "Verify email"}
-          {step === "wallet" && "Solana wallet"}
+          {step === "confirm" && "Confirm unlock"}
         </span>
       </div>
 
@@ -242,76 +254,19 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
         </div>
       )}
 
-      {/* Step 2: Email Verification + Solana Wallet */}
-      {/* TODO(privy): Replace this step with Privy email OTP flow that creates/links embedded Solana wallet */}
-      {step === "verify" && (
-        <div className="card p-4">
-          <button
-            onClick={() => setStep("stock")}
-            className="flex items-center gap-1 text-xs text-muted hover:text-foreground mb-3"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            Back to stock selection
-          </button>
-
-          <h3 className="font-semibold text-sm mb-1">Verify your email</h3>
-          <p className="text-xs text-muted mb-4">
-            Tokenized stocks are delivered to a Solana wallet linked to your account. Verify your email to continue.
-          </p>
-
-          {/* TODO(privy): Replace this placeholder with Privy OTP component */}
-          {/* The email field should be fixed/greyed out showing the session email */}
-          {/* OTP is sent only to that email; mismatch is rejected */}
-          <div className="bg-bg rounded-lg p-4 border border-border mb-4">
-            <p className="text-xs font-medium mb-3 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-cta/10 flex items-center justify-center text-cta text-[10px] font-bold">1</span>
-              Confirm your email
-            </p>
-            <p className="text-[11px] text-muted leading-relaxed mb-3">
-              We&apos;ll send a one-time code to your registered email address to verify it&apos;s you.
-            </p>
-            <div className="p-3 rounded-lg bg-elevated border border-cta/20 text-center">
-              <p className="text-[10px] text-muted mb-1">Privy verification coming soon</p>
-              <p className="text-xs text-cta font-medium">For now, confirm below to continue</p>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-xs font-medium mb-2 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-cta/10 flex items-center justify-center text-cta text-[10px] font-bold">2</span>
-                Solana wallet created
-              </p>
-              <p className="text-[11px] text-muted leading-relaxed">
-                After verification, a <strong className="text-foreground">Solana wallet</strong> will be created and linked to your account automatically.
-              </p>
-            </div>
-          </div>
-
-          <label className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-cta/30 cursor-pointer transition-colors mb-4">
-            <input
-              type="checkbox"
-              checked={hasVerifiedEmail}
-              onChange={(e) => setHasVerifiedEmail(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded border-border text-cta focus:ring-cta/20"
-            />
-            <span className="text-xs text-muted leading-relaxed">
-              I understand stocks will be sent to my Solana wallet
-            </span>
-          </label>
-
-          <button
-            onClick={() => setStep("wallet")}
-            disabled={!hasVerifiedEmail}
-            className="btn-primary w-full text-sm py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Continue to wallet
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+      {/* Step 2: Privy Email Verification */}
+      {step === "verify" && selectedStock && (
+        <PrivyUnlockFlow
+          sessionEmail={sessionEmail}
+          balanceCents={balanceCents}
+          selectedStock={selectedStock}
+          onWalletReady={handleWalletReady}
+          onBack={() => setStep("stock")}
+        />
       )}
 
-      {/* Step 3: Wallet Address */}
-      {/* TODO(privy): This step should auto-populate with the Privy-created Solana wallet address */}
-      {step === "wallet" && (
+      {/* Step 3: Confirm & Submit */}
+      {step === "confirm" && walletAddress && (
         <div className="card p-4">
           <button
             onClick={() => setStep("verify")}
@@ -321,34 +276,13 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             Back to verification
           </button>
 
-          <h3 className="font-semibold text-sm mb-1">Enter your Solana wallet address</h3>
+          <h3 className="font-semibold text-sm mb-1">Confirm your unlock</h3>
           <p className="text-xs text-muted mb-4">
-            Your tokenized stocks will be sent to this Solana wallet.
+            Review the details and unlock your tokenized stock.
           </p>
 
           <div className="space-y-3">
-            <div>
-              {/* TODO(privy): Replace this input with auto-populated Privy wallet address (read-only) */}
-              <label htmlFor="walletAddress" className="block text-xs font-medium text-foreground mb-1.5">
-                Solana Wallet Address
-              </label>
-              <div className="relative">
-                <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-                <input
-                  id="walletAddress"
-                  type="text"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder="Enter Solana address..."
-                  className="w-full bg-bg border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm font-mono placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20"
-                />
-              </div>
-              <p className="text-[10px] text-muted mt-1">
-                Solana address (base58 format)
-              </p>
-            </div>
-
-            <div className="bg-elevated rounded-lg p-3 border border-border space-y-2">
+            <div className="bg-elevated rounded-lg p-4 border border-border space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted">Stock</span>
                 <span className="text-sm font-semibold">{selectedStock}</span>
@@ -359,7 +293,22 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted">Network</span>
-                <span className="text-xs text-cta">Solana</span>
+                <span className="text-xs text-cta font-medium">Solana</span>
+              </div>
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted">Destination Wallet</span>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-gain" />
+                    <span className="text-xs text-gain">Verified</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Wallet className="w-4 h-4 text-cta" />
+                  <span className="text-xs font-mono text-foreground break-all">
+                    {walletAddress}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -386,11 +335,33 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             </button>
 
             <p className="text-[10px] text-muted text-center">
-              Your tokenized stock will be sent to your Solana wallet.
+              Your tokenized stock will be sent to your verified Solana wallet.
             </p>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+export function RedeemFlow({ balanceCents, sessionEmail, privyAppId }: RedeemFlowProps) {
+  if (!privyAppId) {
+    return (
+      <RedeemFlowInner
+        balanceCents={balanceCents}
+        sessionEmail={sessionEmail}
+        privyAppId={privyAppId}
+      />
+    );
+  }
+
+  return (
+    <PrivyProvider appId={privyAppId}>
+      <RedeemFlowInner
+        balanceCents={balanceCents}
+        sessionEmail={sessionEmail}
+        privyAppId={privyAppId}
+      />
+    </PrivyProvider>
   );
 }
