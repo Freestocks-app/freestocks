@@ -250,7 +250,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold">Stock Unlock</p>
-                  <p className="text-[10px] text-muted">Coming soon</p>
+                  <p className="text-[10px] text-muted">To Solana wallet</p>
                 </div>
               </div>
             </div>

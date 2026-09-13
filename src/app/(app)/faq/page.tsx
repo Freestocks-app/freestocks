@@ -22,7 +22,7 @@ const faqs = [
   {
     question: "What's the minimum to unlock stocks?",
     answer:
-      "You need at least $5.00 in your balance to redeem for stocks. This threshold ensures you can purchase meaningful fractional shares. There's no maximum — earn as much as you want and redeem when ready. Stock redemptions are launching soon, so keep building your balance!",
+      "You need at least $5.00 in your balance to redeem for stocks. This threshold ensures you can receive meaningful fractional shares. There's no maximum — earn as much as you want and redeem when ready. Your tokenized stocks will be delivered to your Solana wallet.",
   },
   {
     question: "Which stocks can I get?",
@@ -45,9 +45,9 @@ const faqs = [
       "Advertisers block VPNs to prevent fraud. Before browsing offers: turn off any VPN, disable ad-blockers, and if on mobile, disconnect from work/school networks that might route through proxies. Try using your regular mobile data or home WiFi. After disabling, refresh the Earn page.",
   },
   {
-    question: "When will stock redemptions launch?",
+    question: "How do stock redemptions work?",
     answer:
-      "Stock redemptions are coming soon! We're finalizing partnerships with brokerage providers. Your balance is safe and will be ready to redeem once we launch. Keep earning in the meantime — there's no deadline and your credits don't expire.",
+      "Once you reach the $5.00 minimum balance, you can unlock tokenized fractional shares of top companies. Verify your email, and your tokenized stocks will be sent to your Solana wallet. You'll receive a transaction link to confirm delivery on-chain.",
   },
   {
     question: "Can I cash out instead of getting stocks?",
