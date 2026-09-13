@@ -111,7 +111,7 @@ export default async function UnlockPage() {
                   <span className="text-sm font-semibold tabular-nums">${(req.amountCents / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted">FOMO Address</span>
+                  <span className="text-xs text-muted">Wallet Address</span>
                   <span className="text-xs font-mono text-muted">{req.fomoAddress.slice(0, 6)}...{req.fomoAddress.slice(-4)}</span>
                 </div>
               </div>

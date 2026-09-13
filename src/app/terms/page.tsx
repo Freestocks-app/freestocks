@@ -101,22 +101,22 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold mb-3 text-foreground">6. Redeeming Credits — Stock Unlock</h2>
             <p className="text-muted mb-3">
-              <strong className="text-foreground">Stock redemption is currently in development and not yet available.</strong> When 
-              launched, you will be able to redeem accumulated credits for fractional shares of stocks or other 
-              redemption methods we may offer.
-            </p>
-            <p className="text-muted mb-3">
-              We offer a waitlist feature that allows you to submit your wallet address (such as a FOMO-compatible address) 
-              to register interest in stock redemptions. Joining the waitlist:
+              You may redeem accumulated credits (stored as integer cents, displayed in USD) for tokenized 
+              fractional shares of stocks. Redemptions are processed as follows:
             </p>
             <ul className="list-disc list-inside text-muted space-y-2 ml-2 mb-3">
-              <li>Does not guarantee access to redemptions or lock any credit balance.</li>
-              <li>Does not constitute a financial transaction or transfer of funds.</li>
-              <li>Is subject to eligibility requirements we establish when redemptions launch.</li>
+              <li><strong className="text-foreground">Minimum threshold:</strong> You must have at least $5.00 in your balance to initiate a redemption.</li>
+              <li><strong className="text-foreground">Wallet requirement:</strong> You must provide a valid Solana wallet address to receive your tokenized stocks.</li>
+              <li><strong className="text-foreground">Delivery:</strong> Tokenized stocks are sent to your Solana wallet. Transaction details and confirmation links are provided upon completion.</li>
+              <li><strong className="text-foreground">Processing time:</strong> Redemptions are processed by our team and are not instant on-chain transfers. Processing times may vary.</li>
             </ul>
+            <p className="text-muted mb-3">
+              Credits are deducted from your balance upon successful submission of a redemption request. 
+              Once submitted, redemption requests cannot be cancelled.
+            </p>
             <p className="text-muted">
-              We reserve the right to modify redemption requirements, minimum thresholds, and available redemption 
-              methods at any time. Redemption terms will be announced when the feature becomes available.
+              We reserve the right to modify redemption requirements, minimum thresholds, available stocks, 
+              and supported networks at any time. Any changes will be reflected on our platform.
             </p>
           </section>
 

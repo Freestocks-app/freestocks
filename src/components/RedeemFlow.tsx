@@ -15,7 +15,8 @@ import {
   Check,
 } from "lucide-react";
 
-const FOMO_REFERRAL_URL_PLACEHOLDER = "https://fomo.family/r/freestocks";
+// TODO(privy): Remove referral URL placeholder once Privy OTP flow is implemented
+const REFERRAL_URL_PLACEHOLDER = "https://freestocks.app";
 
 interface Stock {
   symbol: string;
@@ -31,7 +32,7 @@ const STOCKS: Stock[] = [
   { symbol: "MSFT", name: "Microsoft" },
 ];
 
-type Step = "stock" | "fomo" | "wallet";
+type Step = "stock" | "verify" | "wallet";
 
 interface RedeemFlowProps {
   balanceCents: number;
@@ -41,15 +42,16 @@ interface RedeemFlowProps {
 export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
   const [step, setStep] = useState<Step>("stock");
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
-  const [hasFomoAccount, setHasFomoAccount] = useState(false);
-  const [fomoAddress, setFomoAddress] = useState("");
+  const [hasVerifiedEmail, setHasVerifiedEmail] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const referralUrl = fomoReferralUrl || FOMO_REFERRAL_URL_PLACEHOLDER;
-  const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(fomoAddress);
+  const referralUrl = fomoReferralUrl || REFERRAL_URL_PLACEHOLDER;
+  // TODO(privy): Replace 0x validation with Solana base58 address validation
+  const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress) || /^0x[a-fA-F0-9]{40}$/.test(walletAddress);
   const MIN_UNLOCK_CENTS = 500;
   const canUnlock = balanceCents >= MIN_UNLOCK_CENTS;
 
@@ -70,11 +72,12 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
     setError(null);
 
     try {
+      // TODO(privy): Use Privy-created wallet address instead of manual input
       const res = await fetch("/api/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fomoAddress,
+          fomoAddress: walletAddress,
           amountCents: balanceCents,
           stockSymbol: selectedStock,
         }),
@@ -105,7 +108,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
         <p className="text-sm text-muted mb-4">
           Your ${(balanceCents / 100).toFixed(2)} redemption for {selectedStock} is pending.
           <br />
-          <span className="text-foreground">On the way to your FOMO wallet.</span>
+          <span className="text-foreground">On the way to your Solana wallet.</span>
         </p>
         <div className="bg-bg rounded-lg p-3 border border-border text-left mb-4">
           <div className="flex items-center justify-between mb-2">
@@ -117,12 +120,12 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             <span className="text-sm font-semibold tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted">FOMO Address</span>
-            <span className="text-xs font-mono text-muted">{fomoAddress.slice(0, 6)}...{fomoAddress.slice(-4)}</span>
+            <span className="text-xs text-muted">Solana Wallet</span>
+            <span className="text-xs font-mono text-muted">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
           </div>
         </div>
         <p className="text-[10px] text-muted">
-          Status: <span className="text-cta">Pending</span> — Our team will process your redemption soon.
+          Status: <span className="text-cta">Pending</span> — Your tokenized stock will be sent to your Solana wallet.
         </p>
       </div>
     );
@@ -139,7 +142,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm mb-1">Keep earning to unlock</p>
             <p className="text-xs text-muted leading-relaxed mb-3">
-              You need ${(MIN_UNLOCK_CENTS / 100).toFixed(2)} to unlock stocks on FOMO.
+              You need ${(MIN_UNLOCK_CENTS / 100).toFixed(2)} to unlock tokenized stocks.
               <br />
               <span className="text-foreground">${(needsMore / 100).toFixed(2)} more to go!</span>
             </p>
@@ -157,18 +160,18 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
     <div className="space-y-4">
       {/* Progress indicator */}
       <div className="flex items-center gap-2 mb-2">
-        {(["stock", "fomo", "wallet"] as Step[]).map((s, i) => (
+        {(["stock", "verify", "wallet"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center">
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
                 step === s
                   ? "bg-cta text-cta-ink"
-                  : (["stock", "fomo", "wallet"].indexOf(step) > i)
+                  : (["stock", "verify", "wallet"].indexOf(step) > i)
                   ? "bg-gain text-cta-ink"
                   : "bg-elevated border border-border text-muted"
               }`}
             >
-              {(["stock", "fomo", "wallet"].indexOf(step) > i) ? (
+              {(["stock", "verify", "wallet"].indexOf(step) > i) ? (
                 <Check className="w-4 h-4" />
               ) : (
                 i + 1
@@ -177,7 +180,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             {i < 2 && (
               <div
                 className={`w-8 h-0.5 mx-1 ${
-                  (["stock", "fomo", "wallet"].indexOf(step) > i) ? "bg-gain" : "bg-border"
+                  (["stock", "verify", "wallet"].indexOf(step) > i) ? "bg-gain" : "bg-border"
                 }`}
               />
             )}
@@ -185,8 +188,8 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
         ))}
         <span className="text-xs text-muted ml-2">
           {step === "stock" && "Pick stock"}
-          {step === "fomo" && "FOMO account"}
-          {step === "wallet" && "Enter address"}
+          {step === "verify" && "Verify email"}
+          {step === "wallet" && "Solana wallet"}
         </span>
       </div>
 
@@ -229,7 +232,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
           </div>
 
           <button
-            onClick={() => setStep("fomo")}
+            onClick={() => setStep("verify")}
             disabled={!selectedStock}
             className="btn-primary w-full text-sm py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -239,8 +242,9 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
         </div>
       )}
 
-      {/* Step 2: FOMO Account Setup */}
-      {step === "fomo" && (
+      {/* Step 2: Email Verification + Solana Wallet */}
+      {/* TODO(privy): Replace this step with Privy email OTP flow that creates/links embedded Solana wallet */}
+      {step === "verify" && (
         <div className="card p-4">
           <button
             onClick={() => setStep("stock")}
@@ -250,52 +254,34 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
             Back to stock selection
           </button>
 
-          <h3 className="font-semibold text-sm mb-1">Set up your FOMO account</h3>
+          <h3 className="font-semibold text-sm mb-1">Verify your email</h3>
           <p className="text-xs text-muted mb-4">
-            Stocks are delivered to your FOMO wallet on RH Chain. Create an account if you don&apos;t have one.
+            Tokenized stocks are delivered to a Solana wallet linked to your account. Verify your email to continue.
           </p>
 
+          {/* TODO(privy): Replace this placeholder with Privy OTP component */}
+          {/* The email field should be fixed/greyed out showing the session email */}
+          {/* OTP is sent only to that email; mismatch is rejected */}
           <div className="bg-bg rounded-lg p-4 border border-border mb-4">
             <p className="text-xs font-medium mb-3 flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-cta/10 flex items-center justify-center text-cta text-[10px] font-bold">1</span>
-              Sign up on FOMO
+              Confirm your email
             </p>
-            <a
-              href={referralUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary w-full text-sm py-2.5 justify-center mb-2"
-            >
-              Create FOMO Account
-              <ExternalLink className="w-4 h-4" />
-            </a>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={referralUrl}
-                readOnly
-                className="flex-1 bg-elevated border border-border rounded-lg py-2 px-3 text-xs font-mono text-muted"
-              />
-              <button
-                onClick={handleCopyReferral}
-                className="p-2 rounded-lg border border-border hover:border-cta/50 transition-colors"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-gain" />
-                ) : (
-                  <Copy className="w-4 h-4 text-muted" />
-                )}
-              </button>
+            <p className="text-[11px] text-muted leading-relaxed mb-3">
+              We&apos;ll send a one-time code to your registered email address to verify it&apos;s you.
+            </p>
+            <div className="p-3 rounded-lg bg-elevated border border-cta/20 text-center">
+              <p className="text-[10px] text-muted mb-1">Privy verification coming soon</p>
+              <p className="text-xs text-cta font-medium">For now, confirm below to continue</p>
             </div>
 
             <div className="mt-4 pt-4 border-t border-border">
               <p className="text-xs font-medium mb-2 flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-cta/10 flex items-center justify-center text-cta text-[10px] font-bold">2</span>
-                Get your deposit address
+                Solana wallet created
               </p>
               <p className="text-[11px] text-muted leading-relaxed">
-                After signing up, go to your FOMO wallet and copy your <strong className="text-foreground">RH Chain deposit address</strong>. 
-                It starts with <code className="text-cta">0x...</code>
+                After verification, a <strong className="text-foreground">Solana wallet</strong> will be created and linked to your account automatically.
               </p>
             </div>
           </div>
@@ -303,60 +289,62 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
           <label className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-cta/30 cursor-pointer transition-colors mb-4">
             <input
               type="checkbox"
-              checked={hasFomoAccount}
-              onChange={(e) => setHasFomoAccount(e.target.checked)}
+              checked={hasVerifiedEmail}
+              onChange={(e) => setHasVerifiedEmail(e.target.checked)}
               className="mt-0.5 w-4 h-4 rounded border-border text-cta focus:ring-cta/20"
             />
             <span className="text-xs text-muted leading-relaxed">
-              I have a FOMO account and my RH Chain deposit address ready
+              I understand stocks will be sent to my Solana wallet
             </span>
           </label>
 
           <button
             onClick={() => setStep("wallet")}
-            disabled={!hasFomoAccount}
+            disabled={!hasVerifiedEmail}
             className="btn-primary w-full text-sm py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue to address
+            Continue to wallet
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Step 3: Wallet Address */}
+      {/* TODO(privy): This step should auto-populate with the Privy-created Solana wallet address */}
       {step === "wallet" && (
         <div className="card p-4">
           <button
-            onClick={() => setStep("fomo")}
+            onClick={() => setStep("verify")}
             className="flex items-center gap-1 text-xs text-muted hover:text-foreground mb-3"
           >
             <ArrowLeft className="w-3 h-3" />
-            Back to FOMO setup
+            Back to verification
           </button>
 
-          <h3 className="font-semibold text-sm mb-1">Enter your FOMO wallet address</h3>
+          <h3 className="font-semibold text-sm mb-1">Enter your Solana wallet address</h3>
           <p className="text-xs text-muted mb-4">
-            Paste your RH Chain deposit address from your FOMO account.
+            Your tokenized stocks will be sent to this Solana wallet.
           </p>
 
           <div className="space-y-3">
             <div>
-              <label htmlFor="fomoAddress" className="block text-xs font-medium text-foreground mb-1.5">
-                FOMO Deposit Address
+              {/* TODO(privy): Replace this input with auto-populated Privy wallet address (read-only) */}
+              <label htmlFor="walletAddress" className="block text-xs font-medium text-foreground mb-1.5">
+                Solana Wallet Address
               </label>
               <div className="relative">
                 <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
-                  id="fomoAddress"
+                  id="walletAddress"
                   type="text"
-                  value={fomoAddress}
-                  onChange={(e) => setFomoAddress(e.target.value)}
-                  placeholder="0x..."
+                  value={walletAddress}
+                  onChange={(e) => setWalletAddress(e.target.value)}
+                  placeholder="Enter Solana address..."
                   className="w-full bg-bg border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm font-mono placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20"
                 />
               </div>
               <p className="text-[10px] text-muted mt-1">
-                RH Chain address (EVM-compatible, 0x format)
+                Solana address (base58 format)
               </p>
             </div>
 
@@ -371,7 +359,7 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted">Network</span>
-                <span className="text-xs text-cta">RH Chain</span>
+                <span className="text-xs text-cta">Solana</span>
               </div>
             </div>
 
@@ -391,14 +379,14 @@ export function RedeemFlow({ balanceCents, fomoReferralUrl }: RedeemFlowProps) {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Unlock {selectedStock} on FOMO
+                  Unlock {selectedStock}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
 
             <p className="text-[10px] text-muted text-center">
-              Your redemption will be processed by our team. This is not an instant on-chain transfer.
+              Your tokenized stock will be sent to your Solana wallet.
             </p>
           </div>
         </div>

@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             <h3 className="text-base font-medium mb-2 text-foreground">2.1 Information You Provide Directly</h3>
             <ul className="list-disc list-inside text-muted space-y-2 ml-2 mb-4">
               <li><strong className="text-foreground">Account Information:</strong> When you create an account, we collect your email address and password (hashed). If you register using a social login provider (Google, Apple, or Facebook), we receive your email address and basic profile information from that provider.</li>
-              <li><strong className="text-foreground">Waitlist Information:</strong> If you join our stock redemption waitlist, we collect your wallet address (such as a FOMO-compatible address) that you voluntarily provide.</li>
+              <li><strong className="text-foreground">Wallet Information:</strong> When you redeem credits for tokenized stocks, we collect your Solana wallet address that you provide to receive your stocks.</li>
               <li><strong className="text-foreground">Communications:</strong> If you contact us through our FAQ page or support channels, we collect the content of your messages.</li>
             </ul>
 

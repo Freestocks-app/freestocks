@@ -7,13 +7,16 @@ interface RedeemRequestFormProps {
   balanceCents: number;
 }
 
+// TODO(privy): This form should be replaced with the Privy email OTP flow
+// that creates an embedded Solana wallet automatically
 export function RedeemRequestForm({ balanceCents }: RedeemRequestFormProps) {
-  const [fomoAddress, setFomoAddress] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(fomoAddress);
+  // TODO(privy): Replace with Solana base58 address validation
+  const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress) || /^0x[a-fA-F0-9]{40}$/.test(walletAddress);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +30,7 @@ export function RedeemRequestForm({ balanceCents }: RedeemRequestFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fomoAddress,
+          fomoAddress: walletAddress,
           amountCents: balanceCents,
         }),
       });
@@ -52,8 +55,8 @@ export function RedeemRequestForm({ balanceCents }: RedeemRequestFormProps) {
       <div className="flex items-center gap-2 p-3 rounded-lg bg-gain/10 border border-gain/20">
         <CheckCircle className="w-5 h-5 text-gain flex-shrink-0" />
         <div>
-          <p className="text-sm font-medium text-gain">You&apos;re on the waitlist!</p>
-          <p className="text-xs text-muted">We&apos;ll notify you when redemptions launch.</p>
+          <p className="text-sm font-medium text-gain">Request submitted!</p>
+          <p className="text-xs text-muted">Your tokenized stocks will be sent to your wallet.</p>
         </div>
       </div>
     );
@@ -62,23 +65,24 @@ export function RedeemRequestForm({ balanceCents }: RedeemRequestFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <label htmlFor="fomoAddress" className="block text-xs font-medium text-foreground mb-1.5">
-          Your FOMO Wallet Address
+        {/* TODO(privy): Replace with auto-populated Privy wallet address */}
+        <label htmlFor="walletAddress" className="block text-xs font-medium text-foreground mb-1.5">
+          Your Solana Wallet Address
         </label>
         <div className="relative">
           <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
-            id="fomoAddress"
+            id="walletAddress"
             type="text"
-            value={fomoAddress}
-            onChange={(e) => setFomoAddress(e.target.value)}
-            placeholder="0x..."
+            value={walletAddress}
+            onChange={(e) => setWalletAddress(e.target.value)}
+            placeholder="Enter Solana address..."
             className="w-full bg-bg border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm font-mono placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20"
             required
           />
         </div>
         <p className="text-[10px] text-muted mt-1">
-          Enter your FOMO deposit address (EVM-compatible, 0x format)
+          Solana wallet address (base58 format)
         </p>
       </div>
 
@@ -104,12 +108,12 @@ export function RedeemRequestForm({ balanceCents }: RedeemRequestFormProps) {
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          "Join Waitlist"
+          "Unlock Stocks"
         )}
       </button>
 
       <p className="text-[10px] text-muted text-center">
-        No funds will be deducted until stock redemptions launch.
+        Your tokenized stocks will be sent to your Solana wallet.
       </p>
     </form>
   );
