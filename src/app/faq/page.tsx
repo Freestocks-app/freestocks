@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, HelpCircle, Mail } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, HelpCircle, Mail, TrendingUp, ArrowLeft } from "lucide-react";
 
 const faqs = [
   {
@@ -73,13 +74,27 @@ function FAQItem({ question, answer, isLast }: { question: string; answer: strin
 
 export default function FAQPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] pb-20 md:pb-6">
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-bg">
+      <header className="h-14 flex items-center justify-between px-4 md:px-6 border-b border-border bg-elevated/50">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-cta flex items-center justify-center">
+            <TrendingUp className="w-3.5 h-3.5 text-cta-ink" />
+          </div>
+          <span className="font-bold text-sm">Freestocks</span>
+        </Link>
+        <Link href="/" className="text-xs text-muted hover:text-foreground flex items-center gap-1">
+          <ArrowLeft className="w-3 h-3" />
+          Back
+        </Link>
+      </header>
+
+      <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-3">
             <HelpCircle className="w-6 h-6 text-cta" />
           </div>
-          <h1 className="text-xl font-bold">FAQ</h1>
+          <h1 className="text-2xl font-bold">Frequently Asked Questions</h1>
+          <p className="text-sm text-muted mt-1">Everything you need to know about Freestocks</p>
         </div>
 
         <div className="card mb-6">
@@ -110,7 +125,16 @@ export default function FAQPage() {
             </a>
           </div>
         </div>
-      </div>
+
+        <div className="mt-8 pt-6 border-t border-border flex gap-4 text-sm">
+          <Link href="/privacy" className="text-cta hover:underline">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="text-cta hover:underline">
+            Terms of Service
+          </Link>
+        </div>
+      </main>
     </div>
   );
 }
