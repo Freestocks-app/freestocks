@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Zap, AlertTriangle, Wifi, Globe, RefreshCw, HelpCircle } from "lucide-react";
+import { Zap, AlertTriangle, Wifi, Globe, RefreshCw, HelpCircle, Gamepad2, FileText } from "lucide-react";
 
 export interface OfferwallProvider {
   id: string;
@@ -26,14 +26,9 @@ function LoadingSkeleton() {
         <p className="font-medium text-sm mb-1">Loading offers...</p>
         <p className="text-xs text-muted">This may take a few seconds</p>
         
-        <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-sm">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square rounded-lg bg-elevated border border-border animate-pulse" />
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 w-full max-w-sm">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-20 rounded-lg bg-elevated border border-border animate-pulse" />
+        <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="aspect-[4/5] rounded-lg bg-elevated border border-border animate-pulse" />
           ))}
         </div>
       </div>
@@ -49,7 +44,7 @@ function SlowState({ onRetry, onWait }: { onRetry: () => void; onWait: () => voi
       </div>
       <h3 className="font-semibold mb-1">Taking longer than usual</h3>
       <p className="text-sm text-muted max-w-xs mb-4">
-        Offers are still loading. This could be a slow connection or temporary issue.
+        Offers are still loading. This could be a slow connection.
       </p>
       <div className="flex gap-2">
         <button onClick={onWait} className="btn-secondary text-sm py-2 px-4">
@@ -72,27 +67,18 @@ function BlockedState({ onRetry }: { onRetry: () => void }) {
       </div>
       <h3 className="font-semibold mb-1">Offers unavailable</h3>
       <p className="text-sm text-muted max-w-xs mb-4">
-        Offers may be blocked in your region or by your network settings.
+        May be blocked by VPN, ad-blocker, or region.
       </p>
       
       <div className="card p-3 max-w-xs w-full mb-4 text-left">
         <p className="text-xs font-medium mb-2 flex items-center gap-1.5">
           <HelpCircle className="w-3.5 h-3.5 text-cta" />
-          Try these steps:
+          Try:
         </p>
-        <ul className="text-xs text-muted space-y-1.5">
-          <li className="flex items-start gap-2">
-            <span className="text-cta">1.</span>
-            <span>Disable VPN or proxy</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-cta">2.</span>
-            <span>Turn off ad-blocker extensions</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-cta">3.</span>
-            <span>Try mobile data instead of WiFi</span>
-          </li>
+        <ul className="text-xs text-muted space-y-1">
+          <li>• Disable VPN/proxy</li>
+          <li>• Turn off ad-blocker</li>
+          <li>• Try mobile data</li>
         </ul>
       </div>
       
@@ -112,7 +98,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
       </div>
       <h3 className="font-semibold mb-1">Something went wrong</h3>
       <p className="text-sm text-muted max-w-xs mb-4">
-        We couldn&apos;t load offers right now. Please try again.
+        Couldn&apos;t load offers. Please try again.
       </p>
       <button onClick={onRetry} className="btn-primary text-sm py-2 px-4">
         <RefreshCw className="w-4 h-4" />
@@ -120,6 +106,12 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
       </button>
     </div>
   );
+}
+
+function getTabIcon(name: string) {
+  if (name.toLowerCase() === "game") return Gamepad2;
+  if (name.toLowerCase() === "survey") return FileText;
+  return Zap;
 }
 
 function ProviderTabs({
@@ -134,20 +126,25 @@ function ProviderTabs({
   if (providers.length <= 1) return null;
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-elevated/50 rounded-lg border border-border mb-2">
-      {providers.map((provider) => (
-        <button
-          key={provider.id}
-          onClick={() => onSelect(provider.id)}
-          className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-            activeProvider === provider.id
-              ? "bg-cta text-cta-ink"
-              : "text-muted hover:text-foreground hover:bg-elevated"
-          }`}
-        >
-          {provider.name}
-        </button>
-      ))}
+    <div className="flex items-center justify-center gap-2 p-1 bg-elevated/50 rounded-full border border-border max-w-xs mx-auto">
+      {providers.map((provider) => {
+        const Icon = getTabIcon(provider.name);
+        const isActive = activeProvider === provider.id;
+        return (
+          <button
+            key={provider.id}
+            onClick={() => onSelect(provider.id)}
+            className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all min-h-[40px] ${
+              isActive
+                ? "bg-cta text-cta-ink shadow-sm"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            <span>{provider.name}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -210,26 +207,25 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
     setKey((k) => k + 1);
   };
 
-  const showIframe = state === "loaded" || state === "loading" || state === "slow";
-
   if (!currentProvider) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] px-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-14rem)] px-6 text-center">
         <div className="w-14 h-14 rounded-xl bg-cta/10 border border-cta/20 flex items-center justify-center mb-4">
           <Zap className="w-7 h-7 text-cta" />
         </div>
         <h2 className="text-lg font-semibold mb-2">Offers Coming Soon</h2>
         <p className="text-muted text-sm max-w-xs">
-          We&apos;re setting up earning opportunities. Check back shortly for surveys, apps, and games.
+          Check back shortly for surveys, apps, and games.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full min-h-[calc(100vh-10rem)] md:min-h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-full min-h-[calc(100vh-12rem)] md:min-h-[calc(100vh-10rem)]">
+      {/* Game/Survey tabs - FreeCash style */}
       {providers.length > 1 && (
-        <div className="px-4 py-2 bg-bg border-b border-border">
+        <div className="px-4 py-3 bg-bg">
           <ProviderTabs
             providers={providers}
             activeProvider={activeProvider}
@@ -238,6 +234,7 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
         </div>
       )}
       
+      {/* Iframe container */}
       <div className="relative flex-1">
         {state === "loading" && <LoadingSkeleton />}
         {state === "slow" && <SlowState onRetry={handleRetry} onWait={handleKeepWaiting} />}
@@ -247,11 +244,11 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
         <iframe
           key={`${activeProvider}-${key}`}
           src={currentProvider.url}
-          className={`w-full h-full min-h-[calc(100vh-12rem)] md:min-h-[calc(100vh-10rem)] border-0 transition-opacity duration-300 ${
+          className={`w-full h-full min-h-[calc(100vh-14rem)] md:min-h-[calc(100vh-12rem)] border-0 transition-opacity duration-300 ${
             state === "loaded" ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           allow="clipboard-write"
-          title={`${currentProvider.name} Offers`}
+          title="Offers"
           onLoad={handleLoad}
           onError={handleError}
         />

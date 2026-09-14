@@ -154,8 +154,18 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
   console.warn("[Auth] Facebook OAuth not configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET.");
 }
 
+const productionUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL 
+  ? `https://${process.env.VERCEL_URL}` 
+  : "http://localhost:3847";
+
 export const auth = betterAuth({
-  trustedOrigins: ["https://appleid.apple.com"],
+  baseURL: process.env.BETTER_AUTH_URL || productionUrl,
+  trustedOrigins: [
+    "https://appleid.apple.com",
+    "http://localhost:3847",
+    "https://freestocks-beyond-club.vercel.app",
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+  ],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -173,6 +183,14 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days
     updateAge: 60 * 60 * 24, // 1 day
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, // 5 minutes
+    },
+  },
+  advanced: {
+    cookiePrefix: "freestocks",
+    useSecureCookies: process.env.NODE_ENV === "production",
   },
   plugins: [nextCookies()],
 });
