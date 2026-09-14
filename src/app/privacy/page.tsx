@@ -1,15 +1,12 @@
 import Link from "next/link";
-import { TrendingUp, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-bg">
       <header className="h-14 flex items-center justify-between px-4 md:px-6 border-b border-border bg-elevated/50">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-cta flex items-center justify-center">
-            <TrendingUp className="w-3.5 h-3.5 text-cta-ink" />
-          </div>
-          <span className="font-bold text-sm">Freestocks</span>
+        <Link href="/" className="flex items-center">
+          <img src="/brand/freestocks-logo.png" alt="Freestocks" className="h-7 w-auto" />
         </Link>
         <Link href="/" className="text-xs text-muted hover:text-foreground flex items-center gap-1">
           <ArrowLeft className="w-3 h-3" />

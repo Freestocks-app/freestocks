@@ -198,7 +198,7 @@ export default function SignUpPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Type here..."
-                    className="flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0"
+                    className="w-full flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0 autofill-fix"
                     required
                   />
                 </div>
@@ -216,7 +216,7 @@ export default function SignUpPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Type here..."
-                    className="flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0"
+                    className="w-full flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0 autofill-fix"
                     required
                     minLength={8}
                   />

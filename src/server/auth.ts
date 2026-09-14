@@ -156,8 +156,15 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
   console.warn("[Auth] Facebook OAuth not configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET.");
 }
 
-const productionUrl = process.env.BETTER_AUTH_URL || 
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3847");
+// On Vercel Preview deployments, BETTER_AUTH_URL is set to the stable
+// production alias, but the actual request lands on a per-deployment
+// VERCEL_URL. Using the wrong baseURL breaks OAuth state/cookie
+// validation (state_mismatch), so Preview must prefer VERCEL_URL.
+const productionUrl =
+  process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.BETTER_AUTH_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3847");
 
 export const auth = betterAuth({
   baseURL: productionUrl,
