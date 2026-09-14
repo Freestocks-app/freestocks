@@ -7,52 +7,42 @@ const faqs = [
   {
     question: "How does Freestocks work?",
     answer:
-      "Freestocks partners with advertisers who pay us when you complete offers — downloading apps, playing games, taking surveys, and more. We share that revenue directly with you as USD cash credits. Once you reach $5.00, you can redeem your balance for fractional shares of top companies like Apple, Tesla, and NVIDIA. No deposits or purchases required.",
+      "Earn cash by completing offers — surveys, games, app downloads. Once you hit $5, cashout for tokenized stock sent to your Solana wallet. No deposits needed.",
   },
   {
-    question: "How do I earn money?",
+    question: "How do I earn?",
     answer:
-      "Head to the Earn page to browse available offers. You'll find surveys (usually $0.25–$2.00, taking 5–15 minutes), app downloads (earn for signing up or reaching milestones), and mobile games (play to specific levels for larger payouts). Each offer shows its payout upfront so you know exactly what you'll earn before starting.",
+      "Head to Earn and browse offers. Surveys pay $0.25–$2, games can pay $2–$10 for reaching milestones, app signups vary. Each shows payout upfront.",
   },
   {
-    question: "How long until I see my earnings?",
+    question: "When do earnings credit?",
     answer:
-      "Most offers credit within 5–30 minutes of completion. Game offers that require reaching specific levels may take 24–48 hours as advertisers verify progress. Survey payouts are typically instant. If an offer doesn't credit within 48 hours and you've met all requirements, contact our support team with details.",
+      "Most offers credit in 5–30 minutes. Games requiring milestones may take 24–48 hours for verification. Survey payouts are usually instant.",
   },
   {
-    question: "What's the minimum to unlock stocks?",
+    question: "What's the minimum to cashout?",
     answer:
-      "You need at least $5.00 in your balance to redeem for stocks. This threshold ensures you can receive meaningful fractional shares. There's no maximum — earn as much as you want and redeem when ready. Your tokenized stocks will be delivered to your Solana wallet.",
+      "$5.00 minimum. This ensures you receive meaningful fractional shares. Your tokenized stock is sent to your Solana wallet.",
   },
   {
     question: "Which stocks can I get?",
     answer:
-      "We're launching with fractional shares of popular companies including Apple (AAPL), Tesla (TSLA), NVIDIA (NVDA), Amazon (AMZN), Google (GOOGL), Microsoft (MSFT), and more. The selection will expand over time based on demand and availability.",
-  },
-  {
-    question: "Is my account secure?",
-    answer:
-      "Absolutely. We use industry-standard security: passwords are encrypted with bcrypt, sessions are secured with HTTP-only cookies, and all connections use HTTPS. Your balance is tracked in a secure ledger with full transaction history. We never store sensitive payment information.",
+      "Tesla, NVIDIA, Apple, Amazon, Google, Microsoft, Meta, SpaceX, and more. All tokenized on Solana via xStocks.",
   },
   {
     question: "Why didn't my offer credit?",
     answer:
-      "Common reasons: using a VPN or ad-blocker (disable both before starting), not meeting all offer requirements, having completed the offer before, or advertiser rejection. Always read the full offer details, complete on the same device you started, and don't close the app before finishing. Still missing credit? Contact support with the offer name and completion date.",
+      "Common issues: VPN/ad-blocker active, requirements not met, already completed before. Disable VPN, read full requirements, complete on same device.",
   },
   {
-    question: "Offers show 'VPN detected' — what do I do?",
+    question: "How do cashouts work?",
     answer:
-      "Advertisers block VPNs to prevent fraud. Before browsing offers: turn off any VPN, disable ad-blockers, and if on mobile, disconnect from work/school networks that might route through proxies. Try using your regular mobile data or home WiFi. After disabling, refresh the Earn page.",
+      "Pick a stock, verify email via OTP, confirm your Solana wallet. We send tokenized shares to your wallet with a transaction link to verify on-chain.",
   },
   {
-    question: "How do stock redemptions work?",
+    question: "Is this secure?",
     answer:
-      "Once you reach the $5.00 minimum balance, you can unlock tokenized fractional shares of top companies. Verify your email, and your tokenized stocks will be sent to your Solana wallet. You'll receive a transaction link to confirm delivery on-chain.",
-  },
-  {
-    question: "Can I cash out instead of getting stocks?",
-    answer:
-      "Right now, Freestocks focuses exclusively on stock redemptions — it's what makes us unique. We may add cash-out options (like PayPal or gift cards) in the future based on user feedback. Let us know what you'd prefer!",
+      "Yes. Passwords encrypted, sessions secured with HTTP-only cookies, all connections use HTTPS. Your balance is tracked in a secure ledger.",
   },
 ];
 
@@ -63,7 +53,7 @@ function FAQItem({ question, answer, isLast }: { question: string; answer: strin
     <div className={!isLast ? "border-b border-border" : ""}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-elevated/30 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-elevated/30 transition-colors min-h-[48px]"
       >
         <span className="font-medium text-sm pr-4">{question}</span>
         <ChevronDown
@@ -83,21 +73,16 @@ function FAQItem({ question, answer, isLast }: { question: string; answer: strin
 
 export default function FAQPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] pb-24 md:pb-6">
-      <div className="px-4 md:px-6 py-3 border-b border-border bg-elevated/50">
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-cta/10 flex items-center justify-center">
-            <HelpCircle className="w-4 h-4 text-cta" />
+    <div className="min-h-[calc(100vh-4rem)] pb-20 md:pb-6">
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-3">
+            <HelpCircle className="w-6 h-6 text-cta" />
           </div>
-          <h1 className="text-base font-bold">FAQ</h1>
+          <h1 className="text-xl font-bold">FAQ</h1>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 md:px-6 py-4">
-        <div className="card mb-4">
-          <div className="px-4 py-2 border-b border-border bg-elevated/30">
-            <span className="text-xs font-medium text-muted uppercase tracking-wide">Common Questions</span>
-          </div>
+        <div className="card mb-6">
           {faqs.map((faq, index) => (
             <FAQItem 
               key={index} 
@@ -108,23 +93,21 @@ export default function FAQPage() {
           ))}
         </div>
 
-        <div className="card p-4 border-cta/20 bg-cta/5">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-cta/10 border border-cta/20 flex items-center justify-center flex-shrink-0">
-              <Mail className="w-4 h-4 text-cta" />
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-cta/10 border border-cta/20 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-5 h-5 text-cta" />
             </div>
-            <div>
-              <p className="font-semibold text-sm mb-1">Still have questions?</p>
-              <p className="text-xs text-muted mb-3">
-                Our support team is ready to help.
-              </p>
-              <a
-                href="mailto:support@freestocks.app"
-                className="btn-primary text-xs py-2 px-3"
-              >
-                Contact Support
-              </a>
+            <div className="flex-1">
+              <p className="font-semibold text-sm">Still have questions?</p>
+              <p className="text-xs text-muted">support@freestocks.app</p>
             </div>
+            <a
+              href="mailto:support@freestocks.app"
+              className="btn-primary text-xs py-2 px-3"
+            >
+              Contact
+            </a>
           </div>
         </div>
       </div>

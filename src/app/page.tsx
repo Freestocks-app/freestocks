@@ -1,33 +1,25 @@
 import Link from "next/link";
-import { ArrowRight, TrendingUp, DollarSign, Gift, Shield, Zap, Clock, CheckCircle, Star, Gamepad2, FileText, Flame } from "lucide-react";
-
-const tickers = [
-  { symbol: "AAPL", change: "+2.34%" },
-  { symbol: "TSLA", change: "+5.12%" },
-  { symbol: "NVDA", change: "+3.87%" },
-  { symbol: "AMZN", change: "+1.56%" },
-  { symbol: "MSFT", change: "+2.01%" },
-  { symbol: "GOOGL", change: "+1.89%" },
-  { symbol: "META", change: "+4.23%" },
-  { symbol: "AMD", change: "+3.45%" },
-];
+import { ArrowRight, TrendingUp, DollarSign, Gift, Shield, Zap, CheckCircle, Gamepad2, FileText, Flame } from "lucide-react";
+import { tickerData, displayTop10, getIssuerBadge } from "@/lib/tokenized-stocks";
 
 function TickerCube({
   symbol,
+  displaySymbol,
   change,
   delay,
 }: {
   symbol: string;
+  displaySymbol: string;
   change: string;
   delay: number;
 }) {
   return (
     <div
-      className="ticker-cube float mx-1.5"
+      className="ticker-cube float mx-1 sm:mx-1.5"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <span className="text-foreground mr-1.5">{symbol}</span>
-      <span className="gain">{change}</span>
+      <span className="text-foreground mr-1 sm:mr-1.5 text-[10px] sm:text-xs">{displaySymbol}</span>
+      <span className="gain text-[10px] sm:text-xs">{change}</span>
     </div>
   );
 }
@@ -60,15 +52,6 @@ function AmazonLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M13.958 10.09c0 1.232.029 2.256-.591 3.351-.502.891-1.301 1.438-2.186 1.438-1.214 0-1.922-.924-1.922-2.292 0-2.692 2.415-3.182 4.7-3.182v.685zm3.186 7.705a.66.66 0 01-.753.076c-1.057-.878-1.247-1.285-1.828-2.122-1.748 1.782-2.986 2.315-5.249 2.315-2.681 0-4.764-1.654-4.764-4.963 0-2.585 1.401-4.344 3.394-5.203 1.728-.754 4.143-.89 5.985-1.098v-.409c0-.752.057-1.641-.383-2.29-.385-.578-1.124-.816-1.776-.816-1.205 0-2.277.618-2.54 1.9-.054.284-.261.564-.549.578l-3.067-.331c-.259-.056-.547-.266-.472-.66C6.057 1.926 8.893.873 11.459.873c1.32 0 3.043.351 4.082 1.35 1.32 1.229 1.193 2.868 1.193 4.652v4.215c0 1.267.526 1.822 1.02 2.508.173.25.212.549-.009.735-.554.46-1.542 1.318-2.085 1.798l-.516-.336zM21.6 18.134c-1.721 1.28-4.212 1.956-6.36 1.956-3.01 0-5.72-1.113-7.772-2.965-.16-.145-.017-.343.176-.23 2.215 1.288 4.953 2.065 7.778 2.065 1.908 0 4.006-.396 5.937-1.216.291-.125.535.191.241.39zm.688-.773c-.219-.281-1.448-.133-2-.067-.167.02-.193-.126-.042-.232 .979-.689 2.586-.49 2.773-.259.19.234-.05 1.854-.968 2.627-.141.118-.276.055-.213-.101.207-.514.67-1.688.45-1.968z"/>
-    </svg>
-  );
-}
-
-function CostcoLogo({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-      <text x="12" y="16" textAnchor="middle" fontSize="6" fontWeight="bold" fill="currentColor">C</text>
     </svg>
   );
 }
@@ -121,44 +104,47 @@ function StockTile({
 
   return (
     <div className={`${variantClasses[variant]} ${className}`} style={style} title={symbol}>
-      <Logo className="w-6 h-6 md:w-7 md:h-7" />
+      <Logo className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
     </div>
   );
 }
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
-      <header className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 md:px-6 bg-bg/90 backdrop-blur-md border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-cta flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-cta-ink" />
+    <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
+      {/* Header - Mobile optimized */}
+      <header className="fixed top-0 left-0 right-0 z-50 h-12 sm:h-14 flex items-center justify-between px-3 sm:px-4 md:px-6 bg-bg/90 backdrop-blur-md border-b border-border">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cta flex items-center justify-center">
+            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cta-ink" />
           </div>
-          <span className="font-bold">Freestocks</span>
+          <span className="font-bold text-sm sm:text-base">Freestocks</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Link
             href="/sign-in"
-            className="text-sm text-muted hover:text-foreground transition-colors px-3 py-1.5"
+            className="text-xs sm:text-sm text-muted hover:text-foreground transition-colors px-2 sm:px-3 py-1.5"
           >
             Sign In
           </Link>
-          <Link href="/sign-up" className="btn-primary text-sm py-2 px-4">
-            Get Started
-            <ArrowRight className="w-4 h-4" />
+          <Link href="/sign-up" className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4">
+            <span className="hidden xs:inline">Get Started</span>
+            <span className="xs:hidden">Start</span>
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 pt-14">
-        <section className="relative overflow-hidden py-12 md:py-20 min-h-[70vh] flex items-center">
+      <main className="flex-1 pt-12 sm:pt-14">
+        {/* Hero Section - Mobile first */}
+        <section className="relative overflow-hidden py-8 sm:py-12 md:py-20 min-h-[60vh] sm:min-h-[70vh] flex items-center">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-48 h-48 bg-cta/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gain/10 rounded-full blur-3xl" />
+            <div className="absolute top-1/4 left-1/4 w-32 sm:w-48 h-32 sm:h-48 bg-cta/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-40 sm:w-64 h-40 sm:h-64 bg-gain/10 rounded-full blur-3xl" />
           </div>
 
-          {/* Glossy floating brand logo tiles */}
-          <div className="spark-field">
+          {/* Floating brand logo tiles - Adjusted for mobile */}
+          <div className="spark-field hidden sm:block">
             <StockTile logo={AppleLogo} symbol="AAPL" variant="lime" style={{ top: '15%', left: '8%' }} />
             <StockTile logo={TeslaLogo} symbol="TSLA" style={{ top: '25%', right: '10%' }} />
             <StockTile logo={NvidiaLogo} symbol="NVDA" variant="gain" style={{ top: '60%', left: '5%' }} />
@@ -169,101 +155,110 @@ export default function LandingPage() {
             <StockTile logo={NvidiaLogo} symbol="NVDA" style={{ top: '55%', right: '18%' }} className="hidden md:flex" />
           </div>
 
-          <div className="relative max-w-4xl mx-auto px-4 md:px-6 text-center z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated border border-border mb-6">
+          {/* Mobile floating tiles - simplified */}
+          <div className="spark-field sm:hidden">
+            <StockTile logo={TeslaLogo} symbol="TSLA" variant="lime" style={{ top: '10%', right: '5%' }} />
+            <StockTile logo={NvidiaLogo} symbol="NVDA" variant="gain" style={{ top: '65%', left: '3%' }} />
+          </div>
+
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center z-10">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-elevated border border-border mb-4 sm:mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" />
-              <span className="text-xs text-muted">Earn stocks from offers — no deposit needed</span>
+              <span className="text-[10px] sm:text-xs text-muted">Earn stocks from offers — no deposit needed</span>
             </div>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-3 sm:mb-4 px-2">
               The easiest way to{" "}
               <span className="text-cta">earn stocks</span>
             </h1>
 
-            <p className="text-base md:text-lg text-muted max-w-xl mx-auto mb-8">
+            <p className="text-sm sm:text-base md:text-lg text-muted max-w-xl mx-auto mb-6 sm:mb-8 px-4">
               Complete offers, play games, take surveys. Earn real cash and unlock fractional shares of top companies.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 mb-6 sm:mb-8 px-4">
               <Link
                 href="/sign-up"
-                className="btn-primary text-base px-6 py-3 w-full sm:w-auto pulse-glow"
+                className="btn-primary text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-full sm:w-auto pulse-glow min-h-[44px]"
               >
                 Start Earning Free
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
-              <Link href="/sign-in" className="btn-secondary text-base px-6 py-3 w-full sm:w-auto">
+              <Link href="/sign-in" className="btn-secondary text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-full sm:w-auto min-h-[44px]">
                 I have an account
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted">
-              <div className="flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-cta" />
+            <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-2 text-[10px] sm:text-xs text-muted px-2">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <DollarSign className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cta" />
                 <span>USD balance</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-gain" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gain" />
                 <span>Instant credits</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>Secure ledger</span>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-3 border-y border-border bg-elevated/50">
-          <div className="max-w-4xl mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-bg/50 border border-border">
-                <div className="w-8 h-8 rounded-md bg-cta/10 flex items-center justify-center flex-shrink-0">
-                  <DollarSign className="w-4 h-4 text-cta" />
+        {/* Stats Section - Mobile optimized grid */}
+        <section className="py-2.5 sm:py-3 border-y border-border bg-elevated/50">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 rounded-lg bg-bg/50 border border-border">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-cta/10 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cta" />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold">USD Ledger</p>
-                  <p className="text-[10px] text-muted">No points, just $</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-bg/50 border border-border">
-                <div className="w-8 h-8 rounded-md bg-gain/10 flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-4 h-4 text-gain" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">Instant Credits</p>
-                  <p className="text-[10px] text-muted">Credited in minutes</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-semibold truncate">USD Ledger</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted truncate">No points, just $</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-bg/50 border border-border">
-                <div className="w-8 h-8 rounded-md bg-cta/10 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-4 h-4 text-cta" />
+              <div className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 rounded-lg bg-bg/50 border border-border">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-gain/10 flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gain" />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold">Verified Offers</p>
-                  <p className="text-[10px] text-muted">From top brands</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-semibold truncate">Instant Credits</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted truncate">Credited in minutes</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-bg/50 border border-border">
-                <div className="w-8 h-8 rounded-md bg-gain/10 flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-4 h-4 text-gain" />
+              <div className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 rounded-lg bg-bg/50 border border-border">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-cta/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cta" />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold">Stock Unlock</p>
-                  <p className="text-[10px] text-muted">To Solana wallet</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-semibold truncate">Verified Offers</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted truncate">From top brands</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 rounded-lg bg-bg/50 border border-border">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-gain/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gain" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-semibold truncate">Stock Unlock</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted truncate">To Solana wallet</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-4 border-b border-border overflow-hidden bg-elevated/30">
+        {/* Ticker Section - Using tokenized stocks data */}
+        <section className="py-3 sm:py-4 border-b border-border overflow-hidden bg-elevated/30">
           <div className="relative">
             <div className="flex ticker-scroll whitespace-nowrap">
-              {[...tickers, ...tickers].map((ticker, i) => (
+              {[...tickerData, ...tickerData].map((ticker, i) => (
                 <TickerCube
                   key={`${ticker.symbol}-${i}`}
                   symbol={ticker.symbol}
+                  displaySymbol={ticker.displaySymbol}
                   change={ticker.change}
                   delay={i * 200}
                 />
@@ -272,42 +267,43 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-12 md:py-20">
-          <div className="max-w-5xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">
+        {/* Three Steps Section - Mobile optimized */}
+        <section className="py-8 sm:py-12 md:py-20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-6 sm:mb-10">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
                 Three steps to your first stock
               </h2>
-              <p className="text-muted">Simpler than you think</p>
+              <p className="text-sm sm:text-base text-muted">Simpler than you think</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="card p-5 text-center">
-                <div className="w-12 h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-4">
-                  <DollarSign className="w-6 h-6 text-cta" />
+            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="card p-4 sm:p-5 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-cta" />
                 </div>
-                <h3 className="font-semibold mb-2">1. Complete Offers</h3>
-                <p className="text-sm text-muted">
+                <h3 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2">1. Complete Offers</h3>
+                <p className="text-xs sm:text-sm text-muted">
                   Download apps, play games, or take surveys. Each earns you cash.
                 </p>
               </div>
 
-              <div className="card p-5 text-center">
-                <div className="w-12 h-12 rounded-xl bg-gain/10 flex items-center justify-center mx-auto mb-4">
-                  <Gift className="w-6 h-6 text-gain" />
+              <div className="card p-4 sm:p-5 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gain/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-gain" />
                 </div>
-                <h3 className="font-semibold mb-2">2. Build Balance</h3>
-                <p className="text-sm text-muted">
+                <h3 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2">2. Build Balance</h3>
+                <p className="text-xs sm:text-sm text-muted">
                   Watch earnings grow. Track every dollar in your dashboard.
                 </p>
               </div>
 
-              <div className="card p-5 text-center">
-                <div className="w-12 h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-6 h-6 text-cta" />
+              <div className="card p-4 sm:p-5 text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cta/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-cta" />
                 </div>
-                <h3 className="font-semibold mb-2">3. Unlock Stocks</h3>
-                <p className="text-sm text-muted">
+                <h3 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2">3. Unlock Stocks</h3>
+                <p className="text-xs sm:text-sm text-muted">
                   Redeem balance for fractional shares of top companies.
                 </p>
               </div>
@@ -315,16 +311,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-12 md:py-16 bg-elevated/30 border-y border-border">
-          <div className="max-w-5xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">
+        {/* Popular Offers Section - Mobile optimized cards */}
+        <section className="py-8 sm:py-12 md:py-16 bg-elevated/30 border-y border-border">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
                 Popular offers right now
               </h2>
-              <p className="text-muted">Real examples — sign up to see all available</p>
+              <p className="text-sm sm:text-base text-muted">Real examples — sign up to see all available</p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-6 sm:mb-8">
               {[
                 { icon: Gamepad2, title: "Royal Match", meta: "Reach Level 200", reward: 4.50, chip: "Hot", hasBonus: true, bonusText: "2x Weekend" },
                 { icon: FileText, title: "Opinion Survey", meta: "5 min • Instant pay", reward: 0.85, chip: "New", hasBonus: false, bonusText: "" },
@@ -333,38 +330,38 @@ export default function LandingPage() {
               ].map((offer, i) => (
                 <div key={i} className="card overflow-hidden">
                   {offer.hasBonus && (
-                    <div className="h-1 bg-bonus" />
+                    <div className="h-0.5 sm:h-1 bg-bonus" />
                   )}
-                  <div className="p-3">
-                    <div className="flex items-start gap-2.5 mb-2">
-                      <div className="w-9 h-9 rounded-lg bg-bg border border-border flex items-center justify-center flex-shrink-0">
-                        <offer.icon className="w-4 h-4 text-muted" />
+                  <div className="p-2.5 sm:p-3">
+                    <div className="flex items-start gap-2 sm:gap-2.5 mb-2">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-bg border border-border flex items-center justify-center flex-shrink-0">
+                        <offer.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <p className="font-semibold text-sm truncate">{offer.title}</p>
+                        <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5">
+                          <p className="font-semibold text-xs sm:text-sm truncate">{offer.title}</p>
                           {offer.chip && (
-                            <span className={`text-[8px] font-bold px-1 py-0.5 rounded ${offer.chip === 'Hot' ? 'bg-gain/20 text-gain' : 'bg-cta/20 text-cta'}`}>
+                            <span className={`text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded flex-shrink-0 ${offer.chip === 'Hot' ? 'bg-gain/20 text-gain' : 'bg-cta/20 text-cta'}`}>
                               {offer.chip}
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted truncate">{offer.meta}</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted truncate">{offer.meta}</p>
                       </div>
                     </div>
                     {offer.hasBonus && (
                       <div className="flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded bg-bonus/10 border border-bonus/20">
-                        <Flame className="w-2.5 h-2.5 text-bonus" />
-                        <span className="text-[9px] text-bonus font-medium">{offer.bonusText}</span>
+                        <Flame className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-bonus" />
+                        <span className="text-[8px] sm:text-[9px] text-bonus font-medium truncate">{offer.bonusText}</span>
                       </div>
                     )}
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[8px] text-muted uppercase">Up to</p>
-                        <p className="text-base font-bold text-cta tabular-nums">${offer.reward.toFixed(2)}</p>
+                        <p className="text-[7px] sm:text-[8px] text-muted uppercase">Up to</p>
+                        <p className="text-sm sm:text-base font-bold text-cta tabular-nums">${offer.reward.toFixed(2)}</p>
                       </div>
-                      <div className="w-7 h-7 rounded-md bg-cta flex items-center justify-center">
-                        <ArrowRight className="w-3.5 h-3.5 text-cta-ink" />
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-cta flex items-center justify-center min-w-[24px] min-h-[24px]">
+                        <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cta-ink" />
                       </div>
                     </div>
                   </div>
@@ -373,26 +370,66 @@ export default function LandingPage() {
             </div>
 
             <div className="text-center">
-              <Link href="/sign-up" className="btn-primary text-base px-8 py-3">
+              <Link href="/sign-up" className="btn-primary text-sm sm:text-base px-6 sm:px-8 py-2.5 sm:py-3 min-h-[44px]">
                 Start Earning Free
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
-              <p className="text-xs text-muted mt-3">No deposits required</p>
+              <p className="text-[10px] sm:text-xs text-muted mt-2.5 sm:mt-3">No deposits required</p>
             </div>
+          </div>
+        </section>
+
+        {/* Available Stocks Preview - NEW section */}
+        <section className="py-8 sm:py-12 md:py-16">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+                Stocks you can unlock
+              </h2>
+              <p className="text-sm sm:text-base text-muted">Tokenized on Solana • Real company shares</p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+              {displayTop10.slice(0, 8).map((stock) => {
+                const badge = getIssuerBadge(stock.issuer);
+                return (
+                  <div
+                    key={stock.symbol}
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-elevated border border-border hover:border-cta/50 transition-colors"
+                  >
+                    <span className="font-semibold text-xs sm:text-sm">{stock.symbol}</span>
+                    <span className="text-[9px] sm:text-[10px] text-muted">{stock.name}</span>
+                    <span className={`text-[7px] sm:text-[8px] px-1 sm:px-1.5 py-0.5 rounded ${badge.color}`}>
+                      {badge.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-center text-[10px] sm:text-xs text-muted">
+              More stocks available • NVIDIA, SpaceX, S&P 500 ETF, and more
+            </p>
           </div>
         </section>
       </main>
 
-      <footer className="py-6 border-t border-border">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      {/* Footer - Mobile optimized */}
+      <footer className="py-4 sm:py-6 border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-cta flex items-center justify-center">
-              <TrendingUp className="w-3 h-3 text-cta-ink" />
+            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-md bg-cta flex items-center justify-center">
+              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-cta-ink" />
             </div>
-            <span className="font-semibold text-sm">Freestocks</span>
+            <span className="font-semibold text-xs sm:text-sm">Freestocks</span>
           </div>
-          <p className="text-xs text-muted">
-            © {new Date().getFullYear()} Freestocks. All rights reserved.
+          <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-muted">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
+          </div>
+          <p className="text-[10px] sm:text-xs text-muted">
+            © {new Date().getFullYear()} Freestocks
           </p>
         </div>
       </footer>

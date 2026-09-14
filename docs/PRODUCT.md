@@ -202,6 +202,7 @@ Decisions that are **not open for debate** during Stocklana sprint:
 |----------|---------|
 | [PRODUCT.md](./PRODUCT.md) | This file — strategy, priorities, locks |
 | [STOCKLANA-BACKLOG.md](./STOCKLANA-BACKLOG.md) | Sprint backlog for Stocklana branch |
+| [TOKENIZED-STOCKS-SOLANA.md](./TOKENIZED-STOCKS-SOLANA.md) | Tokenized stock issuers (xStocks, Ondo, Backpack) |
 | [FREECASH-GAMIFICATION.md](./FREECASH-GAMIFICATION.md) | P2-1 research — gamification patterns |
 | [OPEN-ITEMS.md](./OPEN-ITEMS.md) | Engineering + ops open items |
 | [QA-REPORT-2026-09-13.md](./QA-REPORT-2026-09-13.md) | QA findings from 2026-09-13 session |

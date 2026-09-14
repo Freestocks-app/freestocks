@@ -20,7 +20,7 @@ export default async function AppLayout({
   const balanceCents = await ledger.getBalance(session.user.id);
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-[#0a0a0f]">
       <Navigation balanceCents={balanceCents} userName={session.user.name} />
       <main className="pt-12 md:pt-14">{children}</main>
     </div>
