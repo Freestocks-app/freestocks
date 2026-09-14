@@ -325,18 +325,15 @@ input[type="password"]::placeholder {
   color: var(--muted);
 }
 
-/* Stock badge - floating brand logo with subtle depth */
+/* Stock badge - floating brand logo, full-bleed glass style */
 .stock-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 44px;
   height: 44px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    0 0 24px rgba(212, 252, 80, 0.1);
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(212, 252, 80, 0.08);
   animation: stock-float 6s ease-in-out infinite;
 }
 
@@ -377,15 +374,12 @@ input[type="password"]::placeholder {
 
 /* Rotating ticker animation for hero headline */
 .ticker-rotate-container {
-  display: inline-block;
-  position: relative;
-  min-width: 5.5ch;
-  text-align: left;
+  display: inline;
   vertical-align: baseline;
 }
 
 .ticker-rotate-text {
-  display: inline-block;
+  display: inline;
   color: var(--cta);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
               opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -399,12 +393,6 @@ input[type="password"]::placeholder {
 .ticker-rotate-text.ticker-exit {
   transform: translateY(-20%) rotateX(-30deg);
   opacity: 0;
-}
-
-@media (max-width: 768px) {
-  .ticker-rotate-container {
-    min-width: 5ch;
-  }
 }
 
 @media (max-width: 768px) {
@@ -427,10 +415,9 @@ input[type="password"]::placeholder {
   }
 
   .stock-badge {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    overflow: hidden;
   }
 
   .stock-card {
