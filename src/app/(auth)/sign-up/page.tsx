@@ -178,15 +178,15 @@ export default function SignUpPage() {
                 <label htmlFor="email" className="block text-[10px] sm:text-xs font-medium text-foreground mb-1 sm:mb-1.5">
                   Email
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-4 w-4 h-4 text-muted pointer-events-none" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Type here..."
-                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-11 pr-4 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
+                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-12 pr-4 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
                     required
                   />
                 </div>
@@ -196,15 +196,15 @@ export default function SignUpPage() {
                 <label htmlFor="password" className="block text-[10px] sm:text-xs font-medium text-foreground mb-1 sm:mb-1.5">
                   Password
                 </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-4 w-4 h-4 text-muted pointer-events-none" />
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Type here..."
-                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-11 pr-12 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
+                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-12 pr-12 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
                     required
                     minLength={8}
                   />
