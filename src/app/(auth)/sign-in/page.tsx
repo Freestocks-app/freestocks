@@ -170,15 +170,15 @@ export default function SignInPage() {
                 <label htmlFor="email" className="block text-[10px] sm:text-xs font-medium text-foreground mb-1 sm:mb-1.5">
                   Email
                 </label>
-                <div className="relative flex items-center">
-                  <Mail className="absolute left-4 w-4 h-4 text-muted pointer-events-none" />
+                <div className="flex items-center gap-3 bg-bg border border-border rounded-lg px-4 min-h-[44px] focus-within:border-cta/50 focus-within:ring-1 focus-within:ring-cta/20">
+                  <Mail className="w-4 h-4 text-muted flex-shrink-0" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Type here..."
-                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-12 pr-4 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
+                    className="flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0"
                     required
                   />
                 </div>
@@ -188,21 +188,21 @@ export default function SignInPage() {
                 <label htmlFor="password" className="block text-[10px] sm:text-xs font-medium text-foreground mb-1 sm:mb-1.5">
                   Password
                 </label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 w-4 h-4 text-muted pointer-events-none" />
+                <div className="flex items-center gap-3 bg-bg border border-border rounded-lg px-4 min-h-[44px] focus-within:border-cta/50 focus-within:ring-1 focus-within:ring-cta/20">
+                  <Lock className="w-4 h-4 text-muted flex-shrink-0" />
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Type here..."
-                    className="w-full bg-bg border border-border rounded-lg py-2.5 sm:py-3 pl-12 pr-12 text-sm placeholder:text-muted/60 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 min-h-[44px]"
+                    className="flex-1 bg-transparent py-2.5 sm:py-3 text-sm placeholder:text-muted/60 focus:outline-none min-w-0"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1.5"
+                    className="text-muted hover:text-foreground transition-colors flex-shrink-0 p-1"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
