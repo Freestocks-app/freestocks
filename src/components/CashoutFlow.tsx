@@ -206,8 +206,11 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
               >
                 <div className="flex items-center gap-2.5">
                   <StockLogo stock={stock} size="md" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm">{stock.symbol}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-sm">{stock.symbol}</p>
+                      <span className="text-[7px] px-1 py-0.5 rounded bg-cta/20 text-cta font-medium">xStocks</span>
+                    </div>
                     <p className="text-[10px] text-muted truncate">{stock.name}</p>
                   </div>
                 </div>
