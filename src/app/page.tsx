@@ -171,86 +171,121 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* 3-Step Section - Clean and focused */}
-        <section className="py-12 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-10 sm:mb-14">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                The easiest way to earn stocks
+        {/* 3-Step Section - Yuki's elevated design */}
+        <section className="py-16 sm:py-24 md:py-32">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            {/* Header */}
+            <div className="text-center mb-12 sm:mb-16">
+              <span className="inline-block px-4 py-1.5 rounded-full border border-cta text-cta text-xs sm:text-sm font-medium tracking-wide mb-6">
+                NO DEPOSIT. REAL OWNERSHIP.
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
+                Turn quick tasks into <span className="text-cta">stock</span>
               </h2>
-              <p className="text-sm sm:text-base text-muted">Three steps. No deposit needed.</p>
+              <p className="text-muted text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                Test apps, play games, and answer surveys. When your balance hits $5, choose the company you want to own.
+              </p>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-cta/10 border border-cta/20 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-cta">1</span>
+            {/* Three Cards */}
+            <div className="grid sm:grid-cols-3 gap-4 sm:gap-6">
+              {/* Card 1 - Complete offers */}
+              <div className="step-card group">
+                <div className="step-number">1</div>
+                <div className="step-icon mb-6">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="8" y="12" width="48" height="40" rx="6" fill="#1a1a1a" stroke="#2b2b2b" strokeWidth="1.5"/>
+                    <rect x="16" y="24" width="32" height="8" rx="4" fill="var(--cta)" fillOpacity="0.9"/>
+                    <rect x="16" y="36" width="20" height="4" rx="2" fill="#3a3a3a"/>
+                    <rect x="16" y="44" width="28" height="4" rx="2" fill="#3a3a3a"/>
+                  </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Earn points</h3>
-                <p className="text-sm text-muted">
-                  Complete offers, download apps, play games, take surveys. Rewards credit your balance.
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Complete offers</h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  Pick bite-size tasks from apps, games, and surveys. Rewards land in your Freestocks balance as points.
                 </p>
               </div>
 
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-cta/10 border border-cta/20 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-cta">2</span>
+              {/* Card 2 - Unlock at $5 */}
+              <div className="step-card group">
+                <div className="step-number">2</div>
+                <div className="step-icon mb-6">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="8" y="12" width="48" height="40" rx="10" fill="var(--cta)"/>
+                    <text x="32" y="40" textAnchor="middle" fill="#0a0a0a" fontSize="22" fontWeight="700" fontFamily="Inter, sans-serif">$5</text>
+                  </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Cashout at $5</h3>
-                <p className="text-sm text-muted">
-                  Once you hit $5, choose a stock to redeem. Apple, Tesla, NVIDIA — your pick.
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Unlock at $5</h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  No deposit needed. Reach the threshold and swap your balance for a stock reward.
                 </p>
               </div>
 
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-gain/10 border border-gain/20 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-gain">3</span>
+              {/* Card 3 - Choose a stock */}
+              <div className="step-card group">
+                <div className="step-number">3</div>
+                <div className="step-icon mb-6">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="barGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stopColor="var(--cta)" stopOpacity="0.4"/>
+                        <stop offset="100%" stopColor="var(--cta)" stopOpacity="1"/>
+                      </linearGradient>
+                    </defs>
+                    <rect x="10" y="36" width="10" height="20" rx="3" fill="url(#barGradient)"/>
+                    <rect x="27" y="24" width="10" height="32" rx="3" fill="url(#barGradient)"/>
+                    <rect x="44" y="12" width="10" height="44" rx="3" fill="url(#barGradient)"/>
+                  </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Receive stock</h3>
-                <p className="text-sm text-muted">
-                  Tokenized shares (xStocks) delivered to your account. You own them.
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Choose a stock</h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  Redeem into tokenized shares from names like Apple, Tesla, NVIDIA, and more.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Stocks Section - Clean cards with brand logos */}
-        <section className="py-12 sm:py-16 bg-elevated/30 border-y border-border">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8 sm:mb-10">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                Stocks you can unlock
+        {/* Stocks Section - Elevated visual language */}
+        <section className="py-16 sm:py-24 border-t border-border">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="inline-block px-3 py-1 rounded-full bg-elevated border border-border text-muted text-xs font-medium mb-4">
+                BACKED 1:1 BY REAL SHARES
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
+                Names you <span className="text-cta">know</span>
               </h2>
-              <p className="text-sm sm:text-base text-muted">
-                xStocks on Solana — backed 1:1 by real shares via{" "}
+              <p className="text-muted text-sm sm:text-base max-w-xl mx-auto">
+                xStocks on Solana via{" "}
                 <a href="https://backed.fi" target="_blank" rel="noopener noreferrer" className="text-cta hover:underline">
                   Backed.fi
                 </a>
+                {" "}— fractional ownership of household names
               </p>
             </div>
 
-            {/* FreeCash-style structured stock cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-8">
+            {/* Stock grid - refined cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-10">
               {TOP10.map((stock) => (
-                <div key={stock.symbol} className="stock-card">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden mb-2">
-                    <Image src={stock.logo} alt={stock.name} width={48} height={48} className="w-full h-full object-cover" unoptimized />
+                <div key={stock.symbol} className="stock-card-elevated">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden mb-3">
+                    <Image src={stock.logo} alt={stock.name} width={56} height={56} className="w-full h-full object-cover" unoptimized />
                   </div>
-                  <p className="font-semibold text-sm">${stock.symbol}</p>
-                  <p className="text-[10px] text-muted">{stock.name}</p>
+                  <p className="font-semibold text-sm sm:text-base">${stock.symbol}</p>
+                  <p className="text-[10px] sm:text-xs text-muted">{stock.name}</p>
                 </div>
               ))}
             </div>
 
             <div className="text-center">
               {comingSoon ? (
-                <span className="btn-primary text-base px-8 py-3 opacity-60 cursor-not-allowed inline-flex items-center gap-2">
+                <span className="btn-primary text-base px-8 py-3.5 opacity-60 cursor-not-allowed inline-flex items-center gap-2">
                   <Clock className="w-5 h-5" />
                   Coming Soon
                 </span>
               ) : (
-                <Link href="/sign-up" className="btn-primary text-base px-8 py-3">
+                <Link href="/sign-up" className="btn-primary text-base px-8 py-3.5">
                   Start Earning
                   <ArrowRight className="w-5 h-5" />
                 </Link>
@@ -259,16 +294,28 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Final CTA Section */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-              {comingSoon ? "Freestocks is launching soon" : "Ready to earn your first stock?"}
+        {/* Final CTA Section - Elevated band */}
+        <section className="py-20 sm:py-28 border-t border-border relative overflow-hidden">
+          {/* Background glow */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-cta/5 rounded-full blur-3xl" />
+          </div>
+          
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center relative z-10">
+            <span className="inline-block px-4 py-1.5 rounded-full border border-cta/40 text-cta text-xs sm:text-sm font-medium mb-6">
+              {comingSoon ? "LAUNCHING SOON" : "FREE TO START"}
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+              {comingSoon ? (
+                <>Freestocks is <span className="text-cta">launching soon</span></>
+              ) : (
+                <>Your first stock is <span className="text-cta">waiting</span></>
+              )}
             </h2>
-            <p className="text-muted mb-8">
+            <p className="text-muted text-base sm:text-lg mb-8 max-w-lg mx-auto">
               {comingSoon 
                 ? "We're putting the finishing touches on something great. Check back soon!"
-                : "Join thousands of users earning fractional shares. No deposit, no catch."}
+                : "No deposit, no catch. Earn points, pick a stock, own a piece of the companies you believe in."}
             </p>
             {comingSoon ? (
               <span className="btn-primary text-lg px-10 py-4 opacity-60 cursor-not-allowed inline-flex items-center gap-2">
