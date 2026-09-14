@@ -375,6 +375,38 @@ input[type="password"]::placeholder {
   transform: translateY(-2px);
 }
 
+/* Rotating ticker animation for hero headline */
+.ticker-rotate-container {
+  display: inline-block;
+  position: relative;
+  min-width: 5.5ch;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.ticker-rotate-text {
+  display: inline-block;
+  color: var(--cta);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ticker-rotate-text.ticker-enter {
+  transform: translateY(0) rotateX(0deg);
+  opacity: 1;
+}
+
+.ticker-rotate-text.ticker-exit {
+  transform: translateY(-20%) rotateX(-30deg);
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .ticker-rotate-container {
+    min-width: 5ch;
+  }
+}
+
 @media (max-width: 768px) {
   .card {
     border-radius: 8px;

@@ -105,6 +105,7 @@ export default async function LandingPage() {
               </span>
             </h1>
 
+
             {/* Primary CTA - high contrast, clear next step */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
               <Link href="/sign-up" className="btn-primary text-base px-8 py-3.5 w-full sm:w-auto pulse-glow">
