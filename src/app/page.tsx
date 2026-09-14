@@ -80,12 +80,12 @@ export default async function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 h-12 sm:h-14 flex items-center justify-between px-3 sm:px-4 md:px-6 bg-bg/95 backdrop-blur-md border-b border-border">
         <Link href="/" className="flex items-center">
           <Image 
-            src="/brand/freestocks-logo.png" 
-            alt="Freestocks" 
-            width={180} 
-            height={44} 
-            className="h-8 sm:h-10 md:h-11 w-auto"
-            priority 
+            src="/brand/freestocks-logo.png"
+            alt="Freestocks"
+            width={180}
+            height={44}
+            className="h-6 sm:h-7 md:h-8 w-auto"
+            priority
           />
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-2">
