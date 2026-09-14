@@ -11,7 +11,7 @@ async function main() {
   console.log(`Source: ${metadata.width}x${metadata.height}`);
   
   // The icon is on the left side - extract square from left portion
-  // Logo is 2172x724, icon takes roughly first 600px width
+  // Trimmed logo is 1829x340, icon takes roughly first portion
   const iconWidth = Math.floor(metadata.height * 0.9);
   
   const iconBuffer = await sharp(SOURCE)
