@@ -1,8 +1,10 @@
 # Freestocks × Stocklana — Backlog
 
-Last updated: 2026-09-13  
+Last updated: 2026-09-14  
 Branch: `stocklana/privy-solana-unlock`  
 Tagline (locked): **The easiest way to earn stocks**
+
+**Related docs:** [PRODUCT.md](./PRODUCT.md) (strategy) · [FREECASH-GAMIFICATION.md](./FREECASH-GAMIFICATION.md) (P2-1 research) · [OPEN-ITEMS.md](./OPEN-ITEMS.md)
 
 ## North star (hackathon)
 
@@ -35,7 +37,7 @@ This branch is **not** FOMO / RH Chain. Exit rail = Privy embedded Solana wallet
 
 | ID | Item | Notes |
 |----|------|-------|
-| P2-1 | **FreeCash-style gamification / dark patterns** | Urgency, social proof, progress/FOMO chrome, offer card pressure — polish that makes LP+Earn addictive. Explicit backlog item for Stocklana attractiveness |
+| P2-1 | **FreeCash-style gamification / dark patterns** | See [FREECASH-GAMIFICATION.md](./FREECASH-GAMIFICATION.md) — endowed progress, progress meters, streaks; explicit OUT list for dark patterns |
 | P2-2 | Privy / fee-payer **gas sponsorship** | Needed if users must sign chain txs; not required for v0 "we send to you". Document as future feature |
 | P2-3 | Production FOMO rail coexistence | `main` may keep FOMO; this branch stays Solana-first |
 
