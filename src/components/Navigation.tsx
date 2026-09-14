@@ -36,7 +36,7 @@ export function DesktopNav({ balanceCents, userName }: NavigationProps) {
         <img 
           src="/brand/freestocks-logo.png" 
           alt="Freestocks" 
-          className="h-8 w-auto" 
+          className="h-10 w-auto" 
         />
       </Link>
 
@@ -108,7 +108,7 @@ export function MobileNav({ balanceCents }: NavigationProps) {
           <img 
             src="/brand/freestocks-logo.png" 
             alt="Freestocks" 
-            className="h-7 w-auto" 
+            className="h-8 w-auto" 
           />
         </Link>
 
