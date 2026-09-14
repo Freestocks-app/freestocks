@@ -90,8 +90,8 @@ export default async function LandingPage() {
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-2">
           {comingSoon ? (
-            <span className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4 opacity-60 cursor-not-allowed">
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden md:inline-flex btn-primary text-sm py-2 px-4 opacity-60 cursor-not-allowed">
+              <Clock className="w-4 h-4" />
               Coming Soon
             </span>
           ) : (
