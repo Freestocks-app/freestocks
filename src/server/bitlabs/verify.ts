@@ -1,5 +1,12 @@
 import crypto from "crypto";
 
+function timingSafeHexEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a.toLowerCase(), "hex");
+  const bufB = Buffer.from(b.toLowerCase(), "hex");
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 export function verifyBitlabsHmac(
   urlWithoutHash: string,
   providedHash: string,
@@ -9,7 +16,7 @@ export function verifyBitlabsHmac(
   hmac.update(urlWithoutHash);
   const computedHash = hmac.digest("hex");
 
-  return computedHash.toLowerCase() === providedHash.toLowerCase();
+  return timingSafeHexEqual(computedHash, providedHash);
 }
 
 export function extractHashFromUrl(fullUrl: string): {
@@ -74,7 +81,7 @@ export function verifyBitlabsCallback(
   hmac1.update(urlWithoutHash);
   const computedHash = hmac1.digest("hex");
 
-  if (computedHash.toLowerCase() === hash.toLowerCase()) {
+  if (timingSafeHexEqual(computedHash, hash)) {
     return {
       valid: true,
       urlUsed: urlWithoutHash,
@@ -89,7 +96,7 @@ export function verifyBitlabsCallback(
     hmac2.update(urlEncoded);
     const computedHashEncoded = hmac2.digest("hex");
 
-    if (computedHashEncoded.toLowerCase() === hash.toLowerCase()) {
+    if (timingSafeHexEqual(computedHashEncoded, hash)) {
       return {
         valid: true,
         urlUsed: urlEncoded,
@@ -105,7 +112,7 @@ export function verifyBitlabsCallback(
     hmac3.update(urlDecoded);
     const computedHashDecoded = hmac3.digest("hex");
 
-    if (computedHashDecoded.toLowerCase() === hash.toLowerCase()) {
+    if (timingSafeHexEqual(computedHashDecoded, hash)) {
       return {
         valid: true,
         urlUsed: urlDecoded,

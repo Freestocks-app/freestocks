@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const DESCRIPTION =
+  "Earn stocks for testing apps, games & surveys. Hit $5 and unlock Apple, Tesla, NVIDIA and more.";
+
 export const metadata: Metadata = {
   title: "Freestocks - The Easiest Way to Earn Stocks",
-  description: "Complete offers, earn cash, unlock fractional stocks. The easiest way to build your portfolio.",
+  description: DESCRIPTION,
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "Freestocks - The Easiest Way to Earn Stocks",
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Freestocks - The Easiest Way to Earn Stocks",
+    description: DESCRIPTION,
   },
 };
 
