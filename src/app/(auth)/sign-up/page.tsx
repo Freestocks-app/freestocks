@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp, signIn } from "@/lib/auth-client";
+import { isComingSoon } from "@/lib/utils";
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -41,6 +42,16 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isComingSoon()) {
+      router.replace("/");
+    }
+  }, [router]);
+
+  if (isComingSoon()) {
+    return null;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
