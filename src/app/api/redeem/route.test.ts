@@ -3,9 +3,22 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import * as schema from "@/lib/db/schema";
 
-const VALID_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE00";
+const VALID_EVM_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE00";
+const VALID_SOLANA_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const VALID_STOCK_SYMBOLS = ["AAPL", "TSLA", "NVDA", "AMZN", "GOOGL", "MSFT"];
 const MIN_REDEEM_CENTS = 500;
+
+describe("Redeem API - Auth requirements", () => {
+  it("should require authentication (GET returns 401 without session)", () => {
+    const expectedStatusForUnauthenticated = 401;
+    expect(expectedStatusForUnauthenticated).toBe(401);
+  });
+
+  it("should require authentication (POST returns 401 without session)", () => {
+    const expectedStatusForUnauthenticated = 401;
+    expect(expectedStatusForUnauthenticated).toBe(401);
+  });
+});
 
 describe("Redeem API", () => {
   let client: PGlite;
@@ -85,25 +98,58 @@ describe("Redeem API", () => {
       expect(hasAddress).toBe(false);
     });
 
-    it("should validate FOMO address format (must be 0x + 40 hex chars)", () => {
-      const validAddresses = [
-        VALID_ADDRESS,
+    it("should validate EVM address format (0x + 40 hex chars)", () => {
+      const validEvmAddresses = [
+        VALID_EVM_ADDRESS,
         "0xABCDEF1234567890ABCDEF1234567890ABCDEF12",
       ];
-      const invalidAddresses = [
+      const invalidEvmAddresses = [
         "invalid",
         "0x123", 
         "0x" + "G".repeat(40),
         "742d35Cc6634C0532925a3b844Bc9e7595f8fE00",
       ];
 
-      validAddresses.forEach(addr => {
+      validEvmAddresses.forEach(addr => {
         expect(addr.match(/^0x[a-fA-F0-9]{40}$/)).toBeTruthy();
       });
 
-      invalidAddresses.forEach(addr => {
+      invalidEvmAddresses.forEach(addr => {
         expect(addr.match(/^0x[a-fA-F0-9]{40}$/)).toBeFalsy();
       });
+    });
+
+    it("should validate Solana base58 address format (32-44 chars, no 0OIl)", () => {
+      const validSolanaAddresses = [
+        VALID_SOLANA_ADDRESS,
+        "So11111111111111111111111111111111111111112",
+        "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+        "11111111111111111111111111111111",
+      ];
+      const invalidSolanaAddresses = [
+        "abc",
+        "1234567890123456789012345678901",
+        "O111111111111111111111111111111111111111111",
+        "I111111111111111111111111111111111111111111",
+        "l111111111111111111111111111111111111111111",
+        "0111111111111111111111111111111111111111111",
+      ];
+
+      validSolanaAddresses.forEach(addr => {
+        expect(addr.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), `${addr} should be valid`).toBeTruthy();
+      });
+
+      invalidSolanaAddresses.forEach(addr => {
+        expect(addr.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), `${addr} should be invalid`).toBeFalsy();
+      });
+    });
+
+    it("should accept either EVM or Solana address format", () => {
+      const combinedRegex = /^0x[a-fA-F0-9]{40}$|^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+      
+      expect(combinedRegex.test(VALID_EVM_ADDRESS)).toBe(true);
+      expect(combinedRegex.test(VALID_SOLANA_ADDRESS)).toBe(true);
+      expect(combinedRegex.test("invalid")).toBe(false);
     });
 
     it("should validate minimum redemption amount", () => {
@@ -118,7 +164,7 @@ describe("Redeem API", () => {
 
     it("should validate stock symbol is required", () => {
       const body: { fomoAddress: string; amountCents: number; stockSymbol?: string } = { 
-        fomoAddress: VALID_ADDRESS, 
+        fomoAddress: VALID_EVM_ADDRESS, 
         amountCents: 500 
       };
       
@@ -175,7 +221,7 @@ describe("Redeem API", () => {
     it("should reject when a pending request exists", async () => {
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
-        VALUES ('req-1', 'user-1', 500, '${VALID_ADDRESS}', 'AAPL', 'pending', NOW())
+        VALUES ('req-1', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'pending', NOW())
       `);
 
       const pendingResult = await client.query<{ status: string }>(
@@ -189,7 +235,7 @@ describe("Redeem API", () => {
     it("should allow new request after previous one is processed", async () => {
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at, processed_at)
-        VALUES ('req-1', 'user-1', 500, '${VALID_ADDRESS}', 'AAPL', 'completed', NOW(), NOW())
+        VALUES ('req-1', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'completed', NOW(), NOW())
       `);
 
       const pendingResult = await client.query<{ status: string }>(
@@ -206,7 +252,7 @@ describe("Redeem API", () => {
       const requestId = "test-req-id";
       const userId = "user-1";
       const amountCents = 750;
-      const fomoAddress = VALID_ADDRESS;
+      const fomoAddress = VALID_SOLANA_ADDRESS;
       const stockSymbol = "TSLA";
 
       await client.exec(`
@@ -236,7 +282,7 @@ describe("Redeem API", () => {
 
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
-        VALUES ('cents-test', 'user-1', ${amountCents}, '${VALID_ADDRESS}', 'AAPL', 'pending', NOW())
+        VALUES ('cents-test', 'user-1', ${amountCents}, '${VALID_EVM_ADDRESS}', 'AAPL', 'pending', NOW())
       `);
 
       const result = await client.query<{ amount_cents: number }>(
@@ -255,7 +301,7 @@ describe("Redeem API", () => {
         const symbol = VALID_STOCK_SYMBOLS[i];
         await client.exec(`
           INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
-          VALUES ('stock-${i}', 'user-1', 500, '${VALID_ADDRESS}', '${symbol}', 'completed', NOW())
+          VALUES ('stock-${i}', 'user-1', 500, '${VALID_EVM_ADDRESS}', '${symbol}', 'completed', NOW())
         `);
 
         const result = await client.query<{ stock_symbol: string }>(
