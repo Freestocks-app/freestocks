@@ -149,20 +149,22 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
   socialProviders.facebook = {
     clientId: process.env.FACEBOOK_CLIENT_ID,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    disableDefaultScope: true,
+    scope: ["public_profile"],
   };
 } else {
   console.warn("[Auth] Facebook OAuth not configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET.");
 }
 
-const productionUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL 
-  ? `https://${process.env.VERCEL_URL}` 
-  : "http://localhost:3847";
+const productionUrl = process.env.BETTER_AUTH_URL || 
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3847");
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || productionUrl,
+  baseURL: productionUrl,
   trustedOrigins: [
     "https://appleid.apple.com",
     "http://localhost:3847",
+    "https://freestocks.vercel.app",
     "https://freestocks-beyond-club.vercel.app",
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
   ],
