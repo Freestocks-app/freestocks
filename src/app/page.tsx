@@ -125,6 +125,7 @@ export default async function LandingPage() {
             <div style={{ position: "absolute", top: "72%", right: "6%" }}><StockBadge stock={TOP10[3]} /></div>
             <div style={{ position: "absolute", top: "12%", left: "18%" }} className="hidden lg:block"><StockBadge stock={TOP10[4]} /></div>
             <div style={{ position: "absolute", top: "22%", right: "16%" }} className="hidden lg:block"><StockBadge stock={TOP10[5]} /></div>
+            <div style={{ position: "absolute", top: "62%", left: "22%" }}><StockBadge stock={TOP10[7]} /></div>
           </div>
 
           {/* Mobile badges - four corners */}
