@@ -5,7 +5,8 @@ export const metadata: Metadata = {
   title: "Freestocks - The Easiest Way to Earn Stocks",
   description: "Complete offers, earn cash, unlock fractional stocks. The easiest way to build your portfolio.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 

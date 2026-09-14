@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DollarSign, Gift, Wallet, Ticket, TrendingUp, LogOut, User, Zap, Flame } from "lucide-react";
+import { DollarSign, Gift, Wallet, Ticket, User, Flame } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 
 const navItems = [
@@ -32,11 +32,12 @@ export function DesktopNav({ balanceCents, userName }: NavigationProps) {
   return (
     <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-14 items-center px-4 bg-[#0d1117] border-b border-border">
       {/* Logo - Left */}
-      <Link href="/" className="flex items-center gap-2 mr-8">
-        <div className="w-7 h-7 rounded-lg bg-cta flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-cta-ink" />
-        </div>
-        <span className="font-bold text-base">Freestocks</span>
+      <Link href="/" className="flex items-center mr-8">
+        <img 
+          src="/brand/freestocks-logo.png" 
+          alt="Freestocks" 
+          className="h-8 w-auto" 
+        />
       </Link>
 
       {/* Center Nav Tabs */}
@@ -103,11 +104,12 @@ export function MobileNav({ balanceCents }: NavigationProps) {
     <>
       {/* Top header - logo + balance */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 h-12 flex items-center justify-between px-3 bg-[#0d1117] border-b border-border">
-        <Link href="/" className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-md bg-cta flex items-center justify-center">
-            <TrendingUp className="w-3.5 h-3.5 text-cta-ink" />
-          </div>
-          <span className="font-bold text-sm">Freestocks</span>
+        <Link href="/" className="flex items-center">
+          <img 
+            src="/brand/freestocks-logo.png" 
+            alt="Freestocks" 
+            className="h-7 w-auto" 
+          />
         </Link>
 
         <div className="flex items-center gap-1.5 bg-cta/10 border border-cta/30 rounded-full px-2.5 py-1">

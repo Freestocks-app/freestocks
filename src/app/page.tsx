@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, TrendingUp, DollarSign, Zap, Wallet } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
 import { RotatingTicker } from "@/components/RotatingTicker";
 
@@ -53,12 +53,16 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 h-12 sm:h-14 flex items-center justify-between px-3 sm:px-4 md:px-6 bg-bg/95 backdrop-blur-md border-b border-border">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cta flex items-center justify-center">
-            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cta-ink" />
-          </div>
-          <span className="font-bold text-sm sm:text-base">Freestocks</span>
-        </div>
+        <Link href="/" className="flex items-center">
+          <Image 
+            src="/brand/freestocks-logo.png" 
+            alt="Freestocks" 
+            width={140} 
+            height={32} 
+            className="h-7 sm:h-8 w-auto" 
+            priority 
+          />
+        </Link>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <Link href="/sign-in" className="text-xs sm:text-sm text-muted hover:text-foreground transition-colors px-2 sm:px-3 py-1.5">
             Sign In
@@ -96,18 +100,17 @@ export default async function LandingPage() {
           </div>
 
           <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center z-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 sm:mb-8">
-              <span className="block">
-                Earn <RotatingTicker /> for
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 sm:mb-8 flex flex-col items-center">
+              <span className="inline-flex items-baseline justify-center flex-wrap">
+                Earn&nbsp;<RotatingTicker />&nbsp;for
               </span>
-              <span className="block whitespace-nowrap text-[0.85em] sm:text-[1em]">
+              <span className="block text-[0.85em] sm:text-[1em]">
                 testing apps, games &amp; surveys
               </span>
             </h1>
 
-
             {/* Primary CTA - high contrast, clear next step */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/sign-up" className="btn-primary text-base px-8 py-3.5 w-full sm:w-auto pulse-glow">
                 Start Earning Free
                 <ArrowRight className="w-5 h-5" />
@@ -115,22 +118,6 @@ export default async function LandingPage() {
               <Link href="/sign-in" className="btn-secondary text-base px-8 py-3.5 w-full sm:w-auto">
                 I have an account
               </Link>
-            </div>
-
-            {/* Compact proof chips */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-              <div className="proof-chip">
-                <DollarSign className="w-3.5 h-3.5 text-cta" />
-                <span>USD balance</span>
-              </div>
-              <div className="proof-chip">
-                <Zap className="w-3.5 h-3.5 text-gain" />
-                <span>Instant credits</span>
-              </div>
-              <div className="proof-chip">
-                <Wallet className="w-3.5 h-3.5 text-cta" />
-                <span>$5 cashout</span>
-              </div>
             </div>
           </div>
         </section>
@@ -247,12 +234,15 @@ export default async function LandingPage() {
       {/* Footer */}
       <footer className="py-5 sm:py-6 border-t border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-cta flex items-center justify-center">
-              <TrendingUp className="w-3 h-3 text-cta-ink" />
-            </div>
-            <span className="font-semibold text-sm">Freestocks</span>
-          </div>
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/brand/freestocks-logo.png" 
+              alt="Freestocks" 
+              width={120} 
+              height={28} 
+              className="h-6 w-auto" 
+            />
+          </Link>
           <div className="flex items-center gap-4 text-xs text-muted">
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
