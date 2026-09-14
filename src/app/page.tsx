@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
 import { RotatingTicker } from "@/components/RotatingTicker";
+import { isComingSoon } from "@/lib/utils";
 
 async function getPrices(): Promise<Record<string, StockPrice>> {
   const prices: Record<string, StockPrice> = {};
@@ -71,6 +72,7 @@ function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; classNa
 export default async function LandingPage() {
   const prices = await getPrices();
   const tickerData = getTickerData(prices);
+  const comingSoon = isComingSoon();
 
   return (
     <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
@@ -87,13 +89,22 @@ export default async function LandingPage() {
           />
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Link href="/sign-in" className="text-xs sm:text-sm text-muted hover:text-foreground transition-colors px-2 sm:px-3 py-1.5">
-            Sign In
-          </Link>
-          <Link href="/sign-up" className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4">
-            Get Started
-            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </Link>
+          {comingSoon ? (
+            <span className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4 opacity-60 cursor-not-allowed">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              Coming Soon
+            </span>
+          ) : (
+            <>
+              <Link href="/sign-in" className="text-xs sm:text-sm text-muted hover:text-foreground transition-colors px-2 sm:px-3 py-1.5">
+                Sign In
+              </Link>
+              <Link href="/sign-up" className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4">
+                Get Started
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -134,10 +145,17 @@ export default async function LandingPage() {
 
             {/* Primary CTA */}
             <div className="flex justify-center">
-              <Link href="/sign-up" className="btn-primary text-base sm:text-lg px-10 py-4 pulse-glow">
-                Start Earning Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {comingSoon ? (
+                <span className="btn-primary text-base sm:text-lg px-10 py-4 opacity-60 cursor-not-allowed">
+                  <Clock className="w-5 h-5" />
+                  Coming Soon
+                </span>
+              ) : (
+                <Link href="/sign-up" className="btn-primary text-base sm:text-lg px-10 py-4 pulse-glow">
+                  Start Earning Free
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -226,10 +244,17 @@ export default async function LandingPage() {
             </div>
 
             <div className="text-center">
-              <Link href="/sign-up" className="btn-primary text-base px-8 py-3">
-                Start Earning
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {comingSoon ? (
+                <span className="btn-primary text-base px-8 py-3 opacity-60 cursor-not-allowed inline-flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Coming Soon
+                </span>
+              ) : (
+                <Link href="/sign-up" className="btn-primary text-base px-8 py-3">
+                  Start Earning
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -238,15 +263,24 @@ export default async function LandingPage() {
         <section className="py-16 sm:py-24">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-              Ready to earn your first stock?
+              {comingSoon ? "Freestocks is launching soon" : "Ready to earn your first stock?"}
             </h2>
             <p className="text-muted mb-8">
-              Join thousands of users earning fractional shares. No deposit, no catch.
+              {comingSoon 
+                ? "We're putting the finishing touches on something great. Check back soon!"
+                : "Join thousands of users earning fractional shares. No deposit, no catch."}
             </p>
-            <Link href="/sign-up" className="btn-primary text-lg px-10 py-4 pulse-glow">
-              Get Started Free
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            {comingSoon ? (
+              <span className="btn-primary text-lg px-10 py-4 opacity-60 cursor-not-allowed inline-flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Coming Soon
+              </span>
+            ) : (
+              <Link href="/sign-up" className="btn-primary text-lg px-10 py-4 pulse-glow">
+                Get Started Free
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            )}
           </div>
         </section>
       </main>

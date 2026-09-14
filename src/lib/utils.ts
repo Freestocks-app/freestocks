@@ -52,3 +52,12 @@ export function isValidEvmAddress(address: string): boolean {
 export function isValidWalletAddress(address: string): boolean {
   return isValidSolanaAddress(address) || isValidEvmAddress(address);
 }
+
+/**
+ * Check if the app is in "Coming Soon" mode.
+ * Production sets NEXT_PUBLIC_COMING_SOON=true to gate the sign-up flow.
+ * Preview/Development deployments leave it unset to keep the full app usable.
+ */
+export function isComingSoon(): boolean {
+  return process.env.NEXT_PUBLIC_COMING_SOON === "true";
+}
