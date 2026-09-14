@@ -337,13 +337,11 @@ input[type="password"]::placeholder {
 
 /* Stock badge - floating glass logo, full-bleed, no outer frame */
 .stock-badge {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 88px;
+  height: 88px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(212, 252, 80, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   animation: stock-float 6s ease-in-out infinite;
 }
 
@@ -433,9 +431,9 @@ input[type="password"]::placeholder {
   }
 
   .stock-badge {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
   }
 
   .stock-card {

@@ -41,7 +41,7 @@ function glassBadge(symbol: string): string {
 export const TOP10: TokenizedStock[] = [
   { symbol: "AAPL", name: "Apple", issuer: "xstocks", tokenSymbol: "AAPLx", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp", logo: xstockLogo("AAPLx"), badge: glassBadge("AAPL") },
   { symbol: "TSLA", name: "Tesla", issuer: "xstocks", tokenSymbol: "TSLAx", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB", logo: xstockLogo("TSLAx"), badge: glassBadge("TSLA") },
-  { symbol: "NVDA", name: "NVIDIA", issuer: "xstocks", tokenSymbol: "NVDAx", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh", logo: xstockLogo("NVDAx") },
+  { symbol: "NVDA", name: "NVIDIA", issuer: "xstocks", tokenSymbol: "NVDAx", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh", logo: xstockLogo("NVDAx"), badge: glassBadge("NVDA") },
   { symbol: "AMZN", name: "Amazon", issuer: "xstocks", tokenSymbol: "AMZNx", mint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg", logo: xstockLogo("AMZNx"), badge: glassBadge("AMZN") },
   { symbol: "GOOGL", name: "Alphabet", issuer: "xstocks", tokenSymbol: "GOOGLx", mint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN", logo: xstockLogo("GOOGLx"), badge: glassBadge("GOOGL") },
   { symbol: "MSFT", name: "Microsoft", issuer: "xstocks", tokenSymbol: "MSFTx", mint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX", logo: xstockLogo("MSFTx"), badge: glassBadge("MSFT") },
