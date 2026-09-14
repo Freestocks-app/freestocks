@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, TrendingUp, DollarSign, Zap, Wallet } from "lucide-react";
 import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
+import { RotatingTicker } from "@/components/RotatingTicker";
 
 async function getPrices(): Promise<Record<string, StockPrice>> {
   try {
@@ -95,12 +96,11 @@ export default async function LandingPage() {
 
           <div className="relative max-w-2xl mx-auto px-4 sm:px-6 text-center z-10">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-5">
-              The easiest way to{" "}
-              <span className="text-cta">earn stocks</span>
+              Earn <RotatingTicker /> for testing apps, games & surveys
             </h1>
 
             <p className="text-base sm:text-lg text-muted max-w-md mx-auto mb-6 sm:mb-8">
-              Complete offers. Reach $5. Get fractional shares of Apple, Tesla, NVIDIA and more.
+              The easiest way to earn stocks
             </p>
 
             {/* Primary CTA - high contrast, clear next step */}
