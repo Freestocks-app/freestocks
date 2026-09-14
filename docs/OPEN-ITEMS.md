@@ -1,6 +1,8 @@
 # Freestocks — Open Items
 
-Last updated: 2026-09-13 (JST context / UTC QA)
+Last updated: 2026-09-14
+
+**Docs:** [PRODUCT.md](./PRODUCT.md) (strategy & priorities) · [STOCKLANA-BACKLOG.md](./STOCKLANA-BACKLOG.md) · [FREECASH-GAMIFICATION.md](./FREECASH-GAMIFICATION.md)
 
 ## Product lock (reminder)
 
