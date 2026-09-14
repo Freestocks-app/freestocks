@@ -64,7 +64,7 @@ function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; classNa
   const imageSrc = stock.badge || stock.logo;
   return (
     <div className={`stock-badge ${className}`} title={stock.name}>
-      <Image src={imageSrc} alt={stock.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
+      <Image src={imageSrc} alt={stock.name} width={88} height={88} className="w-full h-full object-cover" unoptimized />
     </div>
   );
 }
