@@ -84,7 +84,7 @@ export default async function LandingPage() {
             alt="Freestocks" 
             width={180} 
             height={44} 
-            className="h-8 sm:h-10 md:h-11 w-auto" 
+            className="h-8 sm:h-10 md:h-11 w-auto"
             priority 
           />
         </Link>
@@ -294,7 +294,7 @@ export default async function LandingPage() {
               alt="Freestocks" 
               width={120} 
               height={28} 
-              className="h-6 w-auto" 
+              className="h-7 w-auto" 
             />
           </Link>
           <div className="flex items-center gap-4 text-xs text-muted">
