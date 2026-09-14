@@ -189,30 +189,30 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         <p className="text-4xl font-bold text-cta tabular-nums">${(balanceCents / 100).toFixed(2)}</p>
       </div>
 
-      {/* Step 1: Stock Selection */}
+      {/* Step 1: Stock Selection - FreeCash-style clean list */}
       {step === "stock" && (
         <>
           <p className="text-sm text-center text-muted mb-4">Choose a stock to receive</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
             {cashoutStocks.map((stock) => (
               <button
                 key={stock.symbol}
                 onClick={() => setSelectedStock(stock)}
-                className={`p-3 rounded-xl border transition-all text-left ${
+                className={`w-full p-3 rounded-xl border transition-all ${
                   selectedStock?.symbol === stock.symbol
                     ? "border-cta bg-cta/10"
                     : "border-border bg-elevated hover:border-cta/50"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <StockLogo stock={stock} size="md" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="font-semibold text-sm">{stock.symbol}</p>
-                      <span className="text-[7px] px-1 py-0.5 rounded bg-cta/20 text-cta font-medium">xStocks</span>
-                    </div>
-                    <p className="text-[10px] text-muted truncate">{stock.name}</p>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-sm">{stock.symbol}</p>
+                    <p className="text-xs text-muted">{stock.name}</p>
                   </div>
+                  <span className="text-[9px] px-2 py-1 rounded-full bg-cta/15 text-cta font-medium">
+                    xStocks
+                  </span>
                 </div>
               </button>
             ))}
