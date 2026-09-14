@@ -5,19 +5,42 @@ import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
 import { RotatingTicker } from "@/components/RotatingTicker";
 
 async function getPrices(): Promise<Record<string, StockPrice>> {
+  const prices: Record<string, StockPrice> = {};
+  
   try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3847";
-    const res = await fetch(`${baseUrl}/api/prices`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return {};
-    const data = await res.json();
-    return data.prices ?? {};
+    await Promise.allSettled(
+      TOP10.map(async (stock) => {
+        try {
+          const res = await fetch(
+            `https://api.dexscreener.com/tokens/v1/solana/${stock.mint}`,
+            { next: { revalidate: 60 } }
+          );
+          if (!res.ok) return;
+          const pairs = await res.json();
+          if (!pairs || pairs.length === 0) return;
+          
+          const pair = pairs[0];
+          const price = parseFloat(pair.priceUsd) || 0;
+          const changePercent = pair.priceChange?.h24 ?? 0;
+          
+          if (price > 0) {
+            prices[stock.symbol] = {
+              symbol: stock.symbol,
+              price,
+              change: 0,
+              changePercent,
+            };
+          }
+        } catch {
+          // Skip this stock on error
+        }
+      })
+    );
   } catch {
-    return {};
+    // Return whatever we have
   }
+  
+  return prices;
 }
 
 function TickerCube({ symbol, change, logo }: { symbol: string; change: string; logo: string }) {
@@ -40,7 +63,7 @@ function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; classNa
   const imageSrc = stock.badge || stock.logo;
   return (
     <div className={`stock-badge ${className}`} title={stock.name}>
-      <Image src={imageSrc} alt={stock.name} width={44} height={44} className="w-full h-full object-cover rounded-xl" unoptimized />
+      <Image src={imageSrc} alt={stock.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
     </div>
   );
 }
@@ -57,9 +80,9 @@ export default async function LandingPage() {
           <Image 
             src="/brand/freestocks-logo.png" 
             alt="Freestocks" 
-            width={140} 
-            height={32} 
-            className="h-7 sm:h-8 w-auto" 
+            width={180} 
+            height={44} 
+            className="h-8 sm:h-10 md:h-11 w-auto" 
             priority 
           />
         </Link>
@@ -109,14 +132,11 @@ export default async function LandingPage() {
               </span>
             </h1>
 
-            {/* Primary CTA - high contrast, clear next step */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/sign-up" className="btn-primary text-base px-8 py-3.5 w-full sm:w-auto pulse-glow">
+            {/* Primary CTA */}
+            <div className="flex justify-center">
+              <Link href="/sign-up" className="btn-primary text-base sm:text-lg px-10 py-4 pulse-glow">
                 Start Earning Free
                 <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link href="/sign-in" className="btn-secondary text-base px-8 py-3.5 w-full sm:w-auto">
-                I have an account
               </Link>
             </div>
           </div>
@@ -138,7 +158,7 @@ export default async function LandingPage() {
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10 sm:mb-14">
               <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                How it works
+                The easiest way to earn stocks
               </h2>
               <p className="text-sm sm:text-base text-muted">Three steps. No deposit needed.</p>
             </div>

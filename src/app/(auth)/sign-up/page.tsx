@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp, signIn } from "@/lib/auth-client";
-import { TrendingUp, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -101,11 +101,12 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
       {/* Header - Mobile optimized */}
       <header className="h-11 sm:h-12 flex items-center justify-center border-b border-border bg-elevated/50 px-4">
-        <Link href="/" className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-cta flex items-center justify-center">
-            <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cta-ink" />
-          </div>
-          <span className="font-bold text-sm">Freestocks</span>
+        <Link href="/" className="flex items-center">
+          <img 
+            src="/brand/freestocks-logo.png" 
+            alt="Freestocks" 
+            className="h-7 sm:h-8 w-auto" 
+          />
         </Link>
       </header>
 
