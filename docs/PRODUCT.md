@@ -42,6 +42,18 @@ Compare Anywhere Cash: moat = USDC + physical card (utility sink). Freestocks: m
 
 ---
 
+## Core User Flow
+
+**Three steps from signup to stock ownership:**
+
+1. **Earn** → Complete offers (BitLabs/Ayet) → USD credits to `balance_cents` ledger
+2. **Accumulate** → Reach $5 minimum → progress bar fills → unlock available
+3. **Unlock** → Privy OTP (fixed email) → Solana wallet created → SPL stock token sent
+
+*オファー完了 → 残高積立 → Solanaウォレットへ株式トークン送付*
+
+---
+
 ## 2. Core Thesis
 
 ### Why this works
