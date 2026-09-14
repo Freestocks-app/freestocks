@@ -126,8 +126,8 @@ describe("Privy integration requirements", () => {
   });
 
   it("Privy flow validates email matches session (rejects mismatch)", () => {
-    const sessionEmail = "user@example.com";
-    const privyEmail = "different@example.com";
+    const sessionEmail: string = "user@example.com";
+    const privyEmail: string = "different@example.com";
     const emailMatches = sessionEmail === privyEmail;
 
     expect(emailMatches).toBe(false);
