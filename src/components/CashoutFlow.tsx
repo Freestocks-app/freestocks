@@ -34,13 +34,13 @@ function StockLogo({ stock, size = "md" }: { stock: TokenizedStock; size?: "sm" 
 
   if (stock.logo) {
     return (
-      <div className={`${sizeClasses[size]} rounded-xl bg-white flex items-center justify-center overflow-hidden`}>
+      <div className={`${sizeClasses[size]} rounded-xl overflow-hidden flex-shrink-0`}>
         <Image
           src={stock.logo}
           alt={stock.name}
           width={size === "lg" ? 48 : size === "md" ? 40 : 32}
           height={size === "lg" ? 48 : size === "md" ? 40 : 32}
-          className="w-full h-full object-contain p-1"
+          className="w-full h-full object-cover"
           unoptimized
         />
       </div>
@@ -111,7 +111,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         </div>
         <h2 className="text-xl font-bold mb-1 text-gain">Cashout Submitted!</h2>
         <p className="text-sm text-muted mb-6">
-          ${(balanceCents / 100).toFixed(2)} → {selectedStock.symbol}
+          ${(balanceCents / 100).toFixed(2)} → ${selectedStock.symbol}
         </p>
 
         <div className="card p-4 text-left space-y-3">
@@ -119,7 +119,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
             <span className="text-sm text-muted">Stock</span>
             <div className="flex items-center gap-2">
               <StockLogo stock={selectedStock} size="sm" />
-              <span className="font-semibold">{selectedStock.symbol}</span>
+              <span className="font-semibold">${selectedStock.symbol}</span>
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
                 <div className="flex items-center gap-3">
                   <StockLogo stock={stock} size="md" />
                   <div className="flex-1 text-left">
-                    <p className="font-semibold text-sm">{stock.symbol}</p>
+                    <p className="font-semibold text-sm">${stock.symbol}</p>
                     <p className="text-xs text-muted">{stock.name}</p>
                   </div>
                   <span className="text-[9px] px-2 py-1 rounded-full bg-cta/15 text-cta font-medium">
@@ -256,7 +256,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
               <span className="text-sm text-muted">Stock</span>
               <div className="flex items-center gap-2">
                 <StockLogo stock={selectedStock} size="sm" />
-                <span className="font-semibold">{selectedStock.symbol}</span>
+                <span className="font-semibold">${selectedStock.symbol}</span>
               </div>
             </div>
             <div className="flex items-center justify-between">

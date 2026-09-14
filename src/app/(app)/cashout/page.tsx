@@ -52,7 +52,7 @@ export default async function CashoutPage() {
                     <span className="font-bold text-sm">{req.stockSymbol.slice(0, 2)}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold">{req.stockSymbol}</p>
+                    <p className="font-semibold">${req.stockSymbol}</p>
                     <p className="text-xs text-muted">Tokenized stock</p>
                   </div>
                   <div className="text-right">

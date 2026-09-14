@@ -25,10 +25,10 @@ function TickerCube({ symbol, change, logo }: { symbol: string; change: string; 
   const isNegative = change.startsWith("-");
   return (
     <div className="ticker-cube mx-1.5 sm:mx-2">
-      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-white flex items-center justify-center overflow-hidden mr-1.5">
-        <Image src={logo} alt={symbol} width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" unoptimized />
+      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md overflow-hidden mr-1.5 flex-shrink-0">
+        <Image src={logo} alt={symbol} width={20} height={20} className="w-full h-full object-cover" unoptimized />
       </div>
-      <span className="text-foreground mr-1.5 text-xs sm:text-sm font-medium">{symbol}</span>
+      <span className="text-foreground mr-1.5 text-xs sm:text-sm font-medium">${symbol}</span>
       <span className={`text-xs sm:text-sm font-medium ${isPositive ? "text-gain" : isNegative ? "text-red-400" : "text-muted"}`}>
         {change}
       </span>
@@ -37,9 +37,10 @@ function TickerCube({ symbol, change, logo }: { symbol: string; change: string; 
 }
 
 function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; className?: string }) {
+  const imageSrc = stock.badge || stock.logo;
   return (
     <div className={`stock-badge ${className}`} title={stock.name}>
-      <Image src={stock.logo} alt={stock.name} width={28} height={28} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" unoptimized />
+      <Image src={imageSrc} alt={stock.name} width={44} height={44} className="w-full h-full object-cover rounded-xl" unoptimized />
     </div>
   );
 }
@@ -94,14 +95,16 @@ export default async function LandingPage() {
             <div style={{ position: "absolute", top: "70%", left: "2%" }}><StockBadge stock={TOP10[2]} /></div>
           </div>
 
-          <div className="relative max-w-2xl mx-auto px-4 sm:px-6 text-center z-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-5">
-              Earn <RotatingTicker /> for testing apps, games & surveys
+          <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center z-10">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 sm:mb-8">
+              <span className="block">
+                Earn <RotatingTicker /> for
+              </span>
+              <span className="block whitespace-nowrap text-[0.85em] sm:text-[1em]">
+                testing apps, games &amp; surveys
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted max-w-md mx-auto mb-6 sm:mb-8">
-              The easiest way to earn stocks
-            </p>
 
             {/* Primary CTA - high contrast, clear next step */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
@@ -158,9 +161,9 @@ export default async function LandingPage() {
                 <div className="w-14 h-14 rounded-2xl bg-cta/10 border border-cta/20 flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl font-bold text-cta">1</span>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Earn</h3>
+                <h3 className="font-semibold text-lg mb-2">Earn points</h3>
                 <p className="text-sm text-muted">
-                  Complete offers — download apps, play games, take surveys. Each pays real USD.
+                  Complete offers, download apps, play games, take surveys. Rewards credit your balance.
                 </p>
               </div>
 
@@ -180,7 +183,7 @@ export default async function LandingPage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Receive stock</h3>
                 <p className="text-sm text-muted">
-                  Tokenized shares (xStocks) delivered to your Solana wallet. You own them.
+                  Tokenized shares (xStocks) delivered to your account. You own them.
                 </p>
               </div>
             </div>
@@ -206,10 +209,10 @@ export default async function LandingPage() {
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-8">
               {TOP10.map((stock) => (
                 <div key={stock.symbol} className="stock-card">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white flex items-center justify-center mb-2">
-                    <Image src={stock.logo} alt={stock.name} width={40} height={40} className="w-7 h-7 sm:w-9 sm:h-9 object-contain" unoptimized />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden mb-2">
+                    <Image src={stock.logo} alt={stock.name} width={48} height={48} className="w-full h-full object-cover" unoptimized />
                   </div>
-                  <p className="font-semibold text-sm">{stock.symbol}</p>
+                  <p className="font-semibold text-sm">${stock.symbol}</p>
                   <p className="text-[10px] text-muted">{stock.name}</p>
                 </div>
               ))}

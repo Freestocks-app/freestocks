@@ -17,10 +17,15 @@ export interface TokenizedStock {
   tokenSymbol: string;
   mint: string;
   logo: string;
+  badge?: string;
 }
 
 function xstockLogo(tokenSymbol: string): string {
   return `https://xstocks-metadata.backed.fi/logos/tokens/${tokenSymbol}.png`;
+}
+
+function glassBadge(symbol: string): string {
+  return `/assets/badges/${symbol}.png`;
 }
 
 /**
@@ -29,17 +34,20 @@ function xstockLogo(tokenSymbol: string): string {
  * 
  * Mint addresses verified 2026-09-14 via Backed.fi API
  * Logos from official Backed.fi xStocks metadata CDN
+ * 
+ * Custom glass badges (3D style) available for: AAPL, TSLA, NFLX, SPY
+ * Place badge PNGs at public/assets/badges/{SYMBOL}.png
  */
 export const TOP10: TokenizedStock[] = [
-  { symbol: "AAPL", name: "Apple", issuer: "xstocks", tokenSymbol: "AAPLx", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp", logo: xstockLogo("AAPLx") },
-  { symbol: "TSLA", name: "Tesla", issuer: "xstocks", tokenSymbol: "TSLAx", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB", logo: xstockLogo("TSLAx") },
+  { symbol: "AAPL", name: "Apple", issuer: "xstocks", tokenSymbol: "AAPLx", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp", logo: xstockLogo("AAPLx"), badge: glassBadge("AAPL") },
+  { symbol: "TSLA", name: "Tesla", issuer: "xstocks", tokenSymbol: "TSLAx", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB", logo: xstockLogo("TSLAx"), badge: glassBadge("TSLA") },
   { symbol: "NVDA", name: "NVIDIA", issuer: "xstocks", tokenSymbol: "NVDAx", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh", logo: xstockLogo("NVDAx") },
   { symbol: "AMZN", name: "Amazon", issuer: "xstocks", tokenSymbol: "AMZNx", mint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg", logo: xstockLogo("AMZNx") },
   { symbol: "GOOGL", name: "Alphabet", issuer: "xstocks", tokenSymbol: "GOOGLx", mint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN", logo: xstockLogo("GOOGLx") },
   { symbol: "MSFT", name: "Microsoft", issuer: "xstocks", tokenSymbol: "MSFTx", mint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX", logo: xstockLogo("MSFTx") },
   { symbol: "META", name: "Meta", issuer: "xstocks", tokenSymbol: "METAx", mint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu", logo: xstockLogo("METAx") },
-  { symbol: "SPY", name: "S&P 500 ETF", issuer: "xstocks", tokenSymbol: "SPYx", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W", logo: xstockLogo("SPYx") },
-  { symbol: "NFLX", name: "Netflix", issuer: "xstocks", tokenSymbol: "NFLXx", mint: "XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL", logo: xstockLogo("NFLXx") },
+  { symbol: "SPY", name: "S&P 500 ETF", issuer: "xstocks", tokenSymbol: "SPYx", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W", logo: xstockLogo("SPYx"), badge: glassBadge("SPY") },
+  { symbol: "NFLX", name: "Netflix", issuer: "xstocks", tokenSymbol: "NFLXx", mint: "XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL", logo: xstockLogo("NFLXx"), badge: glassBadge("NFLX") },
   { symbol: "QQQ", name: "Nasdaq 100 ETF", issuer: "xstocks", tokenSymbol: "QQQx", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ", logo: xstockLogo("QQQx") },
 ];
 
