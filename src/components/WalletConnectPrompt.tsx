@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePrivy, useLoginWithEmail } from "@privy-io/react-auth";
+import { useState, useEffect, useRef } from "react";
+import { usePrivy, useLoginWithEmail, useCreateWallet } from "@privy-io/react-auth";
 import { Loader2, CheckCircle, AlertCircle, Wallet, ArrowRight, RefreshCw } from "lucide-react";
 
 interface WalletConnectPromptProps {
@@ -14,10 +14,12 @@ type Step = "idle" | "sending" | "code_sent" | "verifying";
 export function WalletConnectPrompt({ sessionEmail, onWalletReady }: WalletConnectPromptProps) {
   const { ready, authenticated, user, logout } = usePrivy();
   const { sendCode, loginWithCode, state: emailState } = useLoginWithEmail();
+  const { createWallet } = useCreateWallet();
 
   const [step, setStep] = useState<Step>("idle");
   const [otpCode, setOtpCode] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
+  const walletCreationAttempted = useRef(false);
 
   const solanaWallet = user?.linkedAccounts?.find(
     (account) =>
@@ -56,6 +58,25 @@ export function WalletConnectPrompt({ sessionEmail, onWalletReady }: WalletConne
       logout();
     }
   }, [emailMismatch, logout]);
+
+  // createOnLogin: "all-users" should auto-provision a Solana embedded
+  // wallet, but that provisioning is an async side-effect of login that can
+  // lag behind `authenticated` flipping true. Explicitly request one as a
+  // fallback rather than leaving the user stuck with no wallet and no
+  // explanation.
+  useEffect(() => {
+    if (
+      authenticated &&
+      !emailMismatch &&
+      !solanaAddress &&
+      !walletCreationAttempted.current
+    ) {
+      walletCreationAttempted.current = true;
+      createWallet().catch((err) => {
+        console.error("Failed to create Solana wallet:", err);
+      });
+    }
+  }, [authenticated, emailMismatch, solanaAddress, createWallet]);
 
   const handleSendCode = async () => {
     setActionError(null);
@@ -99,6 +120,15 @@ export function WalletConnectPrompt({ sessionEmail, onWalletReady }: WalletConne
     return (
       <div className="card p-6 text-center">
         <Loader2 className="w-6 h-6 text-cta animate-spin mx-auto" />
+      </div>
+    );
+  }
+
+  if (authenticated && !emailMismatch && !solanaAddress) {
+    return (
+      <div className="card p-6 text-center">
+        <Loader2 className="w-6 h-6 text-cta animate-spin mx-auto mb-2" />
+        <p className="text-xs text-muted">Creating your Solana wallet...</p>
       </div>
     );
   }

@@ -97,9 +97,7 @@ function StockCard({
             className="h-full rounded-full transition-all"
             style={{
               width: `${Math.max(progressPercent, canCashout ? 100 : 8)}%`,
-              background: canCashout
-                ? "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)"
-                : "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)",
+              background: "linear-gradient(90deg, #9fce2e 0%, #d4fc50 100%)",
             }}
           />
         </div>
