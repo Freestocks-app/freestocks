@@ -54,6 +54,18 @@ test.describe("sign-up form", () => {
     await page.getByRole("button", { name: "Show password" }).click();
     await expect(password).toHaveAttribute("type", "text");
   });
+
+  test("Facebook button icon is visible against its own background", async ({ page }) => {
+    await page.goto("/sign-up");
+    const fill = await page
+      .locator('button:has-text("Sign Up with Facebook") svg path')
+      .evaluate((el) => getComputedStyle(el).fill);
+
+    // the Facebook button background is #1877F2 (blue) — the icon must
+    // not render in that same color or it disappears until :hover
+    // changes the background shade.
+    expect(fill).not.toBe("rgb(24, 119, 242)");
+  });
 });
 
 test.describe("legal pages use the real logo", () => {
