@@ -157,21 +157,9 @@ export default function SignUpPage() {
                   </>
                 )}
               </button>
-              
-              <button
-                onClick={() => handleSocialSignUp("facebook")}
-                disabled={isDisabled}
-                className="w-full flex items-center justify-center gap-2.5 sm:gap-3 py-2.5 sm:py-3 px-4 rounded-lg bg-[#1877F2] border border-[#1877F2] hover:bg-[#166fe5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {socialLoading === "facebook" ? (
-                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                ) : (
-                  <>
-                    <FacebookIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    <span className="font-medium text-xs sm:text-sm text-white">Sign Up with Facebook</span>
-                  </>
-                )}
-              </button>
+              {/* Facebook login temporarily hidden — app is unpublished/dev-mode
+                  in Meta for Developers, only works for registered testers.
+                  Re-enable once the app is published. */}
             </div>
 
             {/* OR divider */}
