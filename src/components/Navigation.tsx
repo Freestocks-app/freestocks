@@ -61,8 +61,17 @@ export function DesktopNav({ balanceCents, userName, streakCount }: NavigationPr
         })}
       </nav>
 
-      {/* Right - Streak + Balance + User */}
+      {/* Right - Referrals + Streak + Balance + User */}
       <div className="flex items-center gap-2 justify-self-end">
+        {/* Referrals */}
+        <Link
+          href="/referrals"
+          className="w-8 h-8 rounded-full bg-elevated flex items-center justify-center hover:bg-elevated/80 transition-colors"
+          title="Refer friends"
+        >
+          <Gift className="w-4 h-4 text-cta" />
+        </Link>
+
         {/* Streak pill */}
         <div className="flex items-center gap-1.5 bg-elevated border border-border rounded-full px-3 py-1.5">
           <Flame className="w-4 h-4 text-cta" />
@@ -112,6 +121,14 @@ export function MobileNav({ balanceCents, streakCount }: NavigationProps) {
         </Link>
 
         <div className="flex items-center gap-1.5">
+          <Link
+            href="/referrals"
+            className="w-7 h-7 rounded-full bg-elevated flex items-center justify-center flex-shrink-0"
+            title="Refer friends"
+          >
+            <Gift className="w-3.5 h-3.5 text-cta" />
+          </Link>
+
           <div className="flex items-center gap-1 bg-elevated border border-border rounded-full px-2 py-1">
             <Flame className="w-3.5 h-3.5 text-cta" />
             <span className="font-bold text-xs tabular-nums">{streakCount}</span>

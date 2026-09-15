@@ -82,9 +82,29 @@ export const redeemRequest = pgTable("redeem_request", {
   processedAt: timestamp("processed_at"),
 });
 
+export const userReferralCode = pgTable("user_referral_code", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  code: text("code").notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const referralLink = pgTable("referral_link", {
+  refereeId: text("referee_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  referrerId: text("referrer_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Account = typeof account.$inferSelect;
 export type UserBalance = typeof userBalance.$inferSelect;
 export type Transaction = typeof transaction.$inferSelect;
 export type RedeemRequest = typeof redeemRequest.$inferSelect;
+export type UserReferralCode = typeof userReferralCode.$inferSelect;
+export type ReferralLink = typeof referralLink.$inferSelect;

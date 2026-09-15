@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, ensureDbInitialized } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
 import { AyetService } from "@/server/ayet/service";
+import { ReferralService } from "@/server/referral/service";
 
 export async function GET(request: NextRequest) {
   await ensureDbInitialized();
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest) {
   });
 
   const ledger = new LedgerService(db);
-  const ayet = new AyetService(ledger, apiKey);
+  const referral = new ReferralService(db);
+  const ayet = new AyetService(ledger, apiKey, referral);
 
   const url = new URL(request.url);
   const result = await ayet.processCallback({

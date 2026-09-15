@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, ensureDbInitialized } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
 import { BitLabsService } from "@/server/bitlabs/service";
+import { ReferralService } from "@/server/referral/service";
 
 export async function GET(request: NextRequest) {
   await ensureDbInitialized();
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest) {
   });
 
   const ledger = new LedgerService(db);
-  const bitlabs = new BitLabsService(ledger, secret);
+  const referral = new ReferralService(db);
+  const bitlabs = new BitLabsService(ledger, secret, referral);
 
   const result = await bitlabs.processCallback({
     fullUrl: request.url,

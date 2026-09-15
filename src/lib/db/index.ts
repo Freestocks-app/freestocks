@@ -187,6 +187,30 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_redeem_request_user_id ON redeem_request(user_id)
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_referral_code (
+      user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+      code TEXT NOT NULL UNIQUE,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_user_referral_code_code ON user_referral_code(code)
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS referral_link (
+      referee_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+      referrer_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_referral_link_referrer_id ON referral_link(referrer_id)
+  `;
+
   return database;
 }
 

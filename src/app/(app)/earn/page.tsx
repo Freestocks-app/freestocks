@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
-import Link from "next/link";
 import { auth } from "@/server/auth";
 import { db } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
-import { Zap, ArrowRight } from "lucide-react";
+import { Zap } from "lucide-react";
 import { EarnOfferwall, OfferwallProvider } from "@/components/EarnOfferwall";
+import { ReferralAttribution } from "@/components/ReferralAttribution";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +42,10 @@ export default async function EarnPage() {
 
   const hasProviders = providers.length > 0;
   const progressPercent = Math.min(100, (balanceCents / MIN_CASHOUT_CENTS) * 100);
-  const needsMore = Math.max(0, MIN_CASHOUT_CENTS - balanceCents);
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex flex-col">
+      <ReferralAttribution />
       {/* Next Cashout Progress Bar - FreeCash style */}
       <div className="border-b border-border bg-[#0d1117]">
         <div className="max-w-md mx-auto px-4 py-3">

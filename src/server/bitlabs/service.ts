@@ -1,5 +1,6 @@
 import { verifyBitlabsCallback, parseCallbackParams } from "./verify";
 import { LedgerService } from "../ledger/service";
+import { ReferralService, creditReferralCommission } from "../referral/service";
 
 export interface CallbackResult {
   success: boolean;
@@ -16,7 +17,8 @@ export interface ProcessCallbackOptions {
 export class BitLabsService {
   constructor(
     private ledger: LedgerService,
-    private secret: string
+    private secret: string,
+    private referral?: ReferralService
   ) {}
 
   async processCallback(options: ProcessCallbackOptions): Promise<CallbackResult> {
@@ -76,6 +78,14 @@ export class BitLabsService {
 
     if (!creditResult.success) {
       return { success: false, error: creditResult.error || "user_not_found" };
+    }
+
+    if (this.referral) {
+      await creditReferralCommission(this.ledger, this.referral, {
+        refereeId: params.userId,
+        refereeTxId: params.txId,
+        amountCents,
+      });
     }
 
     return { success: true, credited: true };

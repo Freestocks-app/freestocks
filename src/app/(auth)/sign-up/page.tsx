@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signUp, signIn } from "@/lib/auth-client";
 import { isComingSoon } from "@/lib/utils";
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -35,6 +35,14 @@ function FacebookIcon({ className }: { className?: string }) {
 }
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignUpPageInner />
+    </Suspense>
+  );
+}
+
+function SignUpPageInner() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +50,9 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref");
+  const earnUrl = refCode ? `/earn?ref=${encodeURIComponent(refCode)}` : "/earn";
 
   useEffect(() => {
     if (isComingSoon()) {
@@ -70,7 +81,7 @@ export default function SignUpPage() {
         email,
         password,
         name,
-        callbackURL: "/earn",
+        callbackURL: earnUrl,
       });
 
       if (result.error) {
@@ -79,7 +90,7 @@ export default function SignUpPage() {
         return;
       }
 
-      router.push("/earn");
+      router.push(earnUrl);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -93,7 +104,7 @@ export default function SignUpPage() {
     try {
       const result = await signIn.social({
         provider,
-        callbackURL: `${window.location.origin}/earn`,
+        callbackURL: `${window.location.origin}${earnUrl}`,
       });
       
       if (result?.error) {

@@ -1,5 +1,6 @@
 import { verifyAyetCallback, parseAyetCallbackParams } from "./verify";
 import { LedgerService } from "../ledger/service";
+import { ReferralService, creditReferralCommission } from "../referral/service";
 
 export interface AyetCallbackResult {
   success: boolean;
@@ -18,7 +19,8 @@ export interface ProcessAyetCallbackOptions {
 export class AyetService {
   constructor(
     private ledger: LedgerService,
-    private apiKey: string
+    private apiKey: string,
+    private referral?: ReferralService
   ) {}
 
   async processCallback(options: ProcessAyetCallbackOptions): Promise<AyetCallbackResult> {
@@ -93,6 +95,14 @@ export class AyetService {
 
     if (!creditResult.success) {
       return { success: false, error: creditResult.error || "user_not_found" };
+    }
+
+    if (this.referral) {
+      await creditReferralCommission(this.ledger, this.referral, {
+        refereeId: userId,
+        refereeTxId: `ayet:${transactionId}`,
+        amountCents,
+      });
     }
 
     return { success: true, credited: true };
