@@ -1,43 +1,63 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { QA_BYPASS_COOKIE } from "@/lib/utils";
 
-// Gates the whole production site behind HTTP Basic Auth while we test
-// OAuth (Google/Facebook) against the real production domain, which is
-// the only domain those providers' redirect URIs are registered for.
-// Set SITE_PASSWORD in the Production env to enable; unset disables the
-// gate entirely (Preview/Development stay open).
-export function middleware(request: NextRequest) {
-  const sitePassword = process.env.SITE_PASSWORD;
-  if (!sitePassword) {
-    return NextResponse.next();
-  }
+// Lets a tester reach the sign-up/sign-in flow on the real production
+// domain (required for Google/Facebook OAuth, which only accept the
+// exact registered redirect URI — not a Preview deployment's random
+// URL) without exposing that flow to the public. The landing page
+// itself stays untouched and world-readable in Coming Soon mode.
+//
+// Visiting /<QA_PATH_SEGMENT>, behind HTTP Basic Auth, sets a bypass
+// cookie read by isComingSoon() (see lib/utils.ts) and redirects to
+// /sign-in. Without QA_PATH_SEGMENT + SITE_PASSWORD both set, this
+// middleware is a no-op.
+const QA_PATH_SEGMENT = process.env.QA_PATH_SEGMENT;
+const SITE_PASSWORD = process.env.SITE_PASSWORD;
 
+function checkBasicAuth(request: NextRequest, password: string): boolean {
   const authHeader = request.headers.get("authorization");
-  if (authHeader) {
-    const [scheme, encoded] = authHeader.split(" ");
-    if (scheme === "Basic" && encoded) {
-      const decoded = Buffer.from(encoded, "base64").toString("utf-8");
-      const separatorIndex = decoded.indexOf(":");
-      const password = separatorIndex === -1 ? decoded : decoded.slice(separatorIndex + 1);
-      if (password === sitePassword) {
-        return NextResponse.next();
-      }
-    }
-  }
+  if (!authHeader) return false;
+  const [scheme, encoded] = authHeader.split(" ");
+  if (scheme !== "Basic" || !encoded) return false;
+  const decoded = Buffer.from(encoded, "base64").toString("utf-8");
+  const separatorIndex = decoded.indexOf(":");
+  const suppliedPassword = separatorIndex === -1 ? decoded : decoded.slice(separatorIndex + 1);
+  return suppliedPassword === password;
+}
 
+function unauthorized(): NextResponse {
   return new NextResponse("Authentication required", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Freestocks"' },
+    headers: { "WWW-Authenticate": 'Basic realm="Freestocks QA"' },
   });
 }
 
+export function middleware(request: NextRequest) {
+  if (!QA_PATH_SEGMENT || !SITE_PASSWORD) {
+    return NextResponse.next();
+  }
+
+  const { pathname } = request.nextUrl;
+  if (pathname !== `/${QA_PATH_SEGMENT}`) {
+    return NextResponse.next();
+  }
+
+  if (!checkBasicAuth(request, SITE_PASSWORD)) {
+    return unauthorized();
+  }
+
+  const response = NextResponse.redirect(new URL("/sign-in", request.url));
+  response.cookies.set(QA_BYPASS_COOKIE, "1", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    path: "/",
+  });
+  return response;
+}
+
 export const config = {
-  matcher: [
-    // Run on everything except static assets, Next.js internals,
-    // /api/auth/* (better-auth's OAuth callback — a redirect from the
-    // provider carries no Basic Auth header and would 401 before
-    // better-auth ever sees it), and the offer-wall webhook callbacks
-    // (server-to-server, HMAC-verified, carry no browser credentials).
-    "/((?!_next/static|_next/image|favicon.png|apple-touch-icon.png|assets/|brand/|api/auth/|api/bitlabs/callback|api/ayet/callback).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };

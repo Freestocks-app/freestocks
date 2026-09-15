@@ -53,11 +53,24 @@ export function isValidWalletAddress(address: string): boolean {
   return isValidSolanaAddress(address) || isValidEvmAddress(address);
 }
 
+export const QA_BYPASS_COOKIE = "fs_qa_bypass";
+
 /**
  * Check if the app is in "Coming Soon" mode.
  * Production sets NEXT_PUBLIC_COMING_SOON=true to gate the sign-up flow.
  * Preview/Development deployments leave it unset to keep the full app usable.
+ *
+ * The gate can be bypassed per-browser via the QA_BYPASS_COOKIE, set by
+ * visiting the hidden, Basic-Auth-protected QA path (see middleware.ts) —
+ * this lets a tester reach /sign-in, /sign-up etc. on production without
+ * making the public landing page's sign-up CTA live for everyone else.
  */
 export function isComingSoon(): boolean {
-  return process.env.NEXT_PUBLIC_COMING_SOON === "true";
+  if (process.env.NEXT_PUBLIC_COMING_SOON !== "true") {
+    return false;
+  }
+  if (typeof document !== "undefined" && document.cookie.includes(`${QA_BYPASS_COOKIE}=1`)) {
+    return false;
+  }
+  return true;
 }
