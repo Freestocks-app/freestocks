@@ -10,7 +10,7 @@ import {
   Wallet,
   AlertCircle,
   Loader2,
-  DollarSign,
+  X,
 } from "lucide-react";
 import { PrivyProvider } from "./PrivyProvider";
 import { PrivyUnlockFlow } from "./PrivyUnlockFlow";
@@ -54,6 +54,54 @@ function StockLogo({ stock, size = "md" }: { stock: TokenizedStock; size?: "sm" 
   );
 }
 
+function LockedProgressModal({
+  balanceCents,
+  minCashoutCents,
+  onClose,
+}: {
+  balanceCents: number;
+  minCashoutCents: number;
+  onClose: () => void;
+}) {
+  const needsMore = minCashoutCents - balanceCents;
+  const progressPercent = Math.min(100, (balanceCents / minCashoutCents) * 100);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70" onClick={onClose}>
+      <div className="card p-5 max-w-sm w-full relative" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-muted hover:text-foreground"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <h2 className="text-lg font-bold mb-2 pr-6">
+          Unlock cashout at ${(minCashoutCents / 100).toFixed(2)}
+        </h2>
+        <p className="text-sm text-muted mb-4">
+          You need ${(minCashoutCents / 100).toFixed(2)} in available balance to make your first cashout.
+        </p>
+        <div className="flex items-center justify-between text-xs text-muted mb-1.5">
+          <span>Your progress</span>
+          <span className="tabular-nums">
+            ${(balanceCents / 100).toFixed(2)} / ${(minCashoutCents / 100).toFixed(2)}
+          </span>
+        </div>
+        <div className="h-2 bg-elevated rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full bg-cta rounded-full transition-all"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <Link href="/earn" className="btn-primary w-full justify-center">
+          Earn ${(needsMore / 100).toFixed(2)} More
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCents }: CashoutFlowProps) {
   const [step, setStep] = useState<Step>("stock");
   const [selectedStock, setSelectedStock] = useState<TokenizedStock | null>(null);
@@ -61,10 +109,18 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showLockedModal, setShowLockedModal] = useState(false);
 
   const canCashout = balanceCents >= minCashoutCents;
   const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress);
-  const progressPercent = Math.min(100, (balanceCents / minCashoutCents) * 100);
+
+  const handleSelectStock = (stock: TokenizedStock) => {
+    if (!canCashout) {
+      setShowLockedModal(true);
+      return;
+    }
+    setSelectedStock(stock);
+  };
 
   const handleWalletReady = useCallback((address: string) => {
     setWalletAddress(address);
@@ -139,36 +195,6 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
     );
   }
 
-  if (!canCashout) {
-    const needsMore = minCashoutCents - balanceCents;
-    return (
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-elevated border border-border flex items-center justify-center mx-auto mb-4">
-          <DollarSign className="w-8 h-8 text-muted" />
-        </div>
-        <h1 className="text-xl font-bold mb-1">Cashout</h1>
-        <p className="text-3xl font-bold text-cta mb-2 tabular-nums">${(balanceCents / 100).toFixed(2)}</p>
-        
-        <div className="mb-6">
-          <div className="h-2 bg-elevated rounded-full overflow-hidden mb-2">
-            <div 
-              className="h-full bg-cta rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <p className="text-sm text-muted">
-            ${(needsMore / 100).toFixed(2)} more to reach $5.00 minimum
-          </p>
-        </div>
-
-        <Link href="/earn" className="btn-primary w-full justify-center">
-          Earn More
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-    );
-  }
-
   if (!privyAppId) {
     return (
       <div className="text-center">
@@ -197,12 +223,12 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
             {cashoutStocks.map((stock) => (
               <button
                 key={stock.symbol}
-                onClick={() => setSelectedStock(stock)}
+                onClick={() => handleSelectStock(stock)}
                 className={`w-full p-3 rounded-xl border transition-all ${
                   selectedStock?.symbol === stock.symbol
                     ? "border-cta bg-cta/10"
                     : "border-border bg-elevated hover:border-cta/50"
-                }`}
+                } ${!canCashout ? "opacity-70" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <StockLogo stock={stock} size="md" />
@@ -220,13 +246,21 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
 
           <button
             onClick={() => setStep("wallet")}
-            disabled={!selectedStock}
+            disabled={!selectedStock || !canCashout}
             className="btn-primary w-full justify-center mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue
             <ArrowRight className="w-4 h-4" />
           </button>
         </>
+      )}
+
+      {showLockedModal && (
+        <LockedProgressModal
+          balanceCents={balanceCents}
+          minCashoutCents={minCashoutCents}
+          onClose={() => setShowLockedModal(false)}
+        />
       )}
 
       {/* Step 2: Wallet Verification */}
