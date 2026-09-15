@@ -6,6 +6,7 @@ import { LedgerService } from "@/server/ledger/service";
 import { redeemRequest, type RedeemRequest } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { priceSymbols } from "@/lib/tokenized-stocks";
 
 const MIN_REDEEM_CENTS = 500;
 
@@ -27,7 +28,7 @@ export async function GET() {
   return NextResponse.json({ requests });
 }
 
-const VALID_STOCK_SYMBOLS = ["AAPL", "TSLA", "NVDA", "AMZN", "GOOGL", "MSFT"];
+const VALID_STOCK_SYMBOLS = priceSymbols;
 
 export async function POST(request: NextRequest) {
   await ensureDbInitialized();

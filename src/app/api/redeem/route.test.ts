@@ -2,10 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import * as schema from "@/lib/db/schema";
+import { priceSymbols } from "@/lib/tokenized-stocks";
 
 const VALID_EVM_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE00";
 const VALID_SOLANA_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-const VALID_STOCK_SYMBOLS = ["AAPL", "TSLA", "NVDA", "AMZN", "GOOGL", "MSFT"];
+const VALID_STOCK_SYMBOLS = priceSymbols;
 const MIN_REDEEM_CENTS = 500;
 
 describe("Redeem API - Auth requirements", () => {

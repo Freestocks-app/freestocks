@@ -60,8 +60,8 @@ export default async function EarnPage() {
               />
             </div>
             <div className="flex justify-between mt-1.5 text-xs">
-              <span className="text-cta font-semibold tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
-              <span className="text-muted tabular-nums">/ $5.00</span>
+              <span className="text-cta font-bold tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
+              <span className="text-muted font-semibold tabular-nums">/ $5.00</span>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, Clock } from "lucide-react";
 import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
 import { RotatingTicker } from "@/components/RotatingTicker";
+import { Footer } from "@/components/Footer";
 import { isComingSoon } from "@/lib/utils";
 
 async function getPrices(): Promise<Record<string, StockPrice>> {
@@ -335,26 +336,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="py-5 sm:py-6 border-t border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <Link href="/" className="flex items-center">
-            <Image 
-              src="/brand/freestocks-logo.png" 
-              alt="Freestocks" 
-              width={120} 
-              height={28} 
-              className="h-7 w-auto" 
-            />
-          </Link>
-          <div className="flex items-center gap-4 text-xs text-muted">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
-          </div>
-          <p className="text-xs text-muted">© {new Date().getFullYear()} Freestocks</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
