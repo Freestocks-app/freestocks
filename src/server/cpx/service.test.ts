@@ -96,9 +96,9 @@ describe("CpxService", () => {
       expect(balance).toBe(500);
     });
 
-    it("should reject invalid secure_hash", async () => {
+    it("should reject invalid hash", async () => {
       const url = new URL(
-        "https://app.freestocks.com/api/cpx/callback?status=1&trans_id=tx123&user_id=user-abc&amount_usd=5.00&secure_hash=invalid"
+        "https://app.freestocks.com/api/cpx/callback?status=1&trans_id=tx123&user_id=user-abc&amount_usd=5.00&hash=invalid"
       );
       const result = await cpx.processCallback({ url, mockVerify: false });
 
@@ -106,10 +106,10 @@ describe("CpxService", () => {
       expect(result.error).toBe("invalid_signature");
     });
 
-    it("should accept a correctly computed secure_hash", async () => {
+    it("should accept a correctly computed hash", async () => {
       const hash = computeCpxSecureHash("tx123", SECRET);
       const url = new URL(
-        `https://app.freestocks.com/api/cpx/callback?status=1&trans_id=tx123&user_id=user-abc&amount_usd=5.00&secure_hash=${hash}`
+        `https://app.freestocks.com/api/cpx/callback?status=1&trans_id=tx123&user_id=user-abc&amount_usd=5.00&hash=${hash}`
       );
       const result = await cpx.processCallback({ url, mockVerify: false });
 

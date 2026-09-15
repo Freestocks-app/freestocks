@@ -7,7 +7,7 @@ describe("CPX verify", () => {
   describe("parseCpxCallbackParams", () => {
     it("parses all callback parameters", () => {
       const url = new URL(
-        "https://example.com/api/cpx/callback?status=1&trans_id=abc123&user_id=user42&amount_local=1.50&amount_usd=1.50&subid_1=a&subid_2=b&secure_hash=deadbeef"
+        "https://example.com/api/cpx/callback?status=1&trans_id=abc123&user_id=user42&amount_local=1.50&amount_usd=1.50&sub_id=a&sub_id_2=b&hash=deadbeef"
       );
       const params = parseCpxCallbackParams(url);
 

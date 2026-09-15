@@ -24,9 +24,12 @@ export function parseCpxCallbackParams(url: URL): CpxCallbackParams {
     status: searchParams.get("status"),
     amountLocal: searchParams.get("amount_local"),
     amountUsd: searchParams.get("amount_usd"),
-    subId1: searchParams.get("subid_1"),
-    subId2: searchParams.get("subid_2"),
-    secureHash: searchParams.get("secure_hash"),
+    subId1: searchParams.get("sub_id"),
+    subId2: searchParams.get("sub_id_2"),
+    // CPX's postback query param is named "hash" (per their Postback
+    // Settings example: &hash={secure_hash}), not "secure_hash" — that
+    // name is reserved for the *outgoing* Script Tag config field.
+    secureHash: searchParams.get("hash"),
   };
 }
 
