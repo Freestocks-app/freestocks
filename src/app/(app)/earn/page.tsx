@@ -58,22 +58,22 @@ export default async function EarnPage() {
       <div className="border-b border-border bg-[#0d1117]">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="text-center mb-2">
-            <span className="text-xs text-muted">Next cashout</span>
+            <span className="text-xs font-bold uppercase tracking-wide text-foreground">Next cashout</span>
           </div>
-          <div className="relative h-9 rounded-full bg-elevated overflow-hidden">
+          <div className="relative h-6 rounded-full bg-elevated overflow-hidden">
             <div
               className="absolute inset-y-0 left-0 rounded-l-full transition-all duration-500"
               style={{
                 width: `${Math.max(progressPercent, 10)}%`,
-                minWidth: "2.25rem",
+                minWidth: "1.5rem",
                 borderTopRightRadius: progressPercent >= 99 ? "9999px" : "0",
                 borderBottomRightRadius: progressPercent >= 99 ? "9999px" : "0",
-                background: "linear-gradient(90deg, #1fa851 0%, #4ade80 100%)",
+                background: "linear-gradient(90deg, #9fce2e 0%, #d4fc50 100%)",
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center gap-1 text-sm font-bold tabular-nums">
-              <span className="text-white drop-shadow-sm">${(balanceCents / 100).toFixed(2)}</span>
-              <span className="text-white/70">/ $5.00</span>
+            <div className="absolute inset-0 flex items-center justify-center gap-1 text-xs font-bold tabular-nums">
+              <span className="text-cta-ink drop-shadow-sm">${(balanceCents / 100).toFixed(2)}</span>
+              <span className="text-cta-ink/60">/ $5.00</span>
             </div>
           </div>
         </div>
