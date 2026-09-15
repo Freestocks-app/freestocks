@@ -54,10 +54,13 @@ export default async function EarnPage() {
           </div>
           <div className="relative h-9 rounded-full bg-elevated overflow-hidden">
             <div
-              className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+              className="absolute inset-y-0 left-0 rounded-l-full transition-all duration-500"
               style={{
-                width: `${Math.max(progressPercent, 14)}%`,
-                background: "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)",
+                width: `${Math.max(progressPercent, 10)}%`,
+                minWidth: "2.25rem",
+                borderTopRightRadius: progressPercent >= 99 ? "9999px" : "0",
+                borderBottomRightRadius: progressPercent >= 99 ? "9999px" : "0",
+                background: "linear-gradient(90deg, #1fa851 0%, #4ade80 100%)",
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center gap-1 text-sm font-bold tabular-nums">
