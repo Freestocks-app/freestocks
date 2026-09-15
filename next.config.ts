@@ -1,5 +1,18 @@
 import type { NextConfig } from "next";
 
+// Solana RPC origin is configurable via NEXT_PUBLIC_SOLANA_RPC_URL (see
+// src/hooks/useWalletBalances.ts) so a paid provider (Alchemy, Helius, etc.)
+// can be swapped in without a code change — connect-src must allow whatever
+// origin is actually configured, falling back to the public default.
+function getSolanaRpcOrigin(): string {
+  const url = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "https://api.mainnet-beta.solana.com";
+  }
+}
+
 // Privy production checklist: CSP protects the embedded wallet iframe,
 // frame-ancestors 'none' + X-Frame-Options DENY stop this site itself
 // from being framed (clickjacking).
@@ -23,7 +36,7 @@ const CSP_DIRECTIVES = [
   // iframes in the earn flow; auth.privy.io is the embedded wallet.
   "child-src https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://offerwall.ayet.io https://web.bitlabs.ai",
   "frame-src https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com https://offerwall.ayet.io https://web.bitlabs.ai",
-  "connect-src 'self' https://auth.privy.io wss://relay.walletconnect.com wss://relay.walletconnect.org wss://www.walletlink.org https://*.rpc.privy.systems https://explorer-api.walletconnect.com https://api.dexscreener.com",
+  `connect-src 'self' https://auth.privy.io wss://relay.walletconnect.com wss://relay.walletconnect.org wss://www.walletlink.org https://*.rpc.privy.systems https://explorer-api.walletconnect.com https://api.dexscreener.com ${getSolanaRpcOrigin()}`,
   "worker-src 'self'",
   "manifest-src 'self'",
 ].join("; ");
