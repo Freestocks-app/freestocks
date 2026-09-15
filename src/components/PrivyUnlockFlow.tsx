@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { usePrivy, useLoginWithEmail, useCreateWallet } from "@privy-io/react-auth";
+import { usePrivy, useLoginWithEmail, useUser } from "@privy-io/react-auth";
+import { useCreateWallet } from "@privy-io/react-auth/solana";
 import {
   Mail,
   Loader2,
@@ -34,11 +35,13 @@ export function PrivyUnlockFlow({
   const { ready, authenticated, user, logout } = usePrivy();
   const { sendCode, loginWithCode, state: emailState } = useLoginWithEmail();
   const { createWallet } = useCreateWallet();
+  const { refreshUser } = useUser();
 
   const [step, setStep] = useState<Step>("idle");
   const [otpCode, setOtpCode] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [walletStuck, setWalletStuck] = useState(false);
   const walletCreationAttempted = useRef(false);
 
   const solanaWallet = user?.linkedAccounts?.find(
@@ -84,6 +87,11 @@ export function PrivyUnlockFlow({
   // lag behind `authenticated` flipping true. If we're authenticated with no
   // mismatch but still see no wallet, explicitly request one as a fallback
   // rather than leaving the user stuck with no wallet and no explanation.
+  //
+  // createWallet() throws if the user already has an embedded wallet (e.g.
+  // an account created before this fallback existed) - in that case the
+  // local `user` object is just stale, so refreshUser() pulls the existing
+  // wallet into `linkedAccounts` instead of leaving the UI stuck forever.
   useEffect(() => {
     if (
       authenticated &&
@@ -92,11 +100,29 @@ export function PrivyUnlockFlow({
       !walletCreationAttempted.current
     ) {
       walletCreationAttempted.current = true;
-      createWallet().catch((err) => {
-        console.error("Failed to create Solana wallet:", err);
-      });
+      createWallet()
+        .catch((err) => {
+          console.error("Failed to create Solana wallet, refreshing user instead:", err);
+          return refreshUser();
+        })
+        .catch((err) => {
+          console.error("Failed to refresh user after wallet creation issue:", err);
+        });
     }
-  }, [authenticated, emailMismatch, solanaAddress, createWallet]);
+  }, [authenticated, emailMismatch, solanaAddress, createWallet, refreshUser]);
+
+  const waitingForWallet = authenticated && !emailMismatch && !solanaAddress;
+
+  // Safety net: if we're still stuck waiting on a wallet a few seconds after
+  // authenticating, stop spinning forever and let the user retry instead.
+  useEffect(() => {
+    if (!waitingForWallet) {
+      return;
+    }
+
+    const timer = setTimeout(() => setWalletStuck(true), 8000);
+    return () => clearTimeout(timer);
+  }, [waitingForWallet]);
 
   const handleSendCode = async () => {
     setActionError(null);
@@ -137,6 +163,14 @@ export function PrivyUnlockFlow({
     setStep("idle");
   };
 
+  const handleRetryWalletCreation = () => {
+    setWalletStuck(false);
+    walletCreationAttempted.current = false;
+    refreshUser().catch((err) => {
+      console.error("Failed to refresh user:", err);
+    });
+  };
+
   if (!ready) {
     return (
       <div className="card p-6 text-center">
@@ -146,11 +180,29 @@ export function PrivyUnlockFlow({
     );
   }
 
-  if (authenticated && !emailMismatch && !solanaAddress) {
+  if (waitingForWallet) {
     return (
       <div className="card p-6 text-center">
-        <Loader2 className="w-8 h-8 text-cta animate-spin mx-auto mb-3" />
-        <p className="text-sm text-muted">Creating your Solana wallet...</p>
+        {walletStuck ? (
+          <>
+            <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
+            <p className="text-sm text-muted mb-3">
+              This is taking longer than expected. Please try again.
+            </p>
+            <button
+              onClick={handleRetryWalletCreation}
+              className="btn-primary w-full text-sm py-2.5 justify-center"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </button>
+          </>
+        ) : (
+          <>
+            <Loader2 className="w-8 h-8 text-cta animate-spin mx-auto mb-3" />
+            <p className="text-sm text-muted">Creating your Solana wallet...</p>
+          </>
+        )}
       </div>
     );
   }
