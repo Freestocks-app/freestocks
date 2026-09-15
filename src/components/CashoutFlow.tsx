@@ -101,7 +101,7 @@ function StockCard({
             }}
           />
         </div>
-        <p className={`text-center text-[11px] font-semibold ${canCashout ? "text-gain" : "text-muted"}`}>
+        <p className={`text-center text-[11px] font-semibold ${canCashout ? "text-cta" : "text-muted"}`}>
           {canCashout
             ? "Withdraw now"
             : `$${(balanceCents / 100).toFixed(0)}/$${(minCashoutCents / 100).toFixed(0)}`}
