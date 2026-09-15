@@ -54,6 +54,65 @@ function StockLogo({ stock, size = "md" }: { stock: TokenizedStock; size?: "sm" 
   );
 }
 
+function StockCard({
+  stock,
+  canCashout,
+  progressPercent,
+  balanceCents,
+  minCashoutCents,
+  onSelect,
+}: {
+  stock: TokenizedStock;
+  canCashout: boolean;
+  progressPercent: number;
+  balanceCents: number;
+  minCashoutCents: number;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      onClick={onSelect}
+      className={`group flex flex-col rounded-2xl border overflow-hidden transition-all text-left ${
+        canCashout
+          ? "border-border bg-elevated hover:border-cta/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cta/5"
+          : "border-border bg-elevated/60"
+      }`}
+    >
+      <div className="p-2 pb-1">
+        <p className="text-xs font-semibold text-center truncate">${stock.symbol}</p>
+      </div>
+      <div className="mx-3 mb-2 aspect-square rounded-xl overflow-hidden bg-bg flex items-center justify-center">
+        <Image
+          src={stock.logo}
+          alt={stock.name}
+          width={96}
+          height={96}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+      </div>
+      <div className="px-3 pb-3">
+        <div className="h-1.5 rounded-full bg-bg overflow-hidden mb-1.5">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${Math.max(progressPercent, canCashout ? 100 : 8)}%`,
+              background: canCashout
+                ? "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)"
+                : "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)",
+            }}
+          />
+        </div>
+        <p className={`text-center text-[11px] font-semibold ${canCashout ? "text-gain" : "text-muted"}`}>
+          {canCashout
+            ? "Withdraw now"
+            : `$${(balanceCents / 100).toFixed(0)}/$${(minCashoutCents / 100).toFixed(0)}`}
+        </p>
+      </div>
+    </button>
+  );
+}
+
 function LockedProgressModal({
   balanceCents,
   minCashoutCents,
@@ -112,6 +171,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   const [showLockedModal, setShowLockedModal] = useState(false);
 
   const canCashout = balanceCents >= minCashoutCents;
+  const progressPercent = Math.min(100, (balanceCents / minCashoutCents) * 100);
   const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress);
 
   const handleSelectStock = (stock: TokenizedStock) => {
@@ -120,6 +180,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
       return;
     }
     setSelectedStock(stock);
+    setStep("wallet");
   };
 
   const handleWalletReady = useCallback((address: string) => {
@@ -215,43 +276,23 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         <p className="text-4xl font-bold text-cta tabular-nums">${(balanceCents / 100).toFixed(2)}</p>
       </div>
 
-      {/* Step 1: Stock Selection - FreeCash-style clean list */}
+      {/* Step 1: Stock Selection - FreeCash-style grid */}
       {step === "stock" && (
         <>
-          <p className="text-sm text-center text-muted mb-4">Choose a stock to receive</p>
-          <div className="space-y-2">
+          <p className="text-sm font-semibold mb-3">Most Popular</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {cashoutStocks.map((stock) => (
-              <button
+              <StockCard
                 key={stock.symbol}
-                onClick={() => handleSelectStock(stock)}
-                className={`w-full p-3 rounded-xl border transition-all ${
-                  selectedStock?.symbol === stock.symbol
-                    ? "border-cta bg-cta/10"
-                    : "border-border bg-elevated hover:border-cta/50"
-                } ${!canCashout ? "opacity-70" : ""}`}
-              >
-                <div className="flex items-center gap-3">
-                  <StockLogo stock={stock} size="md" />
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-sm">${stock.symbol}</p>
-                    <p className="text-xs text-muted">{stock.name}</p>
-                  </div>
-                  <span className="text-[9px] px-2 py-1 rounded-full bg-cta/15 text-cta font-medium">
-                    xStocks
-                  </span>
-                </div>
-              </button>
+                stock={stock}
+                canCashout={canCashout}
+                progressPercent={progressPercent}
+                balanceCents={balanceCents}
+                minCashoutCents={minCashoutCents}
+                onSelect={() => handleSelectStock(stock)}
+              />
             ))}
           </div>
-
-          <button
-            onClick={() => setStep("wallet")}
-            disabled={!selectedStock || !canCashout}
-            className="btn-primary w-full justify-center mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Continue
-            <ArrowRight className="w-4 h-4" />
-          </button>
         </>
       )}
 

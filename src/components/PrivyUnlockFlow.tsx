@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { usePrivy, useLoginWithEmail } from "@privy-io/react-auth";
 import {
   Mail,
@@ -22,7 +22,7 @@ interface PrivyUnlockFlowProps {
   onBack: () => void;
 }
 
-type VerifyState = "idle" | "sending" | "code_sent" | "verifying" | "verified" | "error";
+type Step = "idle" | "sending" | "code_sent" | "verifying";
 
 export function PrivyUnlockFlow({
   sessionEmail,
@@ -34,9 +34,9 @@ export function PrivyUnlockFlow({
   const { ready, authenticated, user, logout } = usePrivy();
   const { sendCode, loginWithCode, state: emailState } = useLoginWithEmail();
 
-  const [verifyState, setVerifyState] = useState<VerifyState>("idle");
+  const [step, setStep] = useState<Step>("idle");
   const [otpCode, setOtpCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
 
   const solanaWallet = user?.linkedAccounts?.find(
@@ -47,73 +47,73 @@ export function PrivyUnlockFlow({
       "walletClientType" in account &&
       (account as { walletClientType?: string }).walletClientType === "privy"
   );
-  const solanaAddress = solanaWallet && "address" in solanaWallet 
-    ? (solanaWallet as { address: string }).address 
+  const solanaAddress = solanaWallet && "address" in solanaWallet
+    ? (solanaWallet as { address: string }).address
     : undefined;
 
-  const handleEmailMismatch = useCallback(async () => {
-    if (authenticated && user?.email?.address && user.email.address !== sessionEmail) {
-      setError(`Email mismatch: Privy account is ${user.email.address}, but your Freestocks account is ${sessionEmail}. Please log out of Privy first.`);
-      setVerifyState("error");
-      await logout();
-    }
-  }, [authenticated, user, sessionEmail, logout]);
+  const emailMismatch =
+    authenticated && user?.email?.address && user.email.address !== sessionEmail
+      ? user.email.address
+      : null;
+
+  const error =
+    actionError ||
+    (emailMismatch
+      ? `Email mismatch: Privy account is ${emailMismatch}, but your Freestocks account is ${sessionEmail}. Please log out of Privy first.`
+      : null) ||
+    (emailState?.status === "error" ? "Failed to complete verification. Please try again." : null);
+
+  const verified = authenticated && !emailMismatch && !!solanaAddress;
 
   useEffect(() => {
-    handleEmailMismatch();
-  }, [handleEmailMismatch]);
+    if (verified) {
+      onWalletReady(solanaAddress as string);
+    }
+  }, [verified, solanaAddress, onWalletReady]);
 
   useEffect(() => {
-    if (authenticated && solanaAddress && verifyState !== "error") {
-      setVerifyState("verified");
-      onWalletReady(solanaAddress);
+    if (emailMismatch) {
+      logout();
     }
-  }, [authenticated, solanaAddress, verifyState, onWalletReady]);
-
-  useEffect(() => {
-    if (emailState?.status === "error") {
-      setError("Failed to complete verification. Please try again.");
-      setVerifyState("error");
-    }
-  }, [emailState?.status]);
+  }, [emailMismatch, logout]);
 
   const handleSendCode = async () => {
-    setError(null);
-    setVerifyState("sending");
+    setActionError(null);
+    setStep("sending");
 
     try {
       await sendCode({ email: sessionEmail });
       setCodeSentTo(sessionEmail);
-      setVerifyState("code_sent");
+      setStep("code_sent");
     } catch (err) {
       console.error("Failed to send code:", err);
-      setError("Failed to send verification code. Please try again.");
-      setVerifyState("error");
+      setActionError("Failed to send verification code. Please try again.");
+      setStep("idle");
     }
   };
 
   const handleVerifyCode = async () => {
     if (otpCode.length !== 6) {
-      setError("Please enter the 6-digit code");
+      setActionError("Please enter the 6-digit code");
       return;
     }
 
-    setError(null);
-    setVerifyState("verifying");
+    setActionError(null);
+    setStep("verifying");
 
     try {
       await loginWithCode({ code: otpCode });
     } catch (err) {
       console.error("Failed to verify code:", err);
-      setError("Invalid code. Please check and try again.");
-      setVerifyState("error");
+      setActionError("Invalid code. Please check and try again.");
+      setStep("code_sent");
     }
   };
 
   const handleRetry = () => {
-    setError(null);
+    setActionError(null);
     setOtpCode("");
-    setVerifyState("idle");
+    setStep("idle");
   };
 
   if (!ready) {
@@ -125,7 +125,7 @@ export function PrivyUnlockFlow({
     );
   }
 
-  if (verifyState === "verified" && solanaAddress) {
+  if (verified) {
     return (
       <div className="card p-4 border-gain/20 bg-gain/5">
         <div className="flex items-center gap-3 mb-4">
@@ -146,7 +146,7 @@ export function PrivyUnlockFlow({
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted">Solana Wallet</span>
             <span className="text-xs font-mono text-cta">
-              {solanaAddress.slice(0, 6)}...{solanaAddress.slice(-4)}
+              {solanaAddress!.slice(0, 6)}...{solanaAddress!.slice(-4)}
             </span>
           </div>
         </div>
@@ -170,10 +170,10 @@ export function PrivyUnlockFlow({
 
       <h3 className="font-semibold text-sm mb-1">Verify your email</h3>
       <p className="text-xs text-muted mb-4">
-        Verify your identity to create a secure Solana wallet for receiving tokenized stocks.
+        ${selectedStock} worth ${(balanceCents / 100).toFixed(2)} will be sent to your Solana wallet.
       </p>
 
-      <div className="bg-bg rounded-lg p-4 border border-border mb-4">
+      <div className="bg-bg rounded-lg p-4 border border-border">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-lg bg-cta/10 border border-cta/20 flex items-center justify-center">
             <Mail className="w-5 h-5 text-cta" />
@@ -185,75 +185,11 @@ export function PrivyUnlockFlow({
           <Shield className="w-4 h-4 text-gain" />
         </div>
 
-        {verifyState === "idle" && (
+        {error ? (
           <>
-            <p className="text-[11px] text-muted leading-relaxed mb-4">
-              We&apos;ll send a one-time verification code to <strong className="text-foreground">{sessionEmail}</strong> to confirm your identity and create your Solana wallet.
-            </p>
-            <button
-              onClick={handleSendCode}
-              className="btn-primary w-full text-sm py-2.5 justify-center"
-            >
-              Send Verification Code
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </>
-        )}
-
-        {verifyState === "sending" && (
-          <div className="flex items-center justify-center gap-2 py-4">
-            <Loader2 className="w-5 h-5 text-cta animate-spin" />
-            <span className="text-sm text-muted">Sending code to {sessionEmail}...</span>
-          </div>
-        )}
-
-        {verifyState === "code_sent" && (
-          <>
-            <div className="mb-4">
-              <p className="text-[11px] text-muted leading-relaxed mb-3">
-                We sent a 6-digit code to <strong className="text-foreground">{codeSentTo}</strong>. Enter it below:
-              </p>
-              <input
-                type="text"
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="000000"
-                className="w-full bg-elevated border border-border rounded-lg py-3 px-4 text-center text-2xl font-mono tracking-[0.5em] placeholder:text-muted/40 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20"
-                autoFocus
-                maxLength={6}
-              />
-            </div>
-            <button
-              onClick={handleVerifyCode}
-              disabled={otpCode.length !== 6}
-              className="btn-primary w-full text-sm py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Verify & Create Wallet
-              <Wallet className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleSendCode}
-              className="w-full text-xs text-muted hover:text-foreground mt-2 py-1"
-            >
-              Didn&apos;t receive it? Send again
-            </button>
-          </>
-        )}
-
-        {verifyState === "verifying" && (
-          <div className="flex items-center justify-center gap-2 py-4">
-            <Loader2 className="w-5 h-5 text-cta animate-spin" />
-            <span className="text-sm text-muted">Verifying & creating wallet...</span>
-          </div>
-        )}
-
-        {verifyState === "error" && (
-          <>
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 mb-4">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-red-400">{error}</p>
-              </div>
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 mb-3 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-red-400">{error}</p>
             </div>
             <button
               onClick={handleRetry}
@@ -263,16 +199,64 @@ export function PrivyUnlockFlow({
               Try Again
             </button>
           </>
-        )}
-      </div>
+        ) : (
+          <>
+            {step === "idle" && (
+              <button
+                onClick={handleSendCode}
+                className="btn-primary w-full text-sm py-2.5 justify-center"
+              >
+                Send Code
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
 
-      <div className="flex items-start gap-2 p-3 rounded-lg bg-elevated/50 border border-border">
-        <Wallet className="w-4 h-4 text-cta flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[11px] text-muted leading-relaxed">
-            After verification, a <strong className="text-foreground">Solana wallet</strong> will be automatically created and linked to your account. Your {selectedStock} tokenized stock worth <strong className="text-foreground">${(balanceCents / 100).toFixed(2)}</strong> will be sent to this wallet.
-          </p>
-        </div>
+            {step === "sending" && (
+              <div className="flex items-center justify-center gap-2 py-3">
+                <Loader2 className="w-5 h-5 text-cta animate-spin" />
+                <span className="text-sm text-muted">Sending code...</span>
+              </div>
+            )}
+
+            {step === "code_sent" && (
+              <>
+                <p className="text-xs text-muted mb-3">
+                  Enter the 6-digit code sent to <strong className="text-foreground">{codeSentTo}</strong>.
+                </p>
+                <input
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-elevated border border-border rounded-lg py-3 px-4 text-center text-2xl font-mono tracking-[0.5em] placeholder:text-muted/40 focus:outline-none focus:border-cta/50 focus:ring-1 focus:ring-cta/20 mb-3"
+                  autoFocus
+                  maxLength={6}
+                />
+                <button
+                  onClick={handleVerifyCode}
+                  disabled={otpCode.length !== 6}
+                  className="btn-primary w-full text-sm py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Verify
+                  <Wallet className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleSendCode}
+                  className="w-full text-xs text-muted hover:text-foreground mt-2 py-1"
+                >
+                  Didn&apos;t receive it? Send again
+                </button>
+              </>
+            )}
+
+            {step === "verifying" && (
+              <div className="flex items-center justify-center gap-2 py-3">
+                <Loader2 className="w-5 h-5 text-cta animate-spin" />
+                <span className="text-sm text-muted">Verifying...</span>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

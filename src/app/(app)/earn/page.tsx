@@ -52,16 +52,17 @@ export default async function EarnPage() {
           <div className="text-center mb-2">
             <span className="text-xs text-muted">Next cashout</span>
           </div>
-          <div className="relative">
-            <div className="h-2 bg-elevated rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-cta rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-1.5 text-xs">
-              <span className="text-cta font-bold tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
-              <span className="text-muted font-semibold tabular-nums">/ $5.00</span>
+          <div className="relative h-9 rounded-full bg-elevated overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+              style={{
+                width: `${Math.max(progressPercent, 14)}%`,
+                background: "linear-gradient(90deg, #38c95e 0%, #7ee881 100%)",
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center gap-1 text-sm font-bold tabular-nums">
+              <span className="text-white drop-shadow-sm">${(balanceCents / 100).toFixed(2)}</span>
+              <span className="text-white/70">/ $5.00</span>
             </div>
           </div>
         </div>
