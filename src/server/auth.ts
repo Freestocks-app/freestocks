@@ -173,6 +173,8 @@ export const auth = betterAuth({
     "http://localhost:3847",
     "https://freestocks.vercel.app",
     "https://freestocks-beyond-club.vercel.app",
+    "https://www.freestocks.app",
+    "https://freestocks.app",
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
   ],
   database: drizzleAdapter(db, {
