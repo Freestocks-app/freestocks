@@ -1,5 +1,37 @@
 import { test, expect } from "@playwright/test";
 
+test.describe("security headers", () => {
+  test("responses carry CSP protecting the Privy iframe and framing headers", async ({ page }) => {
+    const response = await page.goto("/");
+    expect(response).not.toBeNull();
+
+    const csp = response!.headers()["content-security-policy"];
+    expect(csp).toBeTruthy();
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("https://auth.privy.io");
+    // offer-wall providers embedded via <iframe> in the earn flow
+    expect(csp).toContain("https://offerwall.ayet.io");
+    expect(csp).toContain("https://web.bitlabs.ai");
+
+    expect(response!.headers()["x-frame-options"]).toBe("DENY");
+  });
+
+  test("no CSP violations are reported while loading key pages", async ({ page }) => {
+    const violations: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error" && /content security policy|refused to/i.test(msg.text())) {
+        violations.push(msg.text());
+      }
+    });
+
+    for (const path of ["/", "/sign-in", "/sign-up", "/faq", "/privacy", "/terms"]) {
+      await page.goto(path, { waitUntil: "networkidle" });
+    }
+
+    expect(violations).toEqual([]);
+  });
+});
+
 test.describe("sign-up form", () => {
   test("email/password inputs have no nested double border and fill their container", async ({ page }) => {
     await page.goto("/sign-up");
