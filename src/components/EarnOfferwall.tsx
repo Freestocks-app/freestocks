@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Zap, AlertTriangle, Wifi, Globe, RefreshCw, HelpCircle, Gamepad2, FileText } from "lucide-react";
+import { CpxScriptWidget } from "./CpxScriptWidget";
 
 export interface OfferwallProvider {
   id: string;
   name: string;
-  url: string;
+  type?: "iframe" | "cpx_script";
+  url?: string;
+  cpxAppId?: string;
+  cpxSecureHash?: string;
 }
 
 interface EarnOfferwallProps {
@@ -158,9 +162,11 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
 
   const currentProvider = providers.find((p) => p.id === activeProvider);
 
+  const currentIsIframe = (currentProvider?.type ?? "iframe") === "iframe";
+
   useEffect(() => {
-    setState("loading");
-    
+    if (!currentIsIframe) return;
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (extendedTimeoutRef.current) clearTimeout(extendedTimeoutRef.current);
 
@@ -176,7 +182,7 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (extendedTimeoutRef.current) clearTimeout(extendedTimeoutRef.current);
     };
-  }, [key, activeProvider]);
+  }, [key, activeProvider, currentIsIframe]);
 
   const handleLoad = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -191,6 +197,7 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
   };
 
   const handleRetry = () => {
+    setState("loading");
     setKey((k) => k + 1);
   };
 
@@ -203,6 +210,7 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
   };
 
   const handleProviderChange = (id: string) => {
+    setState("loading");
     setActiveProvider(id);
     setKey((k) => k + 1);
   };
@@ -234,24 +242,35 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
         </div>
       )}
       
-      {/* Iframe container */}
+      {/* Offer content */}
       <div className="relative flex-1">
-        {state === "loading" && <LoadingSkeleton />}
-        {state === "slow" && <SlowState onRetry={handleRetry} onWait={handleKeepWaiting} />}
-        {state === "blocked" && <BlockedState onRetry={handleRetry} />}
-        {state === "error" && <ErrorState onRetry={handleRetry} />}
-        
-        <iframe
-          key={`${activeProvider}-${key}`}
-          src={currentProvider.url}
-          className={`w-full h-full min-h-[calc(100vh-14rem)] md:min-h-[calc(100vh-12rem)] border-0 transition-opacity duration-300 ${
-            state === "loaded" ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          allow="clipboard-write"
-          title="Offers"
-          onLoad={handleLoad}
-          onError={handleError}
-        />
+        {currentProvider.type === "cpx_script" ? (
+          <CpxScriptWidget
+            key={activeProvider}
+            appId={currentProvider.cpxAppId || ""}
+            userId={userId}
+            secureHash={currentProvider.cpxSecureHash}
+          />
+        ) : (
+          <>
+            {state === "loading" && <LoadingSkeleton />}
+            {state === "slow" && <SlowState onRetry={handleRetry} onWait={handleKeepWaiting} />}
+            {state === "blocked" && <BlockedState onRetry={handleRetry} />}
+            {state === "error" && <ErrorState onRetry={handleRetry} />}
+
+            <iframe
+              key={`${activeProvider}-${key}`}
+              src={currentProvider.url}
+              className={`w-full h-full min-h-[calc(100vh-14rem)] md:min-h-[calc(100vh-12rem)] border-0 transition-opacity duration-300 ${
+                state === "loaded" ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+              allow="clipboard-write"
+              title="Offers"
+              onLoad={handleLoad}
+              onError={handleError}
+            />
+          </>
+        )}
       </div>
     </div>
   );

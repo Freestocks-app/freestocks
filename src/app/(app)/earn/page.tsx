@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/lib/db";
@@ -31,12 +32,19 @@ export default async function EarnPage() {
     });
   }
 
-  const bitlabsToken = process.env.BITLABS_TOKEN;
-  if (bitlabsToken) {
+  const cpxAppId = process.env.NEXT_PUBLIC_CPX_APP_ID;
+  const cpxSecret = process.env.CPX_SECRET;
+  if (cpxAppId) {
+    const cpxSecureHash = cpxSecret
+      ? crypto.createHash("md5").update(`${session.user.id}-${cpxSecret}`).digest("hex")
+      : undefined;
+
     providers.push({
-      id: "bitlabs",
+      id: "cpx",
       name: "Survey",
-      url: `https://web.bitlabs.ai/?uid=${encodeURIComponent(session.user.id)}&token=${encodeURIComponent(bitlabsToken)}&theme=DARK&display_mode=surveys,offers,gaming&sdk=IFRAME&background_color=%230a0a0a&navigation_color=%23161616&interaction_color=%23d4fc50`,
+      type: "cpx_script",
+      cpxAppId,
+      cpxSecureHash,
     });
   }
 

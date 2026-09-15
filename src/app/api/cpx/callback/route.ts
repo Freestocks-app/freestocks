@@ -1,38 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, ensureDbInitialized } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
-import { BitLabsService } from "@/server/bitlabs/service";
+import { CpxService } from "@/server/cpx/service";
 import { ReferralService } from "@/server/referral/service";
 
 export async function GET(request: NextRequest) {
   await ensureDbInitialized();
-  
-  const secret = process.env.BITLABS_SECRET;
+
+  const secret = process.env.CPX_SECRET;
 
   if (!secret) {
-    console.error("[BitLabs] BITLABS_SECRET not configured");
+    console.error("[CPX] CPX_SECRET not configured");
     return NextResponse.json(
       { error: "Server configuration error" },
       { status: 500 }
     );
   }
 
-  console.log("[BitLabs] Callback received:", {
-    url: request.url,
-    urlLength: request.url.length,
-  });
+  console.log("[CPX] Callback received:", { url: request.url });
 
   const ledger = new LedgerService(db);
   const referral = new ReferralService(db);
-  const bitlabs = new BitLabsService(ledger, secret, referral);
+  const cpx = new CpxService(ledger, secret, referral);
 
-  const result = await bitlabs.processCallback({
-    fullUrl: request.url,
-  });
+  const url = new URL(request.url);
+  const result = await cpx.processCallback({ url });
 
   if (!result.success) {
-    console.error(`[BitLabs] Callback failed: ${result.error}`);
-    
+    console.error(`[CPX] Callback failed: ${result.error}`);
+
     if (result.error === "invalid_signature") {
       return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
@@ -46,10 +42,12 @@ export async function GET(request: NextRequest) {
   }
 
   if (result.duplicate) {
-    console.log("[BitLabs] Duplicate TX, returning OK");
-  } else {
-    console.log("[BitLabs] Credit processed successfully");
+    console.log("[CPX] Duplicate TX, returning OK");
+  } else if (result.credited) {
+    console.log("[CPX] Credit processed successfully");
+  } else if (result.debited) {
+    console.log("[CPX] Chargeback processed successfully");
   }
 
-  return new NextResponse("OK", { status: 200 });
+  return new NextResponse("1", { status: 200 });
 }

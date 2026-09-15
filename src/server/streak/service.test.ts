@@ -89,10 +89,15 @@ describe("StreakService", () => {
   });
 
   it("returns 1 for a user with a transaction today", async () => {
-    await client.exec(`
-      INSERT INTO "transaction" (id, tx_id, user_id, amount_cents, source, created_at)
-      VALUES ('tx-1', 'tx-1', 'user-1', 100, 'test', NOW())
-    `);
+    // Use an explicit UTC timestamp rather than SQL NOW() — PGlite's NOW()
+    // can reflect the host's local timezone offset rather than true UTC,
+    // which flakes this test near a local midnight boundary.
+    const nowUtc = new Date().toISOString();
+    await client.query(
+      `INSERT INTO "transaction" (id, tx_id, user_id, amount_cents, source, created_at)
+       VALUES ('tx-1', 'tx-1', 'user-1', 100, 'test', $1)`,
+      [nowUtc]
+    );
     expect(await streak.getCurrentStreak("user-1")).toBe(1);
   });
 });
