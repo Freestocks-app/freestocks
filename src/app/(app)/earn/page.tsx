@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
+import { getAvailableBalanceCents } from "@/server/redeem/service";
 import { Zap } from "lucide-react";
 import { EarnOfferwall, OfferwallProvider } from "@/components/EarnOfferwall";
 import { ReferralAttribution } from "@/components/ReferralAttribution";
@@ -20,6 +21,7 @@ export default async function EarnPage() {
 
   const ledger = new LedgerService(db);
   const balanceCents = await ledger.getBalance(session.user.id);
+  const availableBalanceCents = await getAvailableBalanceCents(db, session.user.id, balanceCents);
 
   const providers: OfferwallProvider[] = [];
 
@@ -49,7 +51,7 @@ export default async function EarnPage() {
   }
 
   const hasProviders = providers.length > 0;
-  const progressPercent = Math.min(100, (balanceCents / MIN_CASHOUT_CENTS) * 100);
+  const progressPercent = Math.min(100, (availableBalanceCents / MIN_CASHOUT_CENTS) * 100);
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex flex-col">
@@ -72,7 +74,7 @@ export default async function EarnPage() {
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center gap-1 text-xs font-bold tabular-nums">
-              <span className="text-cta-ink drop-shadow-sm">${(balanceCents / 100).toFixed(2)}</span>
+              <span className="text-cta-ink drop-shadow-sm">${(availableBalanceCents / 100).toFixed(2)}</span>
               <span className="text-cta-ink/60">/ $5.00</span>
             </div>
           </div>

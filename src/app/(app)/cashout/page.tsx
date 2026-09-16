@@ -2,8 +2,9 @@ import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
+import { getAvailableBalanceCents } from "@/server/redeem/service";
 import { redeemRequest, type RedeemRequest } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { CashoutTabs } from "@/components/CashoutTabs";
 
 export const dynamic = "force-dynamic";
@@ -27,19 +28,11 @@ export default async function CashoutPage() {
     .orderBy(desc(redeemRequest.createdAt))
     .limit(5);
 
-  // Not derived from the (display-only, limit-5) pendingRequests above -
-  // a user with more than 5 total requests could have pending ones outside
-  // that window, which would under-count here and let them over-request.
-  const allPendingRequests: RedeemRequest[] = await db
-    .select()
-    .from(redeemRequest)
-    .where(and(eq(redeemRequest.userId, session.user.id), eq(redeemRequest.status, "pending")));
-
-  const pendingTotalCents = allPendingRequests.reduce(
-    (sum: number, r: RedeemRequest) => sum + r.amountCents,
-    0
-  );
-  const availableBalanceCents = Math.max(0, balanceCents - pendingTotalCents);
+  // Computed independently of the (display-only, limit-5) pendingRequests
+  // above - a user with more than 5 total requests could have pending ones
+  // outside that window, which would under-count here and let them
+  // over-request.
+  const availableBalanceCents = await getAvailableBalanceCents(db, session.user.id, balanceCents);
 
   const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   const sessionEmail = session.user.email;

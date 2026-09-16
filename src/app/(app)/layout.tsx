@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
+import { getAvailableBalanceCents } from "@/server/redeem/service";
 import { StreakService } from "@/server/streak/service";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -24,10 +25,11 @@ export default async function AppLayout({
     ledger.getBalance(session.user.id),
     streak.getCurrentStreak(session.user.id),
   ]);
+  const availableBalanceCents = await getAvailableBalanceCents(db, session.user.id, balanceCents);
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      <Navigation balanceCents={balanceCents} userName={session.user.name} streakCount={streakCount} />
+      <Navigation balanceCents={availableBalanceCents} userName={session.user.name} streakCount={streakCount} />
       <main className="pt-12 md:pt-14">
         {children}
         <div className="pb-14 md:pb-0">
