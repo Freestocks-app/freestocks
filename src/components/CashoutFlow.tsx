@@ -74,21 +74,21 @@ function StockCard({
   return (
     <button
       onClick={onSelect}
-      className={`group relative flex flex-col rounded-2xl border overflow-hidden transition-all text-left ${
+      className={`group flex flex-col rounded-2xl border overflow-hidden transition-all text-left ${
         canCashout
           ? "border-border bg-elevated hover:border-cta/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cta/5"
           : "border-border bg-elevated/60"
       }`}
     >
-      {stock.issuer === "prestocks" && (
-        <span
-          className={`absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${issuerBadge.color}`}
-        >
-          {issuerBadge.name}
-        </span>
-      )}
-      <div className="p-2 pb-1">
-        <p className="text-xs font-semibold text-center truncate">${stock.symbol}</p>
+      <div className="p-2 pb-1 flex flex-col items-center gap-1">
+        {stock.issuer === "prestocks" && (
+          <span
+            className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide leading-none ${issuerBadge.color}`}
+          >
+            {issuerBadge.name}
+          </span>
+        )}
+        <p className="text-xs font-semibold text-center truncate w-full">${stock.symbol}</p>
       </div>
       <div className="mx-3 mb-2 aspect-square rounded-xl overflow-hidden bg-bg flex items-center justify-center">
         <Image
