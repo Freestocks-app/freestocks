@@ -185,4 +185,43 @@ describe("Coming Soon host gate", () => {
     vi.stubGlobal("window", { location: { hostname: "www.freestocks.app" } });
     expect(isComingSoon()).toBe(false);
   });
+
+  describe("explicit hostname argument (Server Component usage)", () => {
+    it("gates www.freestocks.app when passed explicitly, with no window/document", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+      // No document/window stub here - this is the SSR case (page.tsx
+      // calling isComingSoon(host) from headers()), which must not rely
+      // on globals that don't exist on the server.
+      expect(isComingSoon("www.freestocks.app")).toBe(true);
+      expect(isComingSoon("freestocks.app")).toBe(true);
+    });
+
+    it("opens the full app for demo.freestocks.app passed explicitly (regression: PR #21 SSR bug)", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+      expect(isComingSoon("demo.freestocks.app")).toBe(false);
+    });
+
+    it("opens the full app for a vercel.app alias or localhost passed explicitly", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+      expect(isComingSoon("freestocks-beyond-club.vercel.app")).toBe(false);
+      expect(isComingSoon("localhost")).toBe(false);
+    });
+
+    it("strips a port suffix from the passed hostname", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+      expect(isComingSoon("www.freestocks.app:3847")).toBe(true);
+      expect(isComingSoon("demo.freestocks.app:3847")).toBe(false);
+    });
+
+    it("never defaults to Coming Soon when hostname is missing/empty, even with the flag on", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+      expect(isComingSoon("")).toBe(false);
+      expect(isComingSoon(undefined)).toBe(false);
+    });
+
+    it("stays false regardless of host when the flag itself is off", () => {
+      vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "false");
+      expect(isComingSoon("www.freestocks.app")).toBe(false);
+    });
+  });
 });

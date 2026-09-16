@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { headers } from "next/headers";
 import { ArrowRight, Clock } from "lucide-react";
 import { TOP10, preStocksFeatured, getTickerData } from "@/lib/tokenized-stocks";
 import { getMergedPrices } from "@/lib/prices";
@@ -35,7 +36,9 @@ function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; classNa
 export default async function LandingPage() {
   const prices = await getMergedPrices();
   const tickerData = getTickerData(prices);
-  const comingSoon = isComingSoon();
+  const requestHeaders = await headers();
+  const host = (requestHeaders.get("x-forwarded-host") || requestHeaders.get("host") || "").split(":")[0];
+  const comingSoon = isComingSoon(host);
   const openaiBadge = preStocksFeatured.find((s) => s.symbol === "OPENAI")!;
   const anthropicBadge = preStocksFeatured.find((s) => s.symbol === "ANTHROPIC")!;
 

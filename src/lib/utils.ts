@@ -76,18 +76,30 @@ export function isComingSoonHost(hostname: string): boolean {
  *
  * The gate can be bypassed per-browser via the QA_BYPASS_COOKIE, set by
  * visiting the hidden, Basic-Auth-protected QA path (see middleware.ts).
+ *
+ * Coming Soon is shown ONLY if the flag is true AND the host is one of
+ * COMING_SOON_HOSTS. A missing/unknown host never defaults to Coming
+ * Soon - it defaults to the full app, same as an unlisted host.
+ *
+ * - Client Components: omit `hostname` - falls back to
+ *   window.location.hostname automatically.
+ * - Server Components: MUST pass `hostname` explicitly (e.g. from
+ *   headers().get("host") in next/headers) - there is no window here,
+ *   so without it this always resolves as "full app", never Coming Soon.
  */
-export function isComingSoon(): boolean {
+export function isComingSoon(hostname?: string): boolean {
   if (process.env.NEXT_PUBLIC_COMING_SOON !== "true") {
     return false;
   }
-  if (typeof document !== "undefined") {
-    if (document.cookie.includes(`${QA_BYPASS_COOKIE}=1`)) {
-      return false;
-    }
-    if (!isComingSoonHost(window.location.hostname)) {
-      return false;
-    }
+
+  if (typeof document !== "undefined" && document.cookie.includes(`${QA_BYPASS_COOKIE}=1`)) {
+    return false;
   }
-  return true;
+
+  const host = hostname ?? (typeof window !== "undefined" ? window.location.hostname : undefined);
+  if (!host) {
+    return false;
+  }
+
+  return isComingSoonHost(host);
 }
