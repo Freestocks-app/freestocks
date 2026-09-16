@@ -4,12 +4,15 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Ticket, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { ToastProvider, useToast } from "@/components/Toast";
 
 export default function InvitePage() {
   return (
-    <Suspense fallback={null}>
-      <InvitePageInner />
-    </Suspense>
+    <ToastProvider>
+      <Suspense fallback={null}>
+        <InvitePageInner />
+      </Suspense>
+    </ToastProvider>
   );
 }
 
@@ -26,6 +29,7 @@ function InvitePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/earn";
+  const { showToast } = useToast();
 
   const [code, setCode] = useState(() => extractRefCode(next));
   const [loading, setLoading] = useState(false);
@@ -34,7 +38,11 @@ function InvitePageInner() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!code.trim()) return;
+
+    if (!code.trim()) {
+      showToast("Enter an invite code, or tap Skip for now.");
+      return;
+    }
 
     setError(null);
     setLoading(true);
@@ -119,7 +127,7 @@ function InvitePageInner() {
 
               <button
                 type="submit"
-                disabled={isDisabled || !code.trim()}
+                disabled={isDisabled}
                 className="w-full py-2.5 sm:py-3 rounded-lg bg-cta text-cta-ink font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
                 {loading ? (
