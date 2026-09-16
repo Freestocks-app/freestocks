@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import {
   formatCents,
   formatCentsRaw,
@@ -6,6 +6,9 @@ import {
   isValidSolanaAddress,
   isValidEvmAddress,
   isValidWalletAddress,
+  isComingSoonHost,
+  isComingSoon,
+  QA_BYPASS_COOKIE,
 } from "./utils";
 
 describe("Money formatting utilities", () => {
@@ -44,7 +47,7 @@ describe("Money formatting utilities", () => {
       expect(dollarsToCents(0)).toBe(0);
       expect(dollarsToCents(1)).toBe(100);
       expect(dollarsToCents(12.34)).toBe(1234);
-      expect(dollarsToCents(5.00)).toBe(500);
+      expect(dollarsToCents(5.0)).toBe(500);
     });
 
     it("should round floating point errors", () => {
@@ -141,5 +144,45 @@ describe("Address validation utilities", () => {
       expect(isValidWalletAddress("invalid")).toBe(false);
       expect(isValidWalletAddress("0x123")).toBe(false);
     });
+  });
+});
+
+describe("Coming Soon host gate", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("treats freestocks.app and www as marketing hosts", () => {
+    expect(isComingSoonHost("freestocks.app")).toBe(true);
+    expect(isComingSoonHost("www.freestocks.app")).toBe(true);
+    expect(isComingSoonHost("WWW.FREESTOCKS.APP")).toBe(true);
+  });
+
+  it("keeps demo and vercel hosts off the marketing list", () => {
+    expect(isComingSoonHost("demo.freestocks.app")).toBe(false);
+    expect(isComingSoonHost("freestocks.vercel.app")).toBe(false);
+    expect(isComingSoonHost("localhost")).toBe(false);
+  });
+
+  it("opens the full app on demo even when COMING_SOON=true", () => {
+    vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+    vi.stubGlobal("document", { cookie: "" });
+    vi.stubGlobal("window", { location: { hostname: "demo.freestocks.app" } });
+    expect(isComingSoon()).toBe(false);
+  });
+
+  it("keeps Coming Soon on www when the flag is on", () => {
+    vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+    vi.stubGlobal("document", { cookie: "" });
+    vi.stubGlobal("window", { location: { hostname: "www.freestocks.app" } });
+    expect(isComingSoon()).toBe(true);
+  });
+
+  it("respects the QA bypass cookie on marketing hosts", () => {
+    vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "true");
+    vi.stubGlobal("document", { cookie: `${QA_BYPASS_COOKIE}=1; path=/` });
+    vi.stubGlobal("window", { location: { hostname: "www.freestocks.app" } });
+    expect(isComingSoon()).toBe(false);
   });
 });
