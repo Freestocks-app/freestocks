@@ -252,7 +252,7 @@ export function PrivyUnlockFlow({
 
       <h3 className="font-semibold text-sm mb-1">Verify your email</h3>
       <p className="text-xs text-muted mb-4">
-        ${selectedStock} worth ${(balanceCents / 100).toFixed(2)} will be sent to your Solana wallet.
+        ${selectedStock}, up to ${(balanceCents / 100).toFixed(2)}, will be sent to your Solana wallet.
       </p>
 
       <div className="bg-bg rounded-lg p-4 border border-border">

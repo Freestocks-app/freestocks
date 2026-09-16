@@ -172,14 +172,20 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   const [step, setStep] = useState<Step>("stock");
   const [selectedStock, setSelectedStock] = useState<TokenizedStock | null>(null);
   const [walletAddress, setWalletAddress] = useState("");
+  const [amountInput, setAmountInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [successAmountCents, setSuccessAmountCents] = useState(0);
   const [showLockedModal, setShowLockedModal] = useState(false);
 
   const canCashout = balanceCents >= minCashoutCents;
   const progressPercent = Math.min(100, (balanceCents / minCashoutCents) * 100);
   const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress);
+
+  const amountCents = Math.round(parseFloat(amountInput || "0") * 100);
+  const isValidAmount =
+    Number.isFinite(amountCents) && amountCents >= minCashoutCents && amountCents <= balanceCents;
 
   const handleSelectStock = (stock: TokenizedStock) => {
     if (!canCashout) {
@@ -187,6 +193,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
       return;
     }
     setSelectedStock(stock);
+    setAmountInput((balanceCents / 100).toFixed(2));
     setStep("wallet");
   };
 
@@ -196,7 +203,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   }, []);
 
   async function handleSubmit() {
-    if (!selectedStock || !isValidAddress) return;
+    if (!selectedStock || !isValidAddress || !isValidAmount) return;
 
     setLoading(true);
     setError(null);
@@ -207,7 +214,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fomoAddress: walletAddress,
-          amountCents: balanceCents,
+          amountCents,
           stockSymbol: selectedStock.symbol,
           stockIssuer: selectedStock.issuer,
         }),
@@ -221,6 +228,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         return;
       }
 
+      setSuccessAmountCents(amountCents);
       setSuccess(true);
     } catch {
       setError("Network error. Please try again.");
@@ -236,7 +244,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         </div>
         <h2 className="text-xl font-bold mb-1 text-gain">Cashout Submitted!</h2>
         <p className="text-sm text-muted mb-6">
-          ${(balanceCents / 100).toFixed(2)} → ${selectedStock.symbol}
+          ${(successAmountCents / 100).toFixed(2)} → ${selectedStock.symbol}
         </p>
 
         <div className="card p-4 text-left space-y-3">
@@ -249,7 +257,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted">Amount</span>
-            <span className="font-bold tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
+            <span className="font-bold tabular-nums">${(successAmountCents / 100).toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted">Wallet</span>
@@ -362,9 +370,41 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
                 <span className="font-semibold">${selectedStock.symbol}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted">Amount</span>
-              <span className="font-bold text-lg tabular-nums">${(balanceCents / 100).toFixed(2)}</span>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm text-muted">Amount</span>
+                <span className="text-xs text-muted tabular-nums">
+                  Balance: ${(balanceCents / 100).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 bg-bg rounded-lg px-3 py-2 border border-border focus-within:border-cta/50">
+                <span className="text-lg font-bold text-muted">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={amountInput}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, "");
+                    setAmountInput(value);
+                  }}
+                  className="flex-1 bg-transparent text-lg font-bold tabular-nums outline-none min-w-0"
+                  placeholder="0.00"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAmountInput((balanceCents / 100).toFixed(2))}
+                  className="text-xs font-semibold text-cta hover:underline flex-shrink-0"
+                >
+                  Max
+                </button>
+              </div>
+              {!isValidAmount && amountInput !== "" && (
+                <p className="text-xs text-red-400 mt-1.5">
+                  {amountCents > balanceCents
+                    ? "Amount exceeds your balance"
+                    : `Minimum cashout is $${(minCashoutCents / 100).toFixed(2)}`}
+                </p>
+              )}
             </div>
             <div className="pt-3 border-t border-border">
               <div className="flex items-center justify-between mb-1">
@@ -390,7 +430,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || !isValidAmount}
             className="btn-primary w-full justify-center disabled:opacity-50"
           >
             {loading ? (
