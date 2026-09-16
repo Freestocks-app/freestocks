@@ -247,7 +247,7 @@ export default async function LandingPage() {
             {/* PreStocks mention - light, secondary to the main xStocks grid */}
             <div className="flex flex-col items-center gap-3 mb-10 pt-8 border-t border-border">
               <p className="text-muted text-xs sm:text-sm text-center">
-                Or earn pre-IPO names like SpaceX &amp; OpenAI, via{" "}
+                Or earn pre-IPO names like OpenAI &amp; Anthropic, via{" "}
                 <a href="https://prestocks.com" target="_blank" rel="noopener noreferrer" className="text-cta hover:underline">
                   PreStocks
                 </a>

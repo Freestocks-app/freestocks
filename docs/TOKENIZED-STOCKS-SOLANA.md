@@ -141,7 +141,6 @@ Added ~13 new tokens:
 
 | Symbol | Company | Mint |
 |--------|---------|------|
-| SPACEX | SpaceX | `PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh` |
 | OPENAI | OpenAI | `PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF` |
 | ANTHROPIC | Anthropic | `Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw` |
 | ANDURIL | Anduril | `PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB` |

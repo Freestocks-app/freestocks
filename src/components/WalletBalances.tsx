@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useWalletBalances } from "@/hooks/useWalletBalances";
 import { WalletConnectPrompt } from "./WalletConnectPrompt";
+import { getIssuerBadge } from "@/lib/tokenized-stocks";
 
 interface WalletBalancesProps {
   address?: string;
@@ -43,25 +44,37 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
       </div>
 
       <div className="card divide-y divide-border">
-        {tokenBalances.map((token) => (
-          <div key={token.symbol} className="p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
-              <Image
-                src={token.logo}
-                alt={token.name}
-                width={32}
-                height={32}
-                className="w-full h-full object-cover"
-                unoptimized
-              />
+        {tokenBalances.map((token) => {
+          const issuerBadge = getIssuerBadge(token.issuer);
+          return (
+            <div key={token.symbol} className="p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={token.logo}
+                  alt={token.name}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  unoptimized
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-medium text-sm">${token.symbol}</p>
+                  {token.issuer === "prestocks" && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${issuerBadge.color}`}
+                    >
+                      {issuerBadge.name}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted truncate">{token.name}</p>
+              </div>
+              <span className="font-bold text-sm tabular-nums">{token.uiAmount}</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">${token.symbol}</p>
-              <p className="text-xs text-muted truncate">{token.name}</p>
-            </div>
-            <span className="font-bold text-sm tabular-nums">{token.uiAmount}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

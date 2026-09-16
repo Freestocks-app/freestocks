@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { TOP10 } from "@/lib/tokenized-stocks";
+import { allCashoutStocks, type Issuer } from "@/lib/tokenized-stocks";
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
@@ -13,6 +13,7 @@ export interface TokenBalance {
   symbol: string;
   name: string;
   logo: string;
+  issuer: Issuer;
   uiAmount: number;
 }
 
@@ -33,8 +34,8 @@ interface ParsedTokenAccount {
 
 /**
  * Map raw parsed SPL token accounts (from getParsedTokenAccountsByOwner)
- * against the known xStocks mint list, defaulting to 0 for any mint the
- * wallet has no token account for yet.
+ * against every known cashout-eligible mint (xStocks + PreStocks),
+ * defaulting to 0 for any mint the wallet has no token account for yet.
  */
 export function mapTokenAccountsToBalances(accounts: ParsedTokenAccount[]): TokenBalance[] {
   const byMint = new Map<string, number>();
@@ -43,10 +44,11 @@ export function mapTokenAccountsToBalances(accounts: ParsedTokenAccount[]): Toke
     byMint.set(mint, tokenAmount.uiAmount ?? 0);
   }
 
-  return TOP10.map((stock) => ({
+  return allCashoutStocks.map((stock) => ({
     symbol: stock.symbol,
     name: stock.name,
     logo: stock.logo,
+    issuer: stock.issuer,
     uiAmount: byMint.get(stock.mint) ?? 0,
   }));
 }

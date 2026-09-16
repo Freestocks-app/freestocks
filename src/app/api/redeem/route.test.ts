@@ -320,7 +320,6 @@ describe("Redeem API", () => {
 
     it("includes PreStocks symbols alongside xStocks symbols", () => {
       expect(VALID_STOCK_SYMBOLS).toContain("AAPL");
-      expect(VALID_STOCK_SYMBOLS).toContain("SPACEX");
       expect(VALID_STOCK_SYMBOLS).toContain("OPENAI");
       expect(VALID_STOCK_SYMBOLS).toContain("ANTHROPIC");
     });
@@ -343,14 +342,14 @@ describe("Redeem API", () => {
     it("stores prestocks issuer for a PreStocks symbol", async () => {
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, stock_issuer, status, created_at)
-        VALUES ('issuer-prestocks', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'SPACEX', 'prestocks', 'pending', NOW())
+        VALUES ('issuer-prestocks', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'OPENAI', 'prestocks', 'pending', NOW())
       `);
 
       const result = await client.query<{ stock_issuer: string; stock_symbol: string }>(
         "SELECT stock_issuer, stock_symbol FROM redeem_request WHERE id = 'issuer-prestocks'"
       );
 
-      expect(result.rows[0].stock_symbol).toBe("SPACEX");
+      expect(result.rows[0].stock_symbol).toBe("OPENAI");
       expect(result.rows[0].stock_issuer).toBe("prestocks");
     });
   });

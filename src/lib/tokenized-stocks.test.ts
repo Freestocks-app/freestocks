@@ -44,8 +44,8 @@ describe("tokenized-stocks", () => {
 
   it("allPriceSymbols includes both xStocks and PreStocks symbols", () => {
     expect(allPriceSymbols).toContain("AAPL");
-    expect(allPriceSymbols).toContain("SPACEX");
     expect(allPriceSymbols).toContain("OPENAI");
+    expect(allPriceSymbols).toContain("ANTHROPIC");
     expect(allPriceSymbols.length).toBe(allCashoutStocks.length);
   });
 

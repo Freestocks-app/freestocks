@@ -57,7 +57,7 @@ export const TOP10: TokenizedStock[] = [
 ];
 
 /**
- * PreStocks — tokenized pre-IPO SPV exposure (SpaceX, OpenAI, Anthropic, ...)
+ * PreStocks — tokenized pre-IPO SPV exposure (OpenAI, Anthropic, ...)
  * Used for: Cashout "Pre-IPO" section, light LP mention.
  *
  * Mints + prices verified live 2026-09-16 via https://prestocks.com/api/prestocks
@@ -66,7 +66,6 @@ export const TOP10: TokenizedStock[] = [
  * Custom glass badges (3D style) available for: ANTHROPIC, OPENAI
  */
 export const preStocksFeatured: TokenizedStock[] = [
-  { symbol: "SPACEX", name: "SpaceX", issuer: "prestocks", tokenSymbol: "SPACEX", mint: "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh", logo: "https://www.prestocks.com/logos/spacex.png" },
   { symbol: "OPENAI", name: "OpenAI", issuer: "prestocks", tokenSymbol: "OPENAI", mint: "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF", logo: "https://www.prestocks.com/logos/openai.png", badge: glassBadge("OPENAI") },
   { symbol: "ANTHROPIC", name: "Anthropic", issuer: "prestocks", tokenSymbol: "ANTHROPIC", mint: "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw", logo: "https://www.prestocks.com/logos/anthropic.png", badge: glassBadge("ANTHROPIC") },
   { symbol: "ANDURIL", name: "Anduril", issuer: "prestocks", tokenSymbol: "ANDURIL", mint: "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB", logo: "https://www.prestocks.com/logos/anduril.png" },
