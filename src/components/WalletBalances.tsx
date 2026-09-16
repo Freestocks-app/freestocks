@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useWalletBalances } from "@/hooks/useWalletBalances";
 import { WalletConnectPrompt } from "./WalletConnectPrompt";
-import { getIssuerBadge } from "@/lib/tokenized-stocks";
+import { getIssuerBadge, type StockPrice } from "@/lib/tokenized-stocks";
 
 interface WalletBalancesProps {
   address?: string;
@@ -12,8 +13,37 @@ interface WalletBalancesProps {
   onWalletReady: (address: string) => void;
 }
 
+function usePrices(): { prices: Record<string, StockPrice>; loading: boolean } {
+  const [prices, setPrices] = useState<Record<string, StockPrice>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/prices?all=1")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setPrices(data.prices ?? {});
+      })
+      .catch(() => {
+        // Prices are a nice-to-have on this view - fall back to showing
+        // just token counts with no USD value if this fails.
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { prices, loading };
+}
+
 export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletBalancesProps) {
   const { solBalance, tokenBalances, loading, error } = useWalletBalances(address);
+  const { prices, loading: pricesLoading } = usePrices();
 
   if (!address) {
     return <WalletConnectPrompt sessionEmail={sessionEmail} onWalletReady={onWalletReady} />;
@@ -36,8 +66,27 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
     );
   }
 
+  const heldStocks = tokenBalances.filter((token) => token.uiAmount > 0);
+  const totalValueCents = tokenBalances.reduce((sum, token) => {
+    const price = prices[token.symbol]?.price;
+    return price ? sum + Math.round(token.uiAmount * price * 100) : sum;
+  }, 0);
+
   return (
     <div className="space-y-3">
+      <div className="card p-4 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted mb-0.5">Stocks held</p>
+          <p className="font-bold tabular-nums">{heldStocks.length}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-muted mb-0.5">Portfolio value</p>
+          <p className="font-bold tabular-nums">
+            {pricesLoading ? "—" : `$${(totalValueCents / 100).toFixed(2)}`}
+          </p>
+        </div>
+      </div>
+
       <div className="card p-4 flex items-center justify-between">
         <span className="text-sm text-muted">SOL</span>
         <span className="font-bold tabular-nums">{(solBalance ?? 0).toFixed(4)}</span>
@@ -46,6 +95,11 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
       <div className="card divide-y divide-border">
         {tokenBalances.map((token) => {
           const issuerBadge = getIssuerBadge(token.issuer);
+          const price = prices[token.symbol];
+          const valueCents = price ? Math.round(token.uiAmount * price.price * 100) : null;
+          const changePercent = price?.changePercent;
+          const hasChange = token.issuer === "xstocks" && changePercent !== undefined && changePercent !== 0;
+
           return (
             <div key={token.symbol} className="p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
@@ -71,7 +125,26 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
                 </div>
                 <p className="text-xs text-muted truncate">{token.name}</p>
               </div>
-              <span className="font-bold text-sm tabular-nums">{token.uiAmount}</span>
+              <div className="text-right">
+                <span className="font-bold text-sm tabular-nums block">{token.uiAmount}</span>
+                {valueCents !== null && (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <span className="text-xs text-muted tabular-nums">
+                      ${(valueCents / 100).toFixed(2)}
+                    </span>
+                    {hasChange && (
+                      <span
+                        className={`text-[10px] font-semibold tabular-nums ${
+                          changePercent! > 0 ? "text-gain" : "text-red-400"
+                        }`}
+                      >
+                        {changePercent! > 0 ? "+" : ""}
+                        {changePercent!.toFixed(2)}%
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

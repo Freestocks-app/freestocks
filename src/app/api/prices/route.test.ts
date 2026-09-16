@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { NextRequest } from "next/server";
 import { TOP10 } from "@/lib/tokenized-stocks";
 
 vi.mock("@/lib/prices/pyth", () => ({
   fetchPythPrices: vi.fn(),
 }));
 
+vi.mock("@/lib/prices/prestocks", () => ({
+  fetchPreStocksPrices: vi.fn(),
+}));
+
 const ORIGINAL_FETCH = global.fetch;
+
+function makeRequest(url = "https://example.com/api/prices"): NextRequest {
+  return new NextRequest(url);
+}
 
 describe("GET /api/prices", () => {
   beforeEach(() => {
@@ -36,7 +45,7 @@ describe("GET /api/prices", () => {
     });
 
     const { GET } = await import("./route");
-    const res = await GET();
+    const res = await GET(makeRequest());
     const body = await res.json();
 
     expect(body.prices.AAPL.price).toBe(150.0);
@@ -58,7 +67,7 @@ describe("GET /api/prices", () => {
     });
 
     const { GET } = await import("./route");
-    const res = await GET();
+    const res = await GET(makeRequest());
     const body = await res.json();
 
     expect(body.prices.AAPL.price).toBe(148.5);
@@ -71,7 +80,7 @@ describe("GET /api/prices", () => {
     (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true, json: async () => [] });
 
     const { GET } = await import("./route");
-    const res = await GET();
+    const res = await GET(makeRequest());
     const body = await res.json();
 
     expect(body).toHaveProperty("prices");
@@ -86,9 +95,27 @@ describe("GET /api/prices", () => {
     (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true, json: async () => [] });
 
     const { GET } = await import("./route");
-    const res = await GET();
+    const res = await GET(makeRequest());
     const body = await res.json();
 
     expect(body.prices.AAPL).toBeUndefined();
+  });
+
+  it("includes PreStocks prices only when ?all=1 is passed", async () => {
+    const { fetchPythPrices } = await import("@/lib/prices/pyth");
+    const { fetchPreStocksPrices } = await import("@/lib/prices/prestocks");
+    (fetchPythPrices as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    (fetchPreStocksPrices as ReturnType<typeof vi.fn>).mockResolvedValue({
+      OPENAI: { symbol: "OPENAI", price: 1000, change: 0, changePercent: 0 },
+    });
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true, json: async () => [] });
+
+    const { GET } = await import("./route");
+
+    const withoutAll = await (await GET(makeRequest())).json();
+    expect(withoutAll.prices.OPENAI).toBeUndefined();
+
+    const withAll = await (await GET(makeRequest("https://example.com/api/prices?all=1"))).json();
+    expect(withAll.prices.OPENAI.price).toBe(1000);
   });
 });

@@ -1,5 +1,6 @@
 import { TOP10, type StockPrice } from "@/lib/tokenized-stocks";
 import { fetchPythPrices } from "./pyth";
+import { fetchPreStocksPrices } from "./prestocks";
 
 const CACHE_TTL_SECONDS = 60;
 
@@ -60,4 +61,18 @@ export async function getMergedPrices(): Promise<Record<string, StockPrice>> {
   );
 
   return prices;
+}
+
+/**
+ * Prices for every cashout-eligible symbol (xStocks + PreStocks) - used by
+ * the wallet balance view to show a USD-equivalent value per holding.
+ * PreStocks entries never have a changePercent (see fetchPreStocksPrices).
+ */
+export async function getAllPrices(): Promise<Record<string, StockPrice>> {
+  const [xstocksPrices, prestocksPrices] = await Promise.all([
+    getMergedPrices(),
+    fetchPreStocksPrices(),
+  ]);
+
+  return { ...xstocksPrices, ...prestocksPrices };
 }
