@@ -11,10 +11,12 @@ import {
   AlertCircle,
   Loader2,
   X,
+  Clock,
 } from "lucide-react";
 import { PrivyProvider } from "./PrivyProvider";
 import { PrivyUnlockFlow } from "./PrivyUnlockFlow";
 import { TOP10, preStocksFeatured, getIssuerBadge, type TokenizedStock } from "@/lib/tokenized-stocks";
+import type { RedeemRequest } from "@/lib/db/schema";
 
 type Step = "stock" | "wallet" | "confirm";
 
@@ -22,9 +24,42 @@ interface CashoutFlowProps {
   balanceCents: number;
   /** Balance minus the total of any pending redemption requests. Defaults to balanceCents. */
   availableBalanceCents?: number;
+  pendingRequests?: RedeemRequest[];
   sessionEmail: string;
   privyAppId?: string;
   minCashoutCents: number;
+}
+
+function PendingRequestsList({ pendingRequests }: { pendingRequests: RedeemRequest[] }) {
+  const pending = pendingRequests.filter((r) => r.status === "pending");
+  if (pending.length === 0) return null;
+
+  return (
+    <div className="space-y-2 mb-6">
+      <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+        <Clock className="w-3.5 h-3.5" />
+        Pending ({pending.length})
+      </div>
+      <div className="card divide-y divide-border">
+        {pending.map((req) => (
+          <div key={req.id} className="p-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-elevated border border-border flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-xs">{req.stockSymbol.slice(0, 2)}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm">${req.stockSymbol}</p>
+              <p className="text-xs text-muted font-mono truncate">
+                {req.fomoAddress.slice(0, 6)}...{req.fomoAddress.slice(-4)}
+              </p>
+            </div>
+            <span className="font-bold text-sm tabular-nums flex-shrink-0">
+              ${(req.amountCents / 100).toFixed(2)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function StockLogo({ stock, size = "md" }: { stock: TokenizedStock; size?: "sm" | "md" | "lg" }) {
@@ -115,7 +150,7 @@ function StockCard({
         <p className={`text-center text-[11px] font-semibold ${canCashout ? "text-cta" : "text-muted"}`}>
           {canCashout
             ? "Withdraw now"
-            : `$${(balanceCents / 100).toFixed(0)}/$${(minCashoutCents / 100).toFixed(0)}`}
+            : `$${(balanceCents / 100).toFixed(2)}/$${(minCashoutCents / 100).toFixed(2)}`}
         </p>
       </div>
     </button>
@@ -173,6 +208,7 @@ function LockedProgressModal({
 function CashoutFlowInner({
   balanceCents,
   availableBalanceCents = balanceCents,
+  pendingRequests = [],
   sessionEmail,
   privyAppId,
   minCashoutCents,
@@ -311,6 +347,8 @@ function CashoutFlowInner({
       {/* Step 1: Stock Selection - FreeCash-style grid */}
       {step === "stock" && (
         <>
+          <PendingRequestsList pendingRequests={pendingRequests} />
+
           <p className="text-sm font-semibold mb-3">Most Popular</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {TOP10.map((stock) => (
@@ -467,6 +505,7 @@ function CashoutFlowInner({
 export function CashoutFlow({
   balanceCents,
   availableBalanceCents,
+  pendingRequests,
   sessionEmail,
   privyAppId,
   minCashoutCents,
@@ -476,6 +515,7 @@ export function CashoutFlow({
       <CashoutFlowInner
         balanceCents={balanceCents}
         availableBalanceCents={availableBalanceCents}
+        pendingRequests={pendingRequests}
         sessionEmail={sessionEmail}
         privyAppId={privyAppId}
         minCashoutCents={minCashoutCents}
@@ -488,6 +528,7 @@ export function CashoutFlow({
       <CashoutFlowInner
         balanceCents={balanceCents}
         availableBalanceCents={availableBalanceCents}
+        pendingRequests={pendingRequests}
         sessionEmail={sessionEmail}
         privyAppId={privyAppId}
         minCashoutCents={minCashoutCents}
