@@ -36,6 +36,8 @@ export default async function LandingPage() {
   const prices = await getMergedPrices();
   const tickerData = getTickerData(prices);
   const comingSoon = isComingSoon();
+  const openaiBadge = preStocksFeatured.find((s) => s.symbol === "OPENAI")!;
+  const anthropicBadge = preStocksFeatured.find((s) => s.symbol === "ANTHROPIC")!;
 
   return (
     <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
@@ -87,8 +89,8 @@ export default async function LandingPage() {
             <div style={{ position: "absolute", top: "65%", left: "4%" }}><StockBadge stock={TOP10[2]} /></div>
             <div style={{ position: "absolute", top: "72%", right: "6%" }}><StockBadge stock={TOP10[3]} /></div>
             <div style={{ position: "absolute", top: "12%", left: "18%" }} className="hidden lg:block"><StockBadge stock={TOP10[4]} /></div>
-            <div style={{ position: "absolute", top: "22%", right: "16%" }} className="hidden lg:block"><StockBadge stock={preStocksFeatured[2]} /></div>
-            <div style={{ position: "absolute", top: "62%", left: "22%" }}><StockBadge stock={preStocksFeatured[1]} /></div>
+            <div style={{ position: "absolute", top: "22%", right: "16%" }} className="hidden lg:block"><StockBadge stock={anthropicBadge} /></div>
+            <div style={{ position: "absolute", top: "62%", left: "22%" }}><StockBadge stock={openaiBadge} /></div>
           </div>
 
           {/* Mobile badges - four corners */}
