@@ -3,9 +3,9 @@
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signUp, signIn } from "@/lib/auth-client";
+import { signUp, signIn, sendVerificationEmail } from "@/lib/auth-client";
 import { isComingSoon } from "@/lib/utils";
-import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, MailCheck } from "lucide-react";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -49,6 +49,9 @@ function SignUpPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref");
@@ -90,10 +93,23 @@ function SignUpPageInner() {
         return;
       }
 
-      router.push(earnUrl);
+      setVerificationSent(true);
+      setLoading(false);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    setResending(true);
+    try {
+      await sendVerificationEmail({ email, callbackURL: earnUrl });
+      setResent(true);
+    } catch {
+      // best-effort; the original email is still valid
+    } finally {
+      setResending(false);
     }
   }
 
@@ -119,15 +135,59 @@ function SignUpPageInner() {
 
   const isDisabled = loading || !!socialLoading;
 
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
+        <header className="h-11 sm:h-12 flex items-center justify-center border-b border-border bg-elevated/50 px-4">
+          <Link href="/" className="flex items-center">
+            <img
+              src="/brand/freestocks-logo.png"
+              alt="Freestocks"
+              className="h-7 sm:h-8 w-auto"
+            />
+          </Link>
+        </header>
+
+        <main className="flex-1 flex items-center justify-center p-4 py-6 sm:py-8">
+          <div className="w-full max-w-[380px]">
+            <div className="card p-4 sm:p-6 border-border/50 bg-elevated/80 backdrop-blur-sm text-center">
+              <div className="w-12 h-12 rounded-xl bg-cta/10 border border-cta/20 flex items-center justify-center mx-auto mb-4">
+                <MailCheck className="w-6 h-6 text-cta" />
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold mb-1.5">Check your email</h1>
+              <p className="text-sm text-muted mb-5">
+                We sent a verification link to <span className="text-foreground font-medium">{email}</span>.
+                Click it to activate your account.
+              </p>
+              <button
+                onClick={handleResend}
+                disabled={resending}
+                className="w-full text-sm text-muted hover:text-foreground transition-colors py-1 disabled:opacity-50"
+              >
+                {resending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                ) : resent ? (
+                  "Sent again ✓"
+                ) : (
+                  "Didn't get it? Resend"
+                )}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-bg flex flex-col overflow-x-hidden">
       {/* Header - Mobile optimized */}
       <header className="h-11 sm:h-12 flex items-center justify-center border-b border-border bg-elevated/50 px-4">
         <Link href="/" className="flex items-center">
-          <img 
-            src="/brand/freestocks-logo.png" 
-            alt="Freestocks" 
-            className="h-7 sm:h-8 w-auto" 
+          <img
+            src="/brand/freestocks-logo.png"
+            alt="Freestocks"
+            className="h-7 sm:h-8 w-auto"
           />
         </Link>
       </header>

@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import * as crypto from "crypto";
 import { db, hasDbConnection } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { sendVerificationEmail } from "@/server/email/resend";
 
 if (!process.env.BETTER_AUTH_SECRET) {
   console.error(
@@ -190,6 +191,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail(user.email, url);
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
   },
   socialProviders: Object.keys(socialProviders).length > 0 ? socialProviders : undefined,
   session: {

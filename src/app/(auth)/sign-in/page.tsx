@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, sendVerificationEmail } from "@/lib/auth-client";
 import { isComingSoon } from "@/lib/utils";
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -39,6 +39,9 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const router = useRouter();
@@ -56,6 +59,8 @@ export default function SignInPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
+    setResent(false);
     setLoading(true);
 
     try {
@@ -66,6 +71,11 @@ export default function SignInPage() {
       });
 
       if (result.error) {
+        if (result.error.status === 403) {
+          setNeedsVerification(true);
+          setLoading(false);
+          return;
+        }
         setError(result.error.message || "Invalid email or password");
         setLoading(false);
         return;
@@ -75,6 +85,18 @@ export default function SignInPage() {
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    setResending(true);
+    try {
+      await sendVerificationEmail({ email, callbackURL: "/earn" });
+      setResent(true);
+    } catch {
+      // best-effort
+    } finally {
+      setResending(false);
     }
   }
 
@@ -214,6 +236,20 @@ export default function SignInPage() {
                 <div className="p-2.5 sm:p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs flex items-start gap-2">
                   <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
+                </div>
+              )}
+
+              {needsVerification && (
+                <div className="p-2.5 sm:p-3 rounded-lg bg-cta/10 border border-cta/20 text-[10px] sm:text-xs">
+                  <p className="text-foreground mb-1.5">Please verify your email before logging in.</p>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resending}
+                    className="text-cta hover:underline font-medium disabled:opacity-50"
+                  >
+                    {resending ? "Sending..." : resent ? "Sent again ✓" : "Resend verification email"}
+                  </button>
                 </div>
               )}
 
