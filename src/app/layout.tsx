@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const DESCRIPTION =
-  "Earn stocks for testing apps, games & surveys. Hit $5 and unlock Apple, Tesla, NVIDIA and more.";
+  "Earn stocks by playing games & answering surveys. Hit $5 and unlock Apple, Tesla, NVIDIA and more.";
 
 export const metadata: Metadata = {
   title: "Freestocks - The Easiest Way to Earn Stocks",

@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { ArrowRight, Clock } from "lucide-react";
 import { TOP10, preStocksFeatured, getTickerData } from "@/lib/tokenized-stocks";
 import { getMergedPrices } from "@/lib/prices";
-import { RotatingTicker } from "@/components/RotatingTicker";
 import { Footer } from "@/components/Footer";
 import { isComingSoon } from "@/lib/utils";
 
@@ -107,10 +106,10 @@ export default async function LandingPage() {
           <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center z-10">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 sm:mb-8 flex flex-col items-center">
               <span className="inline-flex items-baseline justify-center flex-wrap">
-                Earn&nbsp;<RotatingTicker />&nbsp;for
+                Earn&nbsp;<span className="text-cta">stocks</span>&nbsp;by
               </span>
               <span className="block text-[0.85em] sm:text-[1em]">
-                testing apps, games &amp; surveys
+                playing games &amp; answering surveys
               </span>
             </h1>
 
