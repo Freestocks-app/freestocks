@@ -10,65 +10,64 @@ import type { RedeemRequest } from "@/lib/db/schema";
 
 interface CashoutTabsProps {
   balanceCents: number;
-  hasPendingRequest: boolean;
+  availableBalanceCents: number;
   pendingRequests: RedeemRequest[];
   sessionEmail: string;
   privyAppId?: string;
   minCashoutCents: number;
 }
 
+function PendingRequestsList({ pendingRequests }: { pendingRequests: RedeemRequest[] }) {
+  const pending = pendingRequests.filter((r) => r.status === "pending");
+  if (pending.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5 text-sm font-semibold text-muted">
+        <Clock className="w-3.5 h-3.5" />
+        Pending ({pending.length})
+      </div>
+      <div className="card divide-y divide-border">
+        {pending.map((req) => (
+          <div key={req.id} className="p-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-elevated border border-border flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-xs">{req.stockSymbol.slice(0, 2)}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm">${req.stockSymbol}</p>
+              <p className="text-xs text-muted font-mono truncate">
+                {req.fomoAddress.slice(0, 6)}...{req.fomoAddress.slice(-4)}
+              </p>
+            </div>
+            <span className="font-bold text-sm tabular-nums flex-shrink-0">
+              ${(req.amountCents / 100).toFixed(2)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CashoutTabContent({
   balanceCents,
-  hasPendingRequest,
+  availableBalanceCents,
   pendingRequests,
   sessionEmail,
   privyAppId,
   minCashoutCents,
 }: CashoutTabsProps) {
-  if (hasPendingRequest) {
-    return (
-      <div className="space-y-4">
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-cta/10 border border-cta/20 flex items-center justify-center mx-auto mb-3">
-            <Clock className="w-7 h-7 text-cta" />
-          </div>
-          <h1 className="text-xl font-bold">Pending Cashout</h1>
-          <p className="text-sm text-muted mt-1">Your request is being processed</p>
-        </div>
-
-        {pendingRequests.filter((r) => r.status === "pending").map((req) => (
-          <div key={req.id} className="card p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-elevated border border-border flex items-center justify-center">
-                <span className="font-bold text-sm">{req.stockSymbol.slice(0, 2)}</span>
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold">${req.stockSymbol}</p>
-                <p className="text-xs text-muted">Tokenized stock</p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-lg tabular-nums">${(req.amountCents / 100).toFixed(2)}</p>
-              </div>
-            </div>
-            <div className="pt-3 border-t border-border">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted">Solana wallet</span>
-                <span className="font-mono text-muted">{req.fomoAddress.slice(0, 6)}...{req.fomoAddress.slice(-4)}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <CashoutFlow
-      balanceCents={balanceCents}
-      sessionEmail={sessionEmail}
-      privyAppId={privyAppId}
-      minCashoutCents={minCashoutCents}
-    />
+    <div className="space-y-6">
+      <CashoutFlow
+        balanceCents={balanceCents}
+        availableBalanceCents={availableBalanceCents}
+        sessionEmail={sessionEmail}
+        privyAppId={privyAppId}
+        minCashoutCents={minCashoutCents}
+      />
+      <PendingRequestsList pendingRequests={pendingRequests} />
+    </div>
   );
 }
 

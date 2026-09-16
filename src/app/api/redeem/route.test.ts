@@ -210,42 +210,82 @@ describe("Redeem API", () => {
     });
   });
 
-  describe("Pending request check", () => {
-    it("should allow request when no pending requests exist", async () => {
-      const pendingResult = await client.query<{ status: string }>(
-        "SELECT status FROM redeem_request WHERE user_id = 'user-1'"
-      );
-      
-      const hasPending = pendingResult.rows.some(r => r.status === "pending");
-      expect(hasPending).toBe(false);
-    });
-
-    it("should reject when a pending request exists", async () => {
+  describe("Available balance (multiple concurrent pending requests allowed)", () => {
+    it("computes available balance as balance minus pending total", async () => {
+      // user-1 has a 1000-cent balance seeded in beforeEach
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
         VALUES ('req-1', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'pending', NOW())
       `);
 
-      const pendingResult = await client.query<{ status: string }>(
-        "SELECT status FROM redeem_request WHERE user_id = 'user-1'"
+      const balanceResult = await client.query<{ balance_cents: number }>(
+        "SELECT balance_cents FROM user_balance WHERE user_id = 'user-1'"
       );
-      
-      const hasPending = pendingResult.rows.some(r => r.status === "pending");
-      expect(hasPending).toBe(true);
+      const pendingResult = await client.query<{ amount_cents: number }>(
+        "SELECT amount_cents FROM redeem_request WHERE user_id = 'user-1' AND status = 'pending'"
+      );
+
+      const balance = balanceResult.rows[0].balance_cents;
+      const pendingTotal = pendingResult.rows.reduce((sum, r) => sum + r.amount_cents, 0);
+      const available = balance - pendingTotal;
+
+      expect(available).toBe(500);
     });
 
-    it("should allow new request after previous one is processed", async () => {
+    it("allows a second pending request when enough available balance remains", async () => {
+      await client.exec(`
+        INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
+        VALUES ('req-1', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'pending', NOW())
+      `);
+
+      const balanceResult = await client.query<{ balance_cents: number }>(
+        "SELECT balance_cents FROM user_balance WHERE user_id = 'user-1'"
+      );
+      const pendingResult = await client.query<{ amount_cents: number }>(
+        "SELECT amount_cents FROM redeem_request WHERE user_id = 'user-1' AND status = 'pending'"
+      );
+      const available = balanceResult.rows[0].balance_cents -
+        pendingResult.rows.reduce((sum, r) => sum + r.amount_cents, 0);
+
+      const secondRequestAmount = 500;
+      expect(available >= secondRequestAmount).toBe(true);
+    });
+
+    it("rejects a new request that would exceed the remaining available balance", async () => {
+      await client.exec(`
+        INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
+        VALUES ('req-1', 'user-1', 800, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'pending', NOW())
+      `);
+
+      const balanceResult = await client.query<{ balance_cents: number }>(
+        "SELECT balance_cents FROM user_balance WHERE user_id = 'user-1'"
+      );
+      const pendingResult = await client.query<{ amount_cents: number }>(
+        "SELECT amount_cents FROM redeem_request WHERE user_id = 'user-1' AND status = 'pending'"
+      );
+      const available = balanceResult.rows[0].balance_cents -
+        pendingResult.rows.reduce((sum, r) => sum + r.amount_cents, 0);
+
+      const secondRequestAmount = 500;
+      expect(available >= secondRequestAmount).toBe(false);
+    });
+
+    it("completed/processed requests don't count toward the pending total", async () => {
       await client.exec(`
         INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at, processed_at)
         VALUES ('req-1', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'AAPL', 'completed', NOW(), NOW())
       `);
 
-      const pendingResult = await client.query<{ status: string }>(
-        "SELECT status FROM redeem_request WHERE user_id = 'user-1'"
+      const balanceResult = await client.query<{ balance_cents: number }>(
+        "SELECT balance_cents FROM user_balance WHERE user_id = 'user-1'"
       );
-      
-      const hasPending = pendingResult.rows.some(r => r.status === "pending");
-      expect(hasPending).toBe(false);
+      const pendingResult = await client.query<{ amount_cents: number }>(
+        "SELECT amount_cents FROM redeem_request WHERE user_id = 'user-1' AND status = 'pending'"
+      );
+      const available = balanceResult.rows[0].balance_cents -
+        pendingResult.rows.reduce((sum, r) => sum + r.amount_cents, 0);
+
+      expect(available).toBe(1000);
     });
   });
 

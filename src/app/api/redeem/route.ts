@@ -81,18 +81,19 @@ export async function POST(request: NextRequest) {
   const ledger = new LedgerService(db);
   const balance = await ledger.getBalance(session.user.id);
 
-  if (balance < amountCents) {
-    return NextResponse.json({ error: "Insufficient balance" }, { status: 400 });
-  }
-
-  const pendingRequests: RedeemRequest[] = await db
+  const existingRequests: RedeemRequest[] = await db
     .select()
     .from(redeemRequest)
     .where(eq(redeemRequest.userId, session.user.id));
 
-  const hasPending = pendingRequests.some((r: RedeemRequest) => r.status === "pending");
-  if (hasPending) {
-    return NextResponse.json({ error: "You already have a pending redemption request" }, { status: 400 });
+  const pendingTotalCents = existingRequests
+    .filter((r: RedeemRequest) => r.status === "pending")
+    .reduce((sum: number, r: RedeemRequest) => sum + r.amountCents, 0);
+
+  const availableCents = balance - pendingTotalCents;
+
+  if (availableCents < amountCents) {
+    return NextResponse.json({ error: "Insufficient available balance" }, { status: 400 });
   }
 
   const requestId = uuidv4();

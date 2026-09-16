@@ -20,6 +20,8 @@ type Step = "stock" | "wallet" | "confirm";
 
 interface CashoutFlowProps {
   balanceCents: number;
+  /** Balance minus the total of any pending redemption requests. Defaults to balanceCents. */
+  availableBalanceCents?: number;
   sessionEmail: string;
   privyAppId?: string;
   minCashoutCents: number;
@@ -168,7 +170,13 @@ function LockedProgressModal({
   );
 }
 
-function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCents }: CashoutFlowProps) {
+function CashoutFlowInner({
+  balanceCents,
+  availableBalanceCents = balanceCents,
+  sessionEmail,
+  privyAppId,
+  minCashoutCents,
+}: CashoutFlowProps) {
   const [step, setStep] = useState<Step>("stock");
   const [selectedStock, setSelectedStock] = useState<TokenizedStock | null>(null);
   const [walletAddress, setWalletAddress] = useState("");
@@ -179,13 +187,13 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   const [successAmountCents, setSuccessAmountCents] = useState(0);
   const [showLockedModal, setShowLockedModal] = useState(false);
 
-  const canCashout = balanceCents >= minCashoutCents;
-  const progressPercent = Math.min(100, (balanceCents / minCashoutCents) * 100);
+  const canCashout = availableBalanceCents >= minCashoutCents;
+  const progressPercent = Math.min(100, (availableBalanceCents / minCashoutCents) * 100);
   const isValidAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress);
 
   const amountCents = Math.round(parseFloat(amountInput || "0") * 100);
   const isValidAmount =
-    Number.isFinite(amountCents) && amountCents >= minCashoutCents && amountCents <= balanceCents;
+    Number.isFinite(amountCents) && amountCents >= minCashoutCents && amountCents <= availableBalanceCents;
 
   const handleSelectStock = (stock: TokenizedStock) => {
     if (!canCashout) {
@@ -193,7 +201,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
       return;
     }
     setSelectedStock(stock);
-    setAmountInput((balanceCents / 100).toFixed(2));
+    setAmountInput((availableBalanceCents / 100).toFixed(2));
     setStep("wallet");
   };
 
@@ -293,6 +301,11 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
       <div className="text-center mb-2">
         <p className="text-sm text-muted">Your balance</p>
         <p className="text-4xl font-bold text-cta tabular-nums">${(balanceCents / 100).toFixed(2)}</p>
+        {availableBalanceCents < balanceCents && (
+          <p className="text-xs text-muted mt-1">
+            ${(availableBalanceCents / 100).toFixed(2)} available (rest pending)
+          </p>
+        )}
       </div>
 
       {/* Step 1: Stock Selection - FreeCash-style grid */}
@@ -306,7 +319,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
                 stock={stock}
                 canCashout={canCashout}
                 progressPercent={progressPercent}
-                balanceCents={balanceCents}
+                balanceCents={availableBalanceCents}
                 minCashoutCents={minCashoutCents}
                 onSelect={() => handleSelectStock(stock)}
               />
@@ -326,7 +339,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
                 stock={stock}
                 canCashout={canCashout}
                 progressPercent={progressPercent}
-                balanceCents={balanceCents}
+                balanceCents={availableBalanceCents}
                 minCashoutCents={minCashoutCents}
                 onSelect={() => handleSelectStock(stock)}
               />
@@ -337,7 +350,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
 
       {showLockedModal && (
         <LockedProgressModal
-          balanceCents={balanceCents}
+          balanceCents={availableBalanceCents}
           minCashoutCents={minCashoutCents}
           onClose={() => setShowLockedModal(false)}
         />
@@ -347,7 +360,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
       {step === "wallet" && selectedStock && (
         <PrivyUnlockFlow
           sessionEmail={sessionEmail}
-          balanceCents={balanceCents}
+          balanceCents={availableBalanceCents}
           selectedStock={selectedStock.symbol}
           onWalletReady={handleWalletReady}
           onBack={() => setStep("stock")}
@@ -377,7 +390,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-sm text-muted">Amount</span>
                 <span className="text-xs text-muted tabular-nums">
-                  Balance: ${(balanceCents / 100).toFixed(2)}
+                  Available: ${(availableBalanceCents / 100).toFixed(2)}
                 </span>
               </div>
               <div className="flex items-center gap-2 bg-bg rounded-lg px-3 py-2 border border-border focus-within:border-cta/50">
@@ -395,7 +408,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
                 />
                 <button
                   type="button"
-                  onClick={() => setAmountInput((balanceCents / 100).toFixed(2))}
+                  onClick={() => setAmountInput((availableBalanceCents / 100).toFixed(2))}
                   className="text-xs font-semibold text-cta hover:underline flex-shrink-0"
                 >
                   Max
@@ -403,8 +416,8 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
               </div>
               {!isValidAmount && amountInput !== "" && (
                 <p className="text-xs text-red-400 mt-1.5">
-                  {amountCents > balanceCents
-                    ? "Amount exceeds your balance"
+                  {amountCents > availableBalanceCents
+                    ? "Amount exceeds your available balance"
                     : `Minimum cashout is $${(minCashoutCents / 100).toFixed(2)}`}
                 </p>
               )}
@@ -451,11 +464,18 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
   );
 }
 
-export function CashoutFlow({ balanceCents, sessionEmail, privyAppId, minCashoutCents }: CashoutFlowProps) {
+export function CashoutFlow({
+  balanceCents,
+  availableBalanceCents,
+  sessionEmail,
+  privyAppId,
+  minCashoutCents,
+}: CashoutFlowProps) {
   if (!privyAppId) {
     return (
       <CashoutFlowInner
         balanceCents={balanceCents}
+        availableBalanceCents={availableBalanceCents}
         sessionEmail={sessionEmail}
         privyAppId={privyAppId}
         minCashoutCents={minCashoutCents}
@@ -467,6 +487,7 @@ export function CashoutFlow({ balanceCents, sessionEmail, privyAppId, minCashout
     <PrivyProvider appId={privyAppId}>
       <CashoutFlowInner
         balanceCents={balanceCents}
+        availableBalanceCents={availableBalanceCents}
         sessionEmail={sessionEmail}
         privyAppId={privyAppId}
         minCashoutCents={minCashoutCents}
