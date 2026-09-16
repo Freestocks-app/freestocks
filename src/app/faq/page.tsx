@@ -28,7 +28,12 @@ const faqs = [
   {
     question: "Which stocks can I get?",
     answer:
-      "Tesla, NVIDIA, Apple, Amazon, Google, Microsoft, Meta, SpaceX, and more. All tokenized on Solana via xStocks.",
+      "Public equities like Tesla, NVIDIA, Apple, Amazon, Google, Microsoft, Meta, and more, tokenized on Solana via xStocks. You can also cash out into pre-IPO names like SpaceX, OpenAI, and Anthropic via PreStocks.",
+  },
+  {
+    question: "What is PreStocks?",
+    answer:
+      "PreStocks tokens are SPV-backed pre-IPO exposure to private companies like SpaceX and OpenAI, tokenized on Solana. This isn't investment advice, and Freestocks doesn't issue PreStocks tokens — they're issued by PreStocks. Learn more at prestocks.com.",
   },
   {
     question: "Why didn't my offer credit?",

@@ -2,11 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import * as schema from "@/lib/db/schema";
-import { priceSymbols } from "@/lib/tokenized-stocks";
+import { allCashoutStocks, allPriceSymbols } from "@/lib/tokenized-stocks";
 
 const VALID_EVM_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE00";
 const VALID_SOLANA_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-const VALID_STOCK_SYMBOLS = priceSymbols;
+const VALID_STOCK_SYMBOLS = allPriceSymbols;
 const MIN_REDEEM_CENTS = 500;
 
 describe("Redeem API - Auth requirements", () => {
@@ -65,6 +65,7 @@ describe("Redeem API", () => {
         amount_cents INTEGER NOT NULL,
         fomo_address TEXT NOT NULL,
         stock_symbol TEXT NOT NULL DEFAULT 'AAPL',
+        stock_issuer TEXT NOT NULL DEFAULT 'xstocks',
         status TEXT NOT NULL DEFAULT 'pending',
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         processed_at TIMESTAMP
@@ -297,21 +298,60 @@ describe("Redeem API", () => {
   });
 
   describe("Stock symbols", () => {
-    it("should accept all valid stock symbols", async () => {
+    it("should accept all valid stock symbols across both issuer families", async () => {
       for (let i = 0; i < VALID_STOCK_SYMBOLS.length; i++) {
         const symbol = VALID_STOCK_SYMBOLS[i];
+        const issuer = allCashoutStocks.find((s) => s.symbol === symbol)?.issuer;
+
         await client.exec(`
-          INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
-          VALUES ('stock-${i}', 'user-1', 500, '${VALID_EVM_ADDRESS}', '${symbol}', 'completed', NOW())
+          INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, stock_issuer, status, created_at)
+          VALUES ('stock-${i}', 'user-1', 500, '${VALID_EVM_ADDRESS}', '${symbol}', '${issuer}', 'completed', NOW())
         `);
 
-        const result = await client.query<{ stock_symbol: string }>(
-          "SELECT stock_symbol FROM redeem_request WHERE id = $1",
+        const result = await client.query<{ stock_symbol: string; stock_issuer: string }>(
+          "SELECT stock_symbol, stock_issuer FROM redeem_request WHERE id = $1",
           [`stock-${i}`]
         );
 
         expect(result.rows[0].stock_symbol).toBe(symbol);
+        expect(result.rows[0].stock_issuer).toBe(issuer);
       }
+    });
+
+    it("includes PreStocks symbols alongside xStocks symbols", () => {
+      expect(VALID_STOCK_SYMBOLS).toContain("AAPL");
+      expect(VALID_STOCK_SYMBOLS).toContain("SPACEX");
+      expect(VALID_STOCK_SYMBOLS).toContain("OPENAI");
+      expect(VALID_STOCK_SYMBOLS).toContain("ANTHROPIC");
+    });
+  });
+
+  describe("Stock issuer", () => {
+    it("defaults to xstocks when not provided", async () => {
+      await client.exec(`
+        INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, status, created_at)
+        VALUES ('issuer-default', 'user-1', 500, '${VALID_EVM_ADDRESS}', 'AAPL', 'pending', NOW())
+      `);
+
+      const result = await client.query<{ stock_issuer: string }>(
+        "SELECT stock_issuer FROM redeem_request WHERE id = 'issuer-default'"
+      );
+
+      expect(result.rows[0].stock_issuer).toBe("xstocks");
+    });
+
+    it("stores prestocks issuer for a PreStocks symbol", async () => {
+      await client.exec(`
+        INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, stock_issuer, status, created_at)
+        VALUES ('issuer-prestocks', 'user-1', 500, '${VALID_SOLANA_ADDRESS}', 'SPACEX', 'prestocks', 'pending', NOW())
+      `);
+
+      const result = await client.query<{ stock_issuer: string; stock_symbol: string }>(
+        "SELECT stock_issuer, stock_symbol FROM redeem_request WHERE id = 'issuer-prestocks'"
+      );
+
+      expect(result.rows[0].stock_symbol).toBe("SPACEX");
+      expect(result.rows[0].stock_issuer).toBe("prestocks");
     });
   });
 });

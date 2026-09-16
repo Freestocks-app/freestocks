@@ -125,6 +125,33 @@ Added ~13 new tokens:
 
 ---
 
+## 4. PreStocks (pre-IPO)
+
+**Naming:** Uses standard ticker symbols (no suffix), issuer tagged `"prestocks"`
+**Issuer:** PreStocks
+**Data source (live):** `GET https://prestocks.com/api/prestocks`
+
+### Characteristics
+- SPV-backed 1:1 exposure to private, pre-IPO companies (not public equities)
+- Mints, prices (`markPrice`/`tokenPrice`), and metadata all sourced live from PreStocks' own API — Freestocks does not issue these tokens
+- Not priced via Pyth or DexScreener; PreStocks prices come from the PreStocks API only
+- Stocklana hackathon bounty: "Best Use of PreStocks"
+
+### Featured Set
+
+| Symbol | Company | Mint |
+|--------|---------|------|
+| SPACEX | SpaceX | `PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh` |
+| OPENAI | OpenAI | `PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF` |
+| ANTHROPIC | Anthropic | `Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw` |
+| ANDURIL | Anduril | `PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB` |
+| NEURALINK | Neuralink | `PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S` |
+| FIGUREAI | Figure AI | `PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd` |
+
+**Use in Freestocks:** Second, clearly-labeled section on the Cashout stock picker ("Pre-IPO" badge), plus a light mention on the landing page. Redemption requests store `stock_issuer = "prestocks"` to disambiguate from xStocks at ops time.
+
+---
+
 ## Data Freshness
 
 | Metric | Notes |
@@ -155,6 +182,18 @@ import { xStocksTop10, ondoFeatured, backpackFeatured, displayTop10 } from '@/li
 1. **LP Ticker** — `displayTop10` array powers scrolling ticker
 2. **Unlock Stock Picker** — User selects from `displayTop10`
 3. **Issuer Badge** — Optional display showing xStocks/Ondo/Backpack source
+
+### Price Feeds
+
+Public equity prices (LP ticker, `/api/prices`) are sourced from **Pyth Hermes**
+first, falling back to **DexScreener** automatically if `PYTH_API_KEY` is
+unset, Hermes errors, or a feed is missing — no blank prices either way. 24h
+change % is always sourced from DexScreener (Hermes doesn't return it).
+See `src/lib/prices/pyth.ts` and `src/lib/prices/index.ts`.
+Stocklana hackathon bounty: "Best Use of Pyth market data".
+
+PreStocks prices are **not** part of this Pyth/DexScreener pipeline — they
+come directly from the PreStocks API (see section 4 above).
 
 ---
 

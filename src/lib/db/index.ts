@@ -184,6 +184,10 @@ export async function initializeDatabase() {
   `;
 
   await sql`
+    ALTER TABLE redeem_request ADD COLUMN IF NOT EXISTS stock_issuer TEXT NOT NULL DEFAULT 'xstocks'
+  `;
+
+  await sql`
     CREATE INDEX IF NOT EXISTS idx_redeem_request_user_id ON redeem_request(user_id)
   `;
 

@@ -1,14 +1,19 @@
 /**
  * Tokenized Stocks on Solana — Data Module
- * 
- * Display set: Popular household-name equities that have xStock mints.
- * Single source of truth for LP ticker, floating icons, Cashout list.
- * 
- * All 10 stocks verified to have Solana xStock mints via Backed.fi API.
+ *
+ * Display set: Popular household-name equities that have xStock mints
+ * (issuer: "xstocks"), plus a featured set of tokenized pre-IPO SPVs
+ * (issuer: "prestocks"). Single source of truth for LP ticker, floating
+ * icons, Cashout list.
+ *
+ * xStocks: 10 stocks verified to have Solana xStock mints via Backed.fi API.
  * @see https://api.backed.fi/api/v2/public/assets
+ *
+ * PreStocks: mints + prices sourced live from prestocks.com.
+ * @see https://prestocks.com/api/prestocks
  */
 
-export type Issuer = "xstocks";
+export type Issuer = "xstocks" | "prestocks";
 
 export interface TokenizedStock {
   symbol: string;
@@ -51,15 +56,42 @@ export const TOP10: TokenizedStock[] = [
   { symbol: "QQQ", name: "Nasdaq 100 ETF", issuer: "xstocks", tokenSymbol: "QQQx", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ", logo: xstockLogo("QQQx") },
 ];
 
+/**
+ * PreStocks — tokenized pre-IPO SPV exposure (SpaceX, OpenAI, Anthropic, ...)
+ * Used for: Cashout "Pre-IPO" section, light LP mention.
+ *
+ * Mints + prices verified live 2026-09-16 via https://prestocks.com/api/prestocks
+ * Logos hotlinked from prestocks.com (confirmed CORS-open, Access-Control-Allow-Origin: *)
+ *
+ * Custom glass badges (3D style) available for: ANTHROPIC, OPENAI
+ */
+export const preStocksFeatured: TokenizedStock[] = [
+  { symbol: "SPACEX", name: "SpaceX", issuer: "prestocks", tokenSymbol: "SPACEX", mint: "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh", logo: "https://www.prestocks.com/logos/spacex.png" },
+  { symbol: "OPENAI", name: "OpenAI", issuer: "prestocks", tokenSymbol: "OPENAI", mint: "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF", logo: "https://www.prestocks.com/logos/openai.png", badge: glassBadge("OPENAI") },
+  { symbol: "ANTHROPIC", name: "Anthropic", issuer: "prestocks", tokenSymbol: "ANTHROPIC", mint: "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw", logo: "https://www.prestocks.com/logos/anthropic.png", badge: glassBadge("ANTHROPIC") },
+  { symbol: "ANDURIL", name: "Anduril", issuer: "prestocks", tokenSymbol: "ANDURIL", mint: "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB", logo: "https://www.prestocks.com/logos/anduril.png" },
+  { symbol: "NEURALINK", name: "Neuralink", issuer: "prestocks", tokenSymbol: "NEURALINK", mint: "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S", logo: "https://www.prestocks.com/logos/neuralink.png" },
+  { symbol: "FIGUREAI", name: "Figure AI", issuer: "prestocks", tokenSymbol: "FIGUREAI", mint: "PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd", logo: "https://www.prestocks.com/logos/figureai.png" },
+];
+
 /** Alias exports for backward compatibility */
 export const cashoutStocks = TOP10;
 export const displayTop10 = TOP10;
 
-/** Stock symbols for price API */
+/** All cashout-eligible stocks across every issuer family */
+export const allCashoutStocks: TokenizedStock[] = [...TOP10, ...preStocksFeatured];
+
+/** Stock symbols for price API (xStocks only — Pyth/DexScreener don't price PreStocks) */
 export const priceSymbols = TOP10.map(s => s.symbol);
 
+/** Stock symbols valid for redemption across every issuer family */
+export const allPriceSymbols = allCashoutStocks.map(s => s.symbol);
+
 /** Get issuer display name and badge color */
-export function getIssuerBadge(): { name: string; color: string } {
+export function getIssuerBadge(issuer: Issuer): { name: string; color: string } {
+  if (issuer === "prestocks") {
+    return { name: "Pre-IPO", color: "bg-purple-500/20 text-purple-300" };
+  }
   return { name: "xStocks", color: "bg-cta/20 text-cta" };
 }
 

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { PrivyProvider } from "./PrivyProvider";
 import { PrivyUnlockFlow } from "./PrivyUnlockFlow";
-import { cashoutStocks, type TokenizedStock } from "@/lib/tokenized-stocks";
+import { TOP10, preStocksFeatured, getIssuerBadge, type TokenizedStock } from "@/lib/tokenized-stocks";
 
 type Step = "stock" | "wallet" | "confirm";
 
@@ -69,15 +69,24 @@ function StockCard({
   minCashoutCents: number;
   onSelect: () => void;
 }) {
+  const issuerBadge = getIssuerBadge(stock.issuer);
+
   return (
     <button
       onClick={onSelect}
-      className={`group flex flex-col rounded-2xl border overflow-hidden transition-all text-left ${
+      className={`group relative flex flex-col rounded-2xl border overflow-hidden transition-all text-left ${
         canCashout
           ? "border-border bg-elevated hover:border-cta/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cta/5"
           : "border-border bg-elevated/60"
       }`}
     >
+      {stock.issuer === "prestocks" && (
+        <span
+          className={`absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${issuerBadge.color}`}
+        >
+          {issuerBadge.name}
+        </span>
+      )}
       <div className="p-2 pb-1">
         <p className="text-xs font-semibold text-center truncate">${stock.symbol}</p>
       </div>
@@ -200,6 +209,7 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
           fomoAddress: walletAddress,
           amountCents: balanceCents,
           stockSymbol: selectedStock.symbol,
+          stockIssuer: selectedStock.issuer,
         }),
       });
 
@@ -279,7 +289,27 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
         <>
           <p className="text-sm font-semibold mb-3">Most Popular</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {cashoutStocks.map((stock) => (
+            {TOP10.map((stock) => (
+              <StockCard
+                key={stock.symbol}
+                stock={stock}
+                canCashout={canCashout}
+                progressPercent={progressPercent}
+                balanceCents={balanceCents}
+                minCashoutCents={minCashoutCents}
+                onSelect={() => handleSelectStock(stock)}
+              />
+            ))}
+          </div>
+
+          <p className="text-sm font-semibold mb-3 mt-6 flex items-center gap-2">
+            Pre-IPO
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-purple-500/20 text-purple-300">
+              via PreStocks
+            </span>
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {preStocksFeatured.map((stock) => (
               <StockCard
                 key={stock.symbol}
                 stock={stock}

@@ -77,6 +77,7 @@ export const redeemRequest = pgTable("redeem_request", {
   amountCents: integer("amount_cents").notNull(),
   fomoAddress: text("fomo_address").notNull(),
   stockSymbol: text("stock_symbol").notNull().default("AAPL"),
+  stockIssuer: text("stock_issuer").notNull().default("xstocks"),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   processedAt: timestamp("processed_at"),

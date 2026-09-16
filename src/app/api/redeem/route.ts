@@ -6,7 +6,7 @@ import { LedgerService } from "@/server/ledger/service";
 import { redeemRequest, type RedeemRequest } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { priceSymbols } from "@/lib/tokenized-stocks";
+import { allCashoutStocks, allPriceSymbols, type Issuer } from "@/lib/tokenized-stocks";
 
 const MIN_REDEEM_CENTS = 500;
 
@@ -28,7 +28,8 @@ export async function GET() {
   return NextResponse.json({ requests });
 }
 
-const VALID_STOCK_SYMBOLS = priceSymbols;
+const VALID_STOCK_SYMBOLS = allPriceSymbols;
+const VALID_ISSUERS: Issuer[] = ["xstocks", "prestocks"];
 
 export async function POST(request: NextRequest) {
   await ensureDbInitialized();
@@ -38,14 +39,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { fomoAddress?: string; amountCents?: number; stockSymbol?: string };
+  let body: { fomoAddress?: string; amountCents?: number; stockSymbol?: string; stockIssuer?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { fomoAddress, amountCents, stockSymbol } = body;
+  const { fomoAddress, amountCents, stockSymbol, stockIssuer } = body;
 
   if (!fomoAddress || typeof fomoAddress !== "string") {
     return NextResponse.json({ error: "Wallet address is required" }, { status: 400 });
@@ -67,6 +68,15 @@ export async function POST(request: NextRequest) {
   if (!VALID_STOCK_SYMBOLS.includes(stockSymbol)) {
     return NextResponse.json({ error: `Invalid stock symbol. Choose from: ${VALID_STOCK_SYMBOLS.join(", ")}` }, { status: 400 });
   }
+
+  if (stockIssuer !== undefined && !VALID_ISSUERS.includes(stockIssuer as Issuer)) {
+    return NextResponse.json({ error: `Invalid stock issuer. Choose from: ${VALID_ISSUERS.join(", ")}` }, { status: 400 });
+  }
+
+  const resolvedIssuer: Issuer =
+    (stockIssuer as Issuer | undefined) ??
+    allCashoutStocks.find((s) => s.symbol === stockSymbol)?.issuer ??
+    "xstocks";
 
   const ledger = new LedgerService(db);
   const balance = await ledger.getBalance(session.user.id);
@@ -92,6 +102,7 @@ export async function POST(request: NextRequest) {
     amountCents,
     fomoAddress,
     stockSymbol,
+    stockIssuer: resolvedIssuer,
     status: "pending",
     createdAt: new Date(),
   });

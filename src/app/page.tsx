@@ -1,49 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock } from "lucide-react";
-import { TOP10, getTickerData, type StockPrice } from "@/lib/tokenized-stocks";
+import { TOP10, preStocksFeatured, getTickerData } from "@/lib/tokenized-stocks";
+import { getMergedPrices } from "@/lib/prices";
 import { RotatingTicker } from "@/components/RotatingTicker";
 import { Footer } from "@/components/Footer";
 import { isComingSoon } from "@/lib/utils";
-
-async function getPrices(): Promise<Record<string, StockPrice>> {
-  const prices: Record<string, StockPrice> = {};
-  
-  try {
-    await Promise.allSettled(
-      TOP10.map(async (stock) => {
-        try {
-          const res = await fetch(
-            `https://api.dexscreener.com/tokens/v1/solana/${stock.mint}`,
-            { next: { revalidate: 60 } }
-          );
-          if (!res.ok) return;
-          const pairs = await res.json();
-          if (!pairs || pairs.length === 0) return;
-          
-          const pair = pairs[0];
-          const price = parseFloat(pair.priceUsd) || 0;
-          const changePercent = pair.priceChange?.h24 ?? 0;
-          
-          if (price > 0) {
-            prices[stock.symbol] = {
-              symbol: stock.symbol,
-              price,
-              change: 0,
-              changePercent,
-            };
-          }
-        } catch {
-          // Skip this stock on error
-        }
-      })
-    );
-  } catch {
-    // Return whatever we have
-  }
-  
-  return prices;
-}
 
 function TickerCube({ symbol, change, logo }: { symbol: string; change: string; logo: string }) {
   const isPositive = change.startsWith("+");
@@ -71,7 +33,7 @@ function StockBadge({ stock, className = "" }: { stock: typeof TOP10[0]; classNa
 }
 
 export default async function LandingPage() {
-  const prices = await getPrices();
+  const prices = await getMergedPrices();
   const tickerData = getTickerData(prices);
   const comingSoon = isComingSoon();
 
@@ -125,8 +87,8 @@ export default async function LandingPage() {
             <div style={{ position: "absolute", top: "65%", left: "4%" }}><StockBadge stock={TOP10[2]} /></div>
             <div style={{ position: "absolute", top: "72%", right: "6%" }}><StockBadge stock={TOP10[3]} /></div>
             <div style={{ position: "absolute", top: "12%", left: "18%" }} className="hidden lg:block"><StockBadge stock={TOP10[4]} /></div>
-            <div style={{ position: "absolute", top: "22%", right: "16%" }} className="hidden lg:block"><StockBadge stock={TOP10[5]} /></div>
-            <div style={{ position: "absolute", top: "62%", left: "22%" }}><StockBadge stock={TOP10[7]} /></div>
+            <div style={{ position: "absolute", top: "22%", right: "16%" }} className="hidden lg:block"><StockBadge stock={preStocksFeatured[2]} /></div>
+            <div style={{ position: "absolute", top: "62%", left: "22%" }}><StockBadge stock={preStocksFeatured[1]} /></div>
           </div>
 
           {/* Mobile badges - four corners */}
@@ -280,6 +242,23 @@ export default async function LandingPage() {
                   <p className="text-[10px] sm:text-xs text-muted">{stock.name}</p>
                 </div>
               ))}
+            </div>
+
+            {/* PreStocks mention - light, secondary to the main xStocks grid */}
+            <div className="flex flex-col items-center gap-3 mb-10 pt-8 border-t border-border">
+              <p className="text-muted text-xs sm:text-sm text-center">
+                Or earn pre-IPO names like SpaceX &amp; OpenAI, via{" "}
+                <a href="https://prestocks.com" target="_blank" rel="noopener noreferrer" className="text-cta hover:underline">
+                  PreStocks
+                </a>
+              </p>
+              <div className="flex items-center gap-3">
+                {preStocksFeatured.map((stock) => (
+                  <div key={stock.symbol} className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden" title={stock.name}>
+                    <Image src={stock.logo} alt={stock.name} width={40} height={40} className="w-full h-full object-cover" unoptimized />
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="text-center">
