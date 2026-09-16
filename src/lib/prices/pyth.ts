@@ -77,11 +77,14 @@ export async function fetchPythPrices(symbols: string[]): Promise<Record<string,
     });
 
     if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`[pyth] Hermes request failed: ${res.status} ${body}`.slice(0, 500));
       return {};
     }
 
     const data: HermesLatestPriceResponse = await res.json();
     if (!data.parsed || data.parsed.length === 0) {
+      console.error("[pyth] Hermes returned no parsed prices", JSON.stringify(data).slice(0, 500));
       return {};
     }
 
@@ -103,7 +106,8 @@ export async function fetchPythPrices(symbols: string[]): Promise<Record<string,
     }
 
     return result;
-  } catch {
+  } catch (err) {
+    console.error("[pyth] fetchPythPrices threw:", err);
     return {};
   }
 }
