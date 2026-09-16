@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Ticket, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { Ticket, Loader2, AlertCircle } from "lucide-react";
 import { ToastProvider, useToast } from "@/components/Toast";
 
 export default function InvitePage() {
@@ -130,14 +130,7 @@ function InvitePageInner() {
                 disabled={isDisabled}
                 className="w-full py-2.5 sm:py-3 rounded-lg bg-cta text-cta-ink font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-                ) : (
-                  <>
-                    Continue
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Continue"}
               </button>
             </form>
 
