@@ -112,3 +112,66 @@ describe("fetchPythPrices", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 });
+
+describe("fetchPythXStockPrices", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    process.env.PYTH_API_KEY = ORIGINAL_ENV;
+  });
+
+  it("returns {} without calling fetch when PYTH_API_KEY is unset", async () => {
+    delete process.env.PYTH_API_KEY;
+    const { fetchPythXStockPrices } = await import("./pyth");
+
+    const result = await fetchPythXStockPrices(["AAPL"]);
+
+    expect(result).toEqual({});
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("converts price * 10^expo for the xStock feed, distinct from the equity feed", async () => {
+    process.env.PYTH_API_KEY = "test-key";
+    const { fetchPythXStockPrices, PYTH_XSTOCK_FEED_IDS } = await import("./pyth");
+
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        parsed: [
+          {
+            id: PYTH_XSTOCK_FEED_IDS.AAPL,
+            price: { price: "15100000000", expo: -8, publish_time: 1700000002 },
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchPythXStockPrices(["AAPL"]);
+
+    expect(result.AAPL.price).toBeCloseTo(151.0, 5);
+  });
+
+  it("equity and xStock feed IDs are distinct per symbol", async () => {
+    const { PYTH_EQUITY_FEED_IDS, PYTH_XSTOCK_FEED_IDS } = await import("./pyth");
+
+    for (const symbol of Object.keys(PYTH_EQUITY_FEED_IDS)) {
+      expect(PYTH_XSTOCK_FEED_IDS[symbol]).toBeDefined();
+      expect(PYTH_XSTOCK_FEED_IDS[symbol]).not.toBe(PYTH_EQUITY_FEED_IDS[symbol]);
+    }
+  });
+
+  it("returns {} when Hermes responds non-200", async () => {
+    process.env.PYTH_API_KEY = "test-key";
+    const { fetchPythXStockPrices } = await import("./pyth");
+
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: false });
+
+    const result = await fetchPythXStockPrices(["AAPL"]);
+
+    expect(result).toEqual({});
+  });
+});
