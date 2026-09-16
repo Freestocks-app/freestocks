@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { Suspense, useState, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SegmentedTabs } from "./SegmentedTabs";
 import { CashoutFlow } from "./CashoutFlow";
 import { WalletBalances } from "./WalletBalances";
@@ -16,6 +17,8 @@ interface CashoutTabsProps {
   privyAppId?: string;
   minCashoutCents: number;
 }
+
+type TabId = "cashout" | "wallet";
 
 function MyWalletTabContent({ sessionEmail, privyAppId }: { sessionEmail: string; privyAppId?: string }) {
   const [address, setAddress] = useState<string | undefined>(undefined);
@@ -40,7 +43,30 @@ function MyWalletTabContent({ sessionEmail, privyAppId }: { sessionEmail: string
 }
 
 export function CashoutTabs(props: CashoutTabsProps) {
-  const [activeTab, setActiveTab] = useState<"cashout" | "wallet">("cashout");
+  return (
+    <Suspense fallback={null}>
+      <CashoutTabsInner {...props} />
+    </Suspense>
+  );
+}
+
+function CashoutTabsInner(props: CashoutTabsProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab");
+  const initialTab: TabId = tabParam === "wallet" ? "wallet" : "cashout";
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+
+  const handleTabChange = (id: string) => {
+    const nextTab = id as TabId;
+    setActiveTab(nextTab);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", nextTab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="space-y-4">
@@ -51,7 +77,7 @@ export function CashoutTabs(props: CashoutTabsProps) {
             { id: "wallet", label: "My Wallet" },
           ]}
           activeId={activeTab}
-          onChange={(id) => setActiveTab(id as "cashout" | "wallet")}
+          onChange={handleTabChange}
         />
       </div>
 

@@ -52,6 +52,12 @@ export default async function EarnPage() {
 
   const hasProviders = providers.length > 0;
   const progressPercent = Math.min(100, (availableBalanceCents / MIN_CASHOUT_CENTS) * 100);
+  const barFillWidth = Math.max(progressPercent, 10);
+  // The amount text is centered in the bar; once the lime fill passes the
+  // midpoint it sits under the text, so switch to the dark ink color that
+  // reads on lime. Below that, the text sits on the dark track background
+  // and needs the light/white color instead.
+  const textOnFill = barFillWidth >= 50;
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex flex-col">
@@ -66,7 +72,7 @@ export default async function EarnPage() {
             <div
               className="absolute inset-y-0 left-0 rounded-l-full transition-all duration-500"
               style={{
-                width: `${Math.max(progressPercent, 10)}%`,
+                width: `${barFillWidth}%`,
                 minWidth: "1.5rem",
                 borderTopRightRadius: progressPercent >= 99 ? "9999px" : "0",
                 borderBottomRightRadius: progressPercent >= 99 ? "9999px" : "0",
@@ -74,8 +80,10 @@ export default async function EarnPage() {
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center gap-1 text-xs font-bold tabular-nums">
-              <span className="text-cta-ink drop-shadow-sm">${(availableBalanceCents / 100).toFixed(2)}</span>
-              <span className="text-cta-ink/60">/ $5.00</span>
+              <span className={textOnFill ? "text-cta-ink drop-shadow-sm" : "text-foreground"}>
+                ${(availableBalanceCents / 100).toFixed(2)}
+              </span>
+              <span className={textOnFill ? "text-cta-ink/60" : "text-muted"}>/ $5.00</span>
             </div>
           </div>
         </div>

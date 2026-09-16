@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Zap, AlertTriangle, Wifi, Globe, RefreshCw, HelpCircle, Gamepad2, FileText } from "lucide-react";
 import { CpxScriptWidget } from "./CpxScriptWidget";
 
@@ -153,8 +154,23 @@ function ProviderTabs({
   );
 }
 
-export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
-  const [activeProvider, setActiveProvider] = useState(providers[0]?.id || "");
+export function EarnOfferwall(props: EarnOfferwallProps) {
+  return (
+    <Suspense fallback={null}>
+      <EarnOfferwallInner {...props} />
+    </Suspense>
+  );
+}
+
+function EarnOfferwallInner({ providers, userId }: EarnOfferwallProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab");
+  const initialProvider = providers.find((p) => p.id === tabParam)?.id || providers[0]?.id || "";
+
+  const [activeProvider, setActiveProvider] = useState(initialProvider);
   const [state, setState] = useState<OfferwallState>("loading");
   const [key, setKey] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -213,6 +229,10 @@ export function EarnOfferwall({ providers, userId }: EarnOfferwallProps) {
     setState("loading");
     setActiveProvider(id);
     setKey((k) => k + 1);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", id);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   if (!currentProvider) {
