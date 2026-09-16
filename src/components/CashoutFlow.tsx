@@ -243,8 +243,11 @@ function CashoutFlowInner({ balanceCents, sessionEmail, privyAppId, minCashoutCe
           <CheckCircle className="w-8 h-8 text-gain" />
         </div>
         <h2 className="text-xl font-bold mb-1 text-gain">Cashout Submitted!</h2>
-        <p className="text-sm text-muted mb-6">
+        <p className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
           ${(successAmountCents / 100).toFixed(2)} → ${selectedStock.symbol}
+        </p>
+        <p className="text-sm text-muted mb-6">
+          Delivered to your wallet within 3 business days.
         </p>
 
         <div className="card p-4 text-left space-y-3">
