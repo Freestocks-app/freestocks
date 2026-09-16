@@ -223,6 +223,13 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_referral_link_referrer_id ON referral_link(referrer_id)
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_invite_status (
+      user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+      completed_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `;
+
   return database;
 }
 

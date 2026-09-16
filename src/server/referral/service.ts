@@ -117,6 +117,21 @@ export class ReferralService {
     });
   }
 
+  /** Whether this user has already passed the invite-code gate (entered a valid code or explicitly skipped). */
+  async hasCompletedInviteGate(userId: string): Promise<boolean> {
+    const row = await this.db.query.userInviteStatus.findFirst({
+      where: eq(schema.userInviteStatus.userId, userId),
+    });
+    return !!row;
+  }
+
+  async markInviteGateCompleted(userId: string): Promise<void> {
+    await this.db
+      .insert(schema.userInviteStatus)
+      .values({ userId })
+      .onConflictDoNothing();
+  }
+
   async getReferralStats(referrerId: string): Promise<ReferralStats> {
     const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)::int` })

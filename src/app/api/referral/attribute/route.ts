@@ -21,5 +21,12 @@ export async function POST(request: NextRequest) {
   const referral = new ReferralService(db);
   const result = await referral.attribute(session.user.id, code);
 
+  // Any outcome except an invalid code means the invite gate has been
+  // handled for this user (either freshly attributed, or a referrer link
+  // already exists) - don't prompt them again on their next page load.
+  if (result.attributed || result.reason !== "invalid_code") {
+    await referral.markInviteGateCompleted(session.user.id);
+  }
+
   return NextResponse.json(result);
 }

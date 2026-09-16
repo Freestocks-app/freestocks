@@ -109,6 +109,13 @@ export const referralLink = pgTable("referral_link", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const userInviteStatus = pgTable("user_invite_status", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  completedAt: timestamp("completed_at").notNull().defaultNow(),
+});
+
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Account = typeof account.$inferSelect;
@@ -118,3 +125,4 @@ export type RedeemRequest = typeof redeemRequest.$inferSelect;
 export type UserWallet = typeof userWallet.$inferSelect;
 export type UserReferralCode = typeof userReferralCode.$inferSelect;
 export type ReferralLink = typeof referralLink.$inferSelect;
+export type UserInviteStatus = typeof userInviteStatus.$inferSelect;

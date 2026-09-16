@@ -163,6 +163,13 @@ describe("ReferralService", () => {
       )
     `);
 
+    await client.exec(`
+      CREATE TABLE user_invite_status (
+        user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+        completed_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     db = drizzle(client, { schema });
     referral = new ReferralService(db);
     ledger = new LedgerService(db);
@@ -213,6 +220,28 @@ describe("ReferralService", () => {
       const second = await referral.attribute("referee-1", code);
       expect(second).toEqual({ attributed: false, reason: "already_attributed" });
       expect(await referral.getReferrerId("referee-1")).toBe("referrer-1");
+    });
+  });
+
+  describe("invite gate", () => {
+    it("hasCompletedInviteGate is false before anything is recorded", async () => {
+      expect(await referral.hasCompletedInviteGate("referee-1")).toBe(false);
+    });
+
+    it("markInviteGateCompleted flips hasCompletedInviteGate to true", async () => {
+      await referral.markInviteGateCompleted("referee-1");
+      expect(await referral.hasCompletedInviteGate("referee-1")).toBe(true);
+    });
+
+    it("markInviteGateCompleted is idempotent (safe to call twice)", async () => {
+      await referral.markInviteGateCompleted("referee-1");
+      await referral.markInviteGateCompleted("referee-1");
+      expect(await referral.hasCompletedInviteGate("referee-1")).toBe(true);
+    });
+
+    it("does not affect other users", async () => {
+      await referral.markInviteGateCompleted("referee-1");
+      expect(await referral.hasCompletedInviteGate("referrer-1")).toBe(false);
     });
   });
 

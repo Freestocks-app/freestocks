@@ -6,6 +6,7 @@ import { LedgerService } from "@/server/ledger/service";
 import { getAvailableBalanceCents } from "@/server/redeem/service";
 import { getPortfolioValueCents } from "@/server/wallet/portfolio";
 import { StreakService } from "@/server/streak/service";
+import { ReferralService } from "@/server/referral/service";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
@@ -14,10 +15,18 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
 
   if (!session) {
     redirect("/sign-in");
+  }
+
+  const referral = new ReferralService(db);
+  const hasCompletedInviteGate = await referral.hasCompletedInviteGate(session.user.id);
+  if (!hasCompletedInviteGate) {
+    const currentUrl = requestHeaders.get("x-current-url") || "/earn";
+    redirect(`/invite?next=${encodeURIComponent(currentUrl)}`);
   }
 
   const ledger = new LedgerService(db);

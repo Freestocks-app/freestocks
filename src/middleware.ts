@@ -33,14 +33,29 @@ function unauthorized(): NextResponse {
   });
 }
 
+// App Router Server Components (layouts especially) have no direct access
+// to the current pathname/search params. Forwarding them as a *request*
+// header (not just a response header) is the standard workaround for
+// this - the request must be re-wrapped with the extra header for
+// Next.js's rendering pipeline (and thus headers() in a Server Component)
+// to see it, since setting it only on the response affects what the
+// browser receives, not what the server renders. Used here so the (app)
+// layout's invite-gate redirect can preserve e.g. /earn?ref=CODE as its
+// ?next= target instead of losing the query string.
+function nextWithCurrentUrlHeader(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-current-url", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export function middleware(request: NextRequest) {
   if (!QA_PATH_SEGMENT || !SITE_PASSWORD) {
-    return NextResponse.next();
+    return nextWithCurrentUrlHeader(request);
   }
 
   const { pathname } = request.nextUrl;
   if (pathname !== `/${QA_PATH_SEGMENT}`) {
-    return NextResponse.next();
+    return nextWithCurrentUrlHeader(request);
   }
 
   if (!checkBasicAuth(request, SITE_PASSWORD)) {
