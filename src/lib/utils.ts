@@ -55,22 +55,39 @@ export function isValidWalletAddress(address: string): boolean {
 
 export const QA_BYPASS_COOKIE = "fs_qa_bypass";
 
+/** Public marketing hosts that stay on the Coming Soon LP when the flag is on. */
+export const COMING_SOON_HOSTS = new Set(["freestocks.app", "www.freestocks.app"]);
+
+/**
+ * True when this hostname should show the Coming Soon LP.
+ * demo.freestocks.app, *.vercel.app, localhost stay full-app even if
+ * NEXT_PUBLIC_COMING_SOON=true on Production.
+ */
+export function isComingSoonHost(hostname: string): boolean {
+  const host = hostname.split(":")[0]?.toLowerCase() ?? "";
+  return COMING_SOON_HOSTS.has(host);
+}
+
 /**
  * Check if the app is in "Coming Soon" mode.
- * Production sets NEXT_PUBLIC_COMING_SOON=true to gate the sign-up flow.
- * Preview/Development deployments leave it unset to keep the full app usable.
+ * Production sets NEXT_PUBLIC_COMING_SOON=true to gate signup on the public
+ * marketing domain only (freestocks.app / www). Judge/demo hosts like
+ * demo.freestocks.app and vercel.app aliases stay fully open.
  *
  * The gate can be bypassed per-browser via the QA_BYPASS_COOKIE, set by
- * visiting the hidden, Basic-Auth-protected QA path (see middleware.ts) —
- * this lets a tester reach /sign-in, /sign-up etc. on production without
- * making the public landing page's sign-up CTA live for everyone else.
+ * visiting the hidden, Basic-Auth-protected QA path (see middleware.ts).
  */
 export function isComingSoon(): boolean {
   if (process.env.NEXT_PUBLIC_COMING_SOON !== "true") {
     return false;
   }
-  if (typeof document !== "undefined" && document.cookie.includes(`${QA_BYPASS_COOKIE}=1`)) {
-    return false;
+  if (typeof document !== "undefined") {
+    if (document.cookie.includes(`${QA_BYPASS_COOKIE}=1`)) {
+      return false;
+    }
+    if (!isComingSoonHost(window.location.hostname)) {
+      return false;
+    }
   }
   return true;
 }
