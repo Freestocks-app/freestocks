@@ -2,56 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { allCashoutStocks, type Issuer } from "@/lib/tokenized-stocks";
+import {
+  mapTokenAccountsToBalances,
+  SOLANA_RPC_URL,
+  TOKEN_PROGRAM_ID_STRING,
+  type TokenBalance,
+  type ParsedTokenAccount,
+} from "@/lib/wallet-balances";
 
-const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-
-const SOLANA_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-
-export interface TokenBalance {
-  symbol: string;
-  name: string;
-  logo: string;
-  issuer: Issuer;
-  uiAmount: number;
-}
-
-interface ParsedTokenAccount {
-  account: {
-    data: {
-      parsed: {
-        info: {
-          mint: string;
-          tokenAmount: {
-            uiAmount: number | null;
-          };
-        };
-      };
-    };
-  };
-}
-
-/**
- * Map raw parsed SPL token accounts (from getParsedTokenAccountsByOwner)
- * against every known cashout-eligible mint (xStocks + PreStocks),
- * defaulting to 0 for any mint the wallet has no token account for yet.
- */
-export function mapTokenAccountsToBalances(accounts: ParsedTokenAccount[]): TokenBalance[] {
-  const byMint = new Map<string, number>();
-  for (const { account } of accounts) {
-    const { mint, tokenAmount } = account.data.parsed.info;
-    byMint.set(mint, tokenAmount.uiAmount ?? 0);
-  }
-
-  return allCashoutStocks.map((stock) => ({
-    symbol: stock.symbol,
-    name: stock.name,
-    logo: stock.logo,
-    issuer: stock.issuer,
-    uiAmount: byMint.get(stock.mint) ?? 0,
-  }));
-}
+const TOKEN_PROGRAM_ID = new PublicKey(TOKEN_PROGRAM_ID_STRING);
 
 interface UseWalletBalancesResult {
   solBalance: number | null;

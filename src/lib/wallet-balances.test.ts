@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapTokenAccountsToBalances } from "./useWalletBalances";
+import { mapTokenAccountsToBalances } from "./wallet-balances";
 import { TOP10, allCashoutStocks } from "@/lib/tokenized-stocks";
 
 function account(mint: string, uiAmount: number | null) {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DollarSign, Gift, Wallet, Ticket, User, Flame } from "lucide-react";
+import { DollarSign, Gift, Wallet, Ticket, User, Flame, PieChart } from "lucide-react";
 
 const navItems = [
   { href: "/earn", label: "Earn", icon: DollarSign },
@@ -15,13 +15,34 @@ interface NavigationProps {
   balanceCents: number;
   userName?: string;
   streakCount: number;
+  /** USD value of tokenized-stock holdings. null = no wallet saved yet. */
+  portfolioValueCents?: number | null;
 }
 
 function formatBalance(cents: number): string {
   return (cents / 100).toFixed(2);
 }
 
-export function DesktopNav({ balanceCents, userName, streakCount }: NavigationProps) {
+function PortfolioPill({ portfolioValueCents, compact = false }: { portfolioValueCents?: number | null; compact?: boolean }) {
+  if (!portfolioValueCents || portfolioValueCents <= 0) return null;
+
+  return (
+    <Link
+      href="/cashout"
+      className={`flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 rounded-full hover:bg-purple-500/20 transition-colors ${
+        compact ? "px-2.5 py-1" : "px-3 py-1.5"
+      }`}
+      title="Portfolio value"
+    >
+      <PieChart className={`text-purple-300 ${compact ? "w-3.5 h-3.5" : "w-4 h-4"}`} />
+      <span className={`text-purple-300 font-bold tabular-nums ${compact ? "text-sm" : "text-sm"}`}>
+        ${formatBalance(portfolioValueCents)}
+      </span>
+    </Link>
+  );
+}
+
+export function DesktopNav({ balanceCents, userName, streakCount, portfolioValueCents }: NavigationProps) {
   const pathname = usePathname();
 
   return (
@@ -78,7 +99,10 @@ export function DesktopNav({ balanceCents, userName, streakCount }: NavigationPr
           <span className="font-bold text-sm tabular-nums">{streakCount}</span>
         </div>
 
-        {/* Balance pill */}
+        {/* Portfolio pill (stock holdings value) */}
+        <PortfolioPill portfolioValueCents={portfolioValueCents} />
+
+        {/* Balance pill (earn points) */}
         <Link
           href="/cashout"
           className="flex items-center gap-1.5 bg-cta/10 border border-cta/30 rounded-full px-3 py-1.5 hover:bg-cta/20 transition-colors"
@@ -105,7 +129,7 @@ export function DesktopNav({ balanceCents, userName, streakCount }: NavigationPr
   );
 }
 
-export function MobileNav({ balanceCents, streakCount }: NavigationProps) {
+export function MobileNav({ balanceCents, streakCount, portfolioValueCents }: NavigationProps) {
   const pathname = usePathname();
 
   return (
@@ -133,6 +157,8 @@ export function MobileNav({ balanceCents, streakCount }: NavigationProps) {
             <Flame className="w-3.5 h-3.5 text-cta" />
             <span className="font-bold text-xs tabular-nums">{streakCount}</span>
           </div>
+
+          <PortfolioPill portfolioValueCents={portfolioValueCents} compact />
 
           <Link
             href="/cashout"
@@ -170,11 +196,11 @@ export function MobileNav({ balanceCents, streakCount }: NavigationProps) {
   );
 }
 
-export function Navigation({ balanceCents, userName, streakCount }: NavigationProps) {
+export function Navigation({ balanceCents, userName, streakCount, portfolioValueCents }: NavigationProps) {
   return (
     <>
-      <DesktopNav balanceCents={balanceCents} userName={userName} streakCount={streakCount} />
-      <MobileNav balanceCents={balanceCents} userName={userName} streakCount={streakCount} />
+      <DesktopNav balanceCents={balanceCents} userName={userName} streakCount={streakCount} portfolioValueCents={portfolioValueCents} />
+      <MobileNav balanceCents={balanceCents} userName={userName} streakCount={streakCount} portfolioValueCents={portfolioValueCents} />
     </>
   );
 }

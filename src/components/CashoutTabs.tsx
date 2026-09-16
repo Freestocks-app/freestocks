@@ -5,6 +5,7 @@ import { SegmentedTabs } from "./SegmentedTabs";
 import { CashoutFlow } from "./CashoutFlow";
 import { WalletBalances } from "./WalletBalances";
 import { PrivyProvider } from "./PrivyProvider";
+import { persistWalletAddress } from "@/lib/persist-wallet-address";
 import type { RedeemRequest } from "@/lib/db/schema";
 
 interface CashoutTabsProps {
@@ -18,7 +19,10 @@ interface CashoutTabsProps {
 
 function MyWalletTabContent({ sessionEmail, privyAppId }: { sessionEmail: string; privyAppId?: string }) {
   const [address, setAddress] = useState<string | undefined>(undefined);
-  const handleWalletReady = useCallback((addr: string) => setAddress(addr), []);
+  const handleWalletReady = useCallback((addr: string) => {
+    setAddress(addr);
+    persistWalletAddress(addr);
+  }, []);
 
   if (!privyAppId) {
     return (

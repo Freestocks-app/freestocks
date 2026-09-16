@@ -192,6 +192,14 @@ export async function initializeDatabase() {
   `;
 
   await sql`
+    CREATE TABLE IF NOT EXISTS user_wallet (
+      user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+      solana_address TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
     CREATE TABLE IF NOT EXISTS user_referral_code (
       user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
       code TEXT NOT NULL UNIQUE,

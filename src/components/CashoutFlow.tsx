@@ -16,6 +16,7 @@ import {
 import { PrivyProvider } from "./PrivyProvider";
 import { PrivyUnlockFlow } from "./PrivyUnlockFlow";
 import { TOP10, preStocksFeatured, getIssuerBadge, type TokenizedStock } from "@/lib/tokenized-stocks";
+import { persistWalletAddress } from "@/lib/persist-wallet-address";
 import type { RedeemRequest } from "@/lib/db/schema";
 
 type Step = "stock" | "wallet" | "confirm";
@@ -244,6 +245,7 @@ function CashoutFlowInner({
   const handleWalletReady = useCallback((address: string) => {
     setWalletAddress(address);
     setStep("confirm");
+    persistWalletAddress(address);
   }, []);
 
   async function handleSubmit() {
