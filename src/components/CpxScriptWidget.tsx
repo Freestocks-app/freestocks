@@ -41,6 +41,15 @@ export function CpxScriptWidget({ appId, userId, secureHash }: CpxScriptWidgetPr
         {
           div_id: DIV_ID,
           theme_style: 1,
+          style_config: {
+            text_color: "#ffffff",
+            survey_box: {
+              topbar_background_color: "#d4fc50",
+              box_background_color: "#161616",
+              rounded_borders: true,
+              stars_filled: "#d4fc50",
+            },
+          },
         },
       ],
     };
