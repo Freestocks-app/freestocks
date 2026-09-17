@@ -2,9 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db, ensureDbInitialized } from "@/lib/db";
-import { saveWalletAddress } from "@/server/wallet/service";
+import { saveWalletAddress, getWalletAddress } from "@/server/wallet/service";
 
 const SOLANA_ADDRESS_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+export async function GET() {
+  await ensureDbInitialized();
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const address = await getWalletAddress(db, session.user.id);
+
+  return NextResponse.json({ address });
+}
 
 export async function POST(request: NextRequest) {
   await ensureDbInitialized();
