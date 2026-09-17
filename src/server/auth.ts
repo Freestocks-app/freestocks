@@ -157,28 +157,27 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
   console.warn("[Auth] Facebook OAuth not configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET.");
 }
 
-// On Vercel Preview deployments, BETTER_AUTH_URL is set to the stable
-// production alias, but the actual request lands on a per-deployment
-// VERCEL_URL. Using the wrong baseURL breaks OAuth state/cookie
-// validation (state_mismatch), so Preview must prefer VERCEL_URL.
-const productionUrl =
-  process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.BETTER_AUTH_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3847");
-
+// The app is served from several hosts at once (apex, www, demo, Vercel
+// preview URLs, local dev), but a single static `baseURL` can only ever
+// match one of them. better-auth signs its OAuth `state` and session
+// cookies against `baseURL`'s origin, so a mismatched static baseURL made
+// every other host fail OAuth with "state_mismatch" (or plain-auth with
+// "Invalid origin") - the origin used to start the flow was never the
+// origin used to validate it. `allowedHosts` resolves baseURL dynamically
+// from each request's actual Host header instead, and better-auth derives
+// trustedOrigins from the same list automatically.
 export const auth = betterAuth({
-  baseURL: productionUrl,
-  trustedOrigins: [
-    "https://appleid.apple.com",
-    "http://localhost:3847",
-    "https://freestocks.vercel.app",
-    "https://freestocks-beyond-club.vercel.app",
-    "https://www.freestocks.app",
-    "https://freestocks.app",
-    "https://demo.freestocks.app",
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-  ],
+  baseURL: {
+    allowedHosts: [
+      "localhost:3847",
+      "*.vercel.app",
+      "www.freestocks.app",
+      "freestocks.app",
+      "demo.freestocks.app",
+    ],
+    fallback: process.env.BETTER_AUTH_URL || "http://localhost:3847",
+  },
+  trustedOrigins: ["https://appleid.apple.com"],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
