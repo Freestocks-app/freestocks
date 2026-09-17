@@ -178,6 +178,17 @@ export const auth = betterAuth({
     fallback: process.env.BETTER_AUTH_URL || "http://localhost:3847",
   },
   trustedOrigins: ["https://appleid.apple.com"],
+  account: {
+    // Apple returns its OAuth callback via a cross-site POST
+    // (response_mode=form_post), which the browser's SameSite=Lax cookie
+    // policy strips - the extra state cookie check below never sees the
+    // cookie and always fails with state_mismatch. The state's actual CSRF
+    // protection is the signed value matched against the DB `verification`
+    // row (see parseGenericState in better-auth), which is unaffected by
+    // this flag - this only disables the redundant cookie check that
+    // cross-site POST callbacks can't satisfy.
+    skipStateCookieCheck: true,
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
