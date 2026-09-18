@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DollarSign, Gift, Wallet, Ticket, User, Flame, PieChart } from "lucide-react";
+import { DollarSign, Gift, Wallet, Ticket, User, Flame, PieChart, TrendingUp } from "lucide-react";
 
 const navItems = [
   { href: "/earn", label: "Earn", icon: DollarSign },
   { href: "/offers", label: "My Offers", icon: Gift },
+  { href: "/trade", label: "Trade", icon: TrendingUp },
   { href: "/cashout", label: "Cashout", icon: Wallet },
   { href: "/lottery", label: "Lottery", icon: Ticket },
 ];

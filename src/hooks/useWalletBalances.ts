@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   mapTokenAccountsToBalances,
+  getUsdcBalance,
   SOLANA_RPC_URL,
   TOKEN_PROGRAM_ID_STRING,
   type TokenBalance,
@@ -14,6 +15,7 @@ const TOKEN_PROGRAM_ID = new PublicKey(TOKEN_PROGRAM_ID_STRING);
 
 interface UseWalletBalancesResult {
   solBalance: number | null;
+  usdcBalance: number | null;
   tokenBalances: TokenBalance[];
   loading: boolean;
   error: string | null;
@@ -22,6 +24,7 @@ interface UseWalletBalancesResult {
 interface LoadedFor {
   address: string;
   solBalance: number;
+  usdcBalance: number;
   tokenBalances: TokenBalance[];
 }
 
@@ -53,10 +56,12 @@ export function useWalletBalances(address: string | undefined): UseWalletBalance
 
         if (cancelled) return;
 
+        const accounts = tokenAccounts.value as unknown as ParsedTokenAccount[];
         setLoaded({
           address: address as string,
           solBalance: lamports / LAMPORTS_PER_SOL,
-          tokenBalances: mapTokenAccountsToBalances(tokenAccounts.value as unknown as ParsedTokenAccount[]),
+          usdcBalance: getUsdcBalance(accounts),
+          tokenBalances: mapTokenAccountsToBalances(accounts),
         });
       } catch {
         if (!cancelled) {
@@ -73,7 +78,7 @@ export function useWalletBalances(address: string | undefined): UseWalletBalance
   }, [address]);
 
   if (!address) {
-    return { solBalance: null, tokenBalances: [], loading: false, error: null };
+    return { solBalance: null, usdcBalance: null, tokenBalances: [], loading: false, error: null };
   }
 
   const isLoadedForCurrentAddress = loaded?.address === address;
@@ -81,6 +86,7 @@ export function useWalletBalances(address: string | undefined): UseWalletBalance
 
   return {
     solBalance: isLoadedForCurrentAddress ? loaded!.solBalance : null,
+    usdcBalance: isLoadedForCurrentAddress ? loaded!.usdcBalance : null,
     tokenBalances: isLoadedForCurrentAddress ? loaded!.tokenBalances : [],
     loading: !isLoadedForCurrentAddress && !errorForCurrentAddress,
     error: errorForCurrentAddress,

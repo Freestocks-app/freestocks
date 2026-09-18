@@ -1,4 +1,5 @@
 import { allCashoutStocks, type Issuer } from "@/lib/tokenized-stocks";
+import { USDC_MINT } from "@/lib/solana-tokens";
 
 export const TOKEN_PROGRAM_ID_STRING = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 
@@ -51,4 +52,19 @@ export function mapTokenAccountsToBalances(accounts: ParsedTokenAccount[]): Toke
     issuer: stock.issuer,
     uiAmount: byMint.get(stock.mint) ?? 0,
   }));
+}
+
+/**
+ * USDC balance from the same parsed token accounts response - not part of
+ * `allCashoutStocks` (that list is "cashout-eligible stocks," not "every
+ * wallet asset"), so it's read out separately rather than folded in there.
+ */
+export function getUsdcBalance(accounts: ParsedTokenAccount[]): number {
+  for (const { account } of accounts) {
+    const { mint, tokenAmount } = account.data.parsed.info;
+    if (mint === USDC_MINT) {
+      return tokenAmount.uiAmount ?? 0;
+    }
+  }
+  return 0;
 }

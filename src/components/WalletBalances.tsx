@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Wallet, Send, QrCode } from "lucide-react";
 import { useWalletBalances } from "@/hooks/useWalletBalances";
+import { usePrices } from "@/hooks/usePrices";
+import { useFundWallet } from "@privy-io/react-auth/solana";
 import { WalletConnectPrompt } from "./WalletConnectPrompt";
-import { getIssuerBadge, type StockPrice } from "@/lib/tokenized-stocks";
+import { SendFlow } from "./SendFlow";
+import { ReceiveView } from "./ReceiveView";
+import { getIssuerBadge } from "@/lib/tokenized-stocks";
 
 interface WalletBalancesProps {
   address?: string;
@@ -13,37 +17,13 @@ interface WalletBalancesProps {
   onWalletReady: (address: string) => void;
 }
 
-function usePrices(): { prices: Record<string, StockPrice>; loading: boolean } {
-  const [prices, setPrices] = useState<Record<string, StockPrice>>({});
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch("/api/prices?all=1")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled) setPrices(data.prices ?? {});
-      })
-      .catch(() => {
-        // Prices are a nice-to-have on this view - fall back to showing
-        // just token counts with no USD value if this fails.
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { prices, loading };
-}
+type View = "balances" | "send" | "receive";
 
 export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletBalancesProps) {
-  const { solBalance, tokenBalances, loading, error } = useWalletBalances(address);
+  const { solBalance, usdcBalance, tokenBalances, loading, error } = useWalletBalances(address);
   const { prices, loading: pricesLoading } = usePrices();
+  const { fundWallet } = useFundWallet();
+  const [view, setView] = useState<View>("balances");
 
   if (!address) {
     return <WalletConnectPrompt sessionEmail={sessionEmail} onWalletReady={onWalletReady} />;
@@ -64,6 +44,13 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
         <p className="text-xs text-red-400">{error}</p>
       </div>
     );
+  }
+
+  if (view === "send") {
+    return <SendFlow address={address} onBack={() => setView("balances")} />;
+  }
+  if (view === "receive") {
+    return <ReceiveView address={address} onBack={() => setView("balances")} />;
   }
 
   const heldStocks = tokenBalances.filter((token) => token.uiAmount > 0);
@@ -87,9 +74,40 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
         </div>
       </div>
 
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          onClick={() =>
+            fundWallet({ address, options: { asset: "USDC", defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } })
+          }
+          className="flex flex-col items-center gap-1 py-2.5 rounded-lg border border-border hover:bg-elevated transition-colors"
+        >
+          <Wallet className="w-4 h-4 text-cta" />
+          <span className="text-xs font-semibold">Add cash</span>
+        </button>
+        <button
+          onClick={() => setView("send")}
+          className="flex flex-col items-center gap-1 py-2.5 rounded-lg border border-border hover:bg-elevated transition-colors"
+        >
+          <Send className="w-4 h-4 text-cta" />
+          <span className="text-xs font-semibold">Send</span>
+        </button>
+        <button
+          onClick={() => setView("receive")}
+          className="flex flex-col items-center gap-1 py-2.5 rounded-lg border border-border hover:bg-elevated transition-colors"
+        >
+          <QrCode className="w-4 h-4 text-cta" />
+          <span className="text-xs font-semibold">Receive</span>
+        </button>
+      </div>
+
       <div className="card p-4 flex items-center justify-between">
         <span className="text-sm text-muted">SOL</span>
         <span className="font-bold tabular-nums">{(solBalance ?? 0).toFixed(4)}</span>
+      </div>
+
+      <div className="card p-4 flex items-center justify-between">
+        <span className="text-sm text-muted">USDC</span>
+        <span className="font-bold tabular-nums">{(usdcBalance ?? 0).toFixed(2)}</span>
       </div>
 
       <div className="card divide-y divide-border">

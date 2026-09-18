@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { mapTokenAccountsToBalances } from "./wallet-balances";
+import { mapTokenAccountsToBalances, getUsdcBalance } from "./wallet-balances";
 import { TOP10, allCashoutStocks } from "@/lib/tokenized-stocks";
+import { USDC_MINT } from "@/lib/solana-tokens";
 
 function account(mint: string, uiAmount: number | null) {
   return {
@@ -49,5 +50,24 @@ describe("mapTokenAccountsToBalances", () => {
     const result = mapTokenAccountsToBalances([account("UnknownMintAddress111", 100)]);
     expect(result).toHaveLength(allCashoutStocks.length);
     expect(result.every((r) => r.uiAmount === 0)).toBe(true);
+  });
+});
+
+describe("getUsdcBalance", () => {
+  it("returns 0 when the wallet has no token accounts", () => {
+    expect(getUsdcBalance([])).toBe(0);
+  });
+
+  it("returns the USDC balance when a matching account exists", () => {
+    expect(getUsdcBalance([account(USDC_MINT, 42.5)])).toBe(42.5);
+  });
+
+  it("defaults null uiAmount to 0", () => {
+    expect(getUsdcBalance([account(USDC_MINT, null)])).toBe(0);
+  });
+
+  it("ignores non-USDC mints", () => {
+    const aapl = TOP10.find((s) => s.symbol === "AAPL")!;
+    expect(getUsdcBalance([account(aapl.mint, 100)])).toBe(0);
   });
 });
