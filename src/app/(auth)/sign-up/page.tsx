@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signUp, signIn, sendVerificationEmail } from "@/lib/auth-client";
+import { signUp, signIn, sendVerificationEmail, useSession } from "@/lib/auth-client";
 import { isComingSoon } from "@/lib/utils";
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, MailCheck } from "lucide-react";
 
@@ -56,14 +56,19 @@ function SignUpPageInner() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref");
   const earnUrl = refCode ? `/earn?ref=${encodeURIComponent(refCode)}` : "/earn";
+  const { data: session, isPending: sessionLoading } = useSession();
 
   useEffect(() => {
     if (isComingSoon()) {
       router.replace("/");
+      return;
     }
-  }, [router]);
+    if (!sessionLoading && session) {
+      router.replace(earnUrl);
+    }
+  }, [router, session, sessionLoading, earnUrl]);
 
-  if (isComingSoon()) {
+  if (isComingSoon() || sessionLoading || session) {
     return null;
   }
 

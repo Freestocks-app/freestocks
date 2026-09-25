@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, sendVerificationEmail } from "@/lib/auth-client";
+import { signIn, sendVerificationEmail, useSession } from "@/lib/auth-client";
 import { isComingSoon } from "@/lib/utils";
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -45,14 +45,19 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = useSession();
 
   useEffect(() => {
     if (isComingSoon()) {
       router.replace("/");
+      return;
     }
-  }, [router]);
+    if (!sessionLoading && session) {
+      router.replace("/earn");
+    }
+  }, [router, session, sessionLoading]);
 
-  if (isComingSoon()) {
+  if (isComingSoon() || sessionLoading || session) {
     return null;
   }
 
