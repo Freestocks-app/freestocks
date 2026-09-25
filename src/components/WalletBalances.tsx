@@ -10,6 +10,7 @@ import { WalletConnectPrompt } from "./WalletConnectPrompt";
 import { SendFlow } from "./SendFlow";
 import { ReceiveView } from "./ReceiveView";
 import { getIssuerBadge } from "@/lib/tokenized-stocks";
+import { formatTokenAmount } from "@/lib/token-amount";
 
 interface WalletBalancesProps {
   address?: string;
@@ -144,7 +145,7 @@ export function WalletBalances({ address, sessionEmail, onWalletReady }: WalletB
                 <p className="text-xs text-muted truncate">{token.name}</p>
               </div>
               <div className="text-right">
-                <span className="font-bold text-sm tabular-nums block">{token.uiAmount}</span>
+                <span className="font-bold text-sm tabular-nums block">{formatTokenAmount(token.uiAmount, token.decimals)}</span>
                 {valueCents !== null && (
                   <div className="flex items-center justify-end gap-1.5">
                     <span className="text-xs text-muted tabular-nums">

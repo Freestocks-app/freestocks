@@ -12,6 +12,8 @@ export interface TokenBalance {
   logo: string;
   issuer: Issuer;
   uiAmount: number;
+  /** On-chain SPL decimals for this mint - used to format small balances without falling back to exponential notation. */
+  decimals: number;
 }
 
 export interface ParsedTokenAccount {
@@ -51,6 +53,7 @@ export function mapTokenAccountsToBalances(accounts: ParsedTokenAccount[]): Toke
     logo: stock.logo,
     issuer: stock.issuer,
     uiAmount: byMint.get(stock.mint) ?? 0,
+    decimals: stock.decimals,
   }));
 }
 

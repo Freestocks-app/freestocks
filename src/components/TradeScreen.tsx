@@ -15,7 +15,7 @@ import { USDC_MINT, USDC_DECIMALS } from "@/lib/solana-tokens";
 import { usePrices } from "@/hooks/usePrices";
 import { useWalletBalances } from "@/hooks/useWalletBalances";
 import { useSolanaWalletAddress } from "@/hooks/useSolanaWalletAddress";
-import { toBaseUnits, fromBaseUnits } from "@/lib/token-amount";
+import { toBaseUnits, fromBaseUnits, formatTokenAmount } from "@/lib/token-amount";
 import { getJupiterQuote, getJupiterSwapTransaction, type JupiterQuoteResponse } from "@/lib/jupiter/client";
 import { persistWalletAddress } from "@/lib/persist-wallet-address";
 
@@ -69,6 +69,7 @@ function TradeScreenInner({ sessionEmail }: { sessionEmail: string }) {
   const heldTokenBalance = tokenBalances.find((t) => t.symbol === stock.symbol)?.uiAmount ?? 0;
 
   const payDecimals = side === "buy" ? USDC_DECIMALS : stock.decimals;
+  const receiveDecimals = side === "buy" ? stock.decimals : USDC_DECIMALS;
   const payBalance = side === "buy" ? usdcBalance ?? 0 : heldTokenBalance;
   const inputMint = side === "buy" ? USDC_MINT : stock.mint;
   const outputMint = side === "buy" ? stock.mint : USDC_MINT;
@@ -378,7 +379,7 @@ function TradeScreenInner({ sessionEmail }: { sessionEmail: string }) {
               </button>
             </div>
             <p className="text-xs text-muted">
-              Balance: {balancesLoading ? "…" : payBalance.toFixed(payDecimals === USDC_DECIMALS ? 2 : 4)}{" "}
+              Balance: {balancesLoading ? "…" : formatTokenAmount(payBalance, payDecimals)}{" "}
               {side === "buy" ? "USDC" : stock.symbol}
             </p>
           </div>
@@ -398,14 +399,14 @@ function TradeScreenInner({ sessionEmail }: { sessionEmail: string }) {
               {quoteLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-muted" />
               ) : outputPreview !== null ? (
-                outputPreview.toFixed(payDecimals === USDC_DECIMALS ? 4 : 2)
+                formatTokenAmount(outputPreview, receiveDecimals)
               ) : (
                 "0.00"
               )}
             </p>
             {quote && minReceived !== null && (
               <p className="text-xs text-muted">
-                Min received: {minReceived.toFixed(4)} · Price impact:{" "}
+                Min received: {formatTokenAmount(minReceived, receiveDecimals)} · Price impact:{" "}
                 {(parseFloat(quote.priceImpactPct as string) * 100).toFixed(2)}% · Slippage: 0.5%
               </p>
             )}

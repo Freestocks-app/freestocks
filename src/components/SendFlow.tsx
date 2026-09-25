@@ -12,7 +12,7 @@ import { Loader2, AlertCircle, CheckCircle, ArrowLeft, ExternalLink } from "luci
 import { TOP10 } from "@/lib/tokenized-stocks";
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/solana-tokens";
 import { useWalletBalances } from "@/hooks/useWalletBalances";
-import { toBaseUnits } from "@/lib/token-amount";
+import { toBaseUnits, formatTokenAmount } from "@/lib/token-amount";
 import { SOLANA_RPC_URL } from "@/lib/wallet-balances";
 import bs58 from "bs58";
 
@@ -228,7 +228,7 @@ export function SendFlow({ address, onBack }: SendFlowProps) {
           disabled={state !== "idle"}
           className="w-full bg-bg border border-border rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-cta/50 disabled:opacity-60"
         />
-        <p className="text-xs text-muted mt-1">Balance: {balance.toFixed(4)}</p>
+        <p className="text-xs text-muted mt-1">Balance: {formatTokenAmount(balance, decimals)}</p>
         {insufficientBalance && <p className="text-xs text-red-400 mt-1">Amount exceeds your balance.</p>}
       </div>
 

@@ -31,3 +31,29 @@ export function fromBaseUnits(raw: bigint | string, decimals: number): number {
   const divisor = 10 ** decimals;
   return Number(value) / divisor;
 }
+
+/**
+ * Formats a token ui-amount for display, avoiding two failure modes of
+ * naively rendering the raw number: JS's exponential notation for very
+ * small values (e.g. 0.0000008026 -> "8.026e-7", which reads as garbage/0
+ * to a user), and needlessly long trailing zeros for round numbers. Shows
+ * up to the mint's full decimals, trimmed of trailing zeros, with at least
+ * 2 decimal places for readability.
+ */
+export function formatTokenAmount(uiAmount: number, decimals: number): string {
+  if (uiAmount === 0) return "0";
+
+  const fixed = uiAmount.toFixed(decimals);
+  const trimmed = fixed.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+
+  // A nonzero input must never render as "0" - if rounding to `decimals`
+  // wiped out every significant digit (the amount is smaller than the
+  // mint's smallest representable unit at this precision), fall back to
+  // the full unrounded `fixed` string rather than silently showing "0".
+  if (/^0(\.0*)?$/.test(trimmed)) {
+    return fixed;
+  }
+
+  const [, fractionalPart = ""] = trimmed.split(".");
+  return fractionalPart.length < 2 ? uiAmount.toFixed(2) : trimmed;
+}
