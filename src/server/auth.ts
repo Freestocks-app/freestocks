@@ -174,6 +174,7 @@ export const auth = betterAuth({
       "www.freestocks.app",
       "freestocks.app",
       "demo.freestocks.app",
+      "demo-hack.freestocks.app",
     ],
     fallback: process.env.BETTER_AUTH_URL || "http://localhost:3847",
   },
