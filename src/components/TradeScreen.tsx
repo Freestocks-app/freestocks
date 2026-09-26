@@ -18,6 +18,7 @@ import { useSolanaWalletAddress } from "@/hooks/useSolanaWalletAddress";
 import { toBaseUnits, fromBaseUnits, formatTokenAmount } from "@/lib/token-amount";
 import { getJupiterQuote, getJupiterSwapTransaction, type JupiterQuoteResponse } from "@/lib/jupiter/client";
 import { persistWalletAddress } from "@/lib/persist-wallet-address";
+import { EvmTradeScreen } from "./EvmTradeScreen";
 
 interface TradeScreenProps {
   sessionEmail: string;
@@ -467,7 +468,11 @@ function TradeScreenInner({ sessionEmail }: { sessionEmail: string }) {
   );
 }
 
+type Chain = "solana" | "ethereum";
+
 export function TradeScreen({ sessionEmail, privyAppId }: TradeScreenProps) {
+  const [chain, setChain] = useState<Chain>("solana");
+
   if (!privyAppId) {
     return (
       <div className="text-center py-8">
@@ -478,7 +483,17 @@ export function TradeScreen({ sessionEmail, privyAppId }: TradeScreenProps) {
 
   return (
     <PrivyProvider appId={privyAppId}>
-      <TradeScreenInner sessionEmail={sessionEmail} />
+      <div className="max-w-md mx-auto mb-4 flex justify-center">
+        <SegmentedTabs
+          tabs={[
+            { id: "solana", label: "Solana" },
+            { id: "ethereum", label: "Ethereum" },
+          ]}
+          activeId={chain}
+          onChange={(id) => setChain(id as Chain)}
+        />
+      </div>
+      {chain === "solana" ? <TradeScreenInner sessionEmail={sessionEmail} /> : <EvmTradeScreen />}
     </PrivyProvider>
   );
 }

@@ -23,7 +23,7 @@ export function PrivyProvider({ children, appId }: PrivyProviderProps) {
             createOnLogin: "all-users",
           },
           ethereum: {
-            createOnLogin: "off",
+            createOnLogin: "all-users",
           },
         },
       }}

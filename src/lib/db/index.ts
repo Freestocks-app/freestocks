@@ -230,6 +230,14 @@ export async function initializeDatabase() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_world_id_verification (
+      user_id TEXT PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+      nullifier_hash TEXT NOT NULL UNIQUE,
+      verified_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `;
+
   return database;
 }
 

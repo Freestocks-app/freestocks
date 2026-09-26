@@ -116,6 +116,17 @@ export const userInviteStatus = pgTable("user_invite_status", {
   completedAt: timestamp("completed_at").notNull().defaultNow(),
 });
 
+export const userWorldIdVerification = pgTable("user_world_id_verification", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  // Unique across all users, not just per-user - this is what actually
+  // prevents one real person from claiming the bonus under multiple
+  // Freestocks accounts (the whole point of the World ID credential).
+  nullifierHash: text("nullifier_hash").notNull().unique(),
+  verifiedAt: timestamp("verified_at").notNull().defaultNow(),
+});
+
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Account = typeof account.$inferSelect;
@@ -126,3 +137,4 @@ export type UserWallet = typeof userWallet.$inferSelect;
 export type UserReferralCode = typeof userReferralCode.$inferSelect;
 export type ReferralLink = typeof referralLink.$inferSelect;
 export type UserInviteStatus = typeof userInviteStatus.$inferSelect;
+export type UserWorldIdVerification = typeof userWorldIdVerification.$inferSelect;

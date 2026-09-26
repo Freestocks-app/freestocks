@@ -1,10 +1,12 @@
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
-import { db } from "@/lib/db";
+import { db, ensureDbInitialized } from "@/lib/db";
 import { LedgerService } from "@/server/ledger/service";
+import { hasVerified } from "@/server/worldid/service";
 import { formatCents } from "@/lib/utils";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ProfileWallet } from "@/components/ProfileWallet";
+import { WorldIdVerifyCard } from "@/components/WorldIdVerifyCard";
 import { User } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +18,15 @@ export default async function ProfilePage() {
     return null;
   }
 
+  await ensureDbInitialized();
   const ledger = new LedgerService(db);
-  const balanceCents = await ledger.getBalance(session.user.id);
+  const [balanceCents, worldIdVerified] = await Promise.all([
+    ledger.getBalance(session.user.id),
+    hasVerified(db, session.user.id),
+  ]);
   const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  const worldIdAppId = process.env.NEXT_PUBLIC_WORLD_APP_ID;
+  const worldIdAction = process.env.WORLD_ID_ACTION;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] pb-20 md:pb-6">
@@ -46,6 +54,14 @@ export default async function ProfilePage() {
           <h2 className="text-sm font-semibold mb-2">Wallet</h2>
           <ProfileWallet sessionEmail={session.user.email} privyAppId={privyAppId} />
         </div>
+
+        {worldIdAppId && (
+          <WorldIdVerifyCard
+            initiallyVerified={worldIdVerified}
+            appId={worldIdAppId}
+            action={worldIdAction}
+          />
+        )}
 
         <SignOutButton />
       </div>
