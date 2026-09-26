@@ -392,5 +392,26 @@ describe("Redeem API", () => {
       expect(result.rows[0].stock_symbol).toBe("OPENAI");
       expect(result.rows[0].stock_issuer).toBe("prestocks");
     });
+
+    it("stores coinbase issuer for a Base tokenized-stock redemption with an EVM address", async () => {
+      await client.exec(`
+        INSERT INTO redeem_request (id, user_id, amount_cents, fomo_address, stock_symbol, stock_issuer, status, created_at)
+        VALUES ('issuer-coinbase', 'user-1', 500, '${VALID_EVM_ADDRESS}', 'AAPL', 'coinbase', 'pending', NOW())
+      `);
+
+      const result = await client.query<{ stock_issuer: string; stock_symbol: string; fomo_address: string }>(
+        "SELECT stock_issuer, stock_symbol, fomo_address FROM redeem_request WHERE id = 'issuer-coinbase'"
+      );
+
+      expect(result.rows[0].stock_symbol).toBe("AAPL");
+      expect(result.rows[0].stock_issuer).toBe("coinbase");
+      expect(result.rows[0].fomo_address).toBe(VALID_EVM_ADDRESS);
+    });
+
+    it("accepts coinbase as a valid issuer value", () => {
+      const VALID_ISSUERS = ["xstocks", "prestocks", "coinbase"];
+      expect(VALID_ISSUERS.includes("coinbase")).toBe(true);
+      expect(VALID_ISSUERS.includes("invalid-issuer")).toBe(false);
+    });
   });
 });

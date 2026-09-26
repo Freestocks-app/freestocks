@@ -18,6 +18,8 @@
  * @see https://github.com/Uniswap/sdks/blob/main/sdks/sdk-core/src/addresses.ts
  */
 
+import { xstockLogo } from "@/lib/tokenized-stocks";
+
 export const BASE_CHAIN_ID = 8453;
 
 export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://mainnet.base.org";
@@ -56,15 +58,25 @@ export interface BaseStock {
   decimals: number;
   /** The one fee tier (in hundredths of a bip) confirmed to actually serve a live quote. */
   poolFee: number;
+  /**
+   * PLACEHOLDER for the hackathon demo only: Coinbase's own base.org/stocks
+   * page has no logo image for any individual stock (confirmed by reading
+   * its raw HTML directly - each stock renders as a plain colored text
+   * badge, e.g. "AAPLc", no <img> anywhere). Reusing xStocks' (Backed.fi's)
+   * logo CDN here is a different issuer's branding, not Coinbase's - this
+   * is a deliberate, explicit hackathon-only shortcut, not a permanent
+   * choice. Replace with real Coinbase/B20 branding if this ships further.
+   */
+  logo: string;
 }
 
 export const BASE_STOCKS: BaseStock[] = [
-  { symbol: "AAPL", name: "Apple", tokenSymbol: "AAPLc", address: "0xb200000000000000000000C2e324d24d7eEcd1fb", decimals: 8, poolFee: 3000 },
-  { symbol: "NVDA", name: "NVIDIA", tokenSymbol: "NVDAc", address: "0xb20000000000000000000078ee7ce2fE4908108C", decimals: 8, poolFee: 3000 },
-  { symbol: "META", name: "Meta", tokenSymbol: "METAc", address: "0xb2000000000000000000008bC8786B856E61707C", decimals: 8, poolFee: 3000 },
-  { symbol: "GOOGL", name: "Alphabet", tokenSymbol: "GOOGLc", address: "0xb2000000000000000000002D0BA3164cc74f58B7", decimals: 8, poolFee: 3000 },
-  { symbol: "MSFT", name: "Microsoft", tokenSymbol: "MSFTc", address: "0xB200000000000000000000Ab99cFa739E253872B", decimals: 8, poolFee: 10000 },
-  { symbol: "AMZN", name: "Amazon", tokenSymbol: "AMZNc", address: "0xb200000000000000000000d9192b6B456483C2E8", decimals: 8, poolFee: 10000 },
+  { symbol: "AAPL", name: "Apple", tokenSymbol: "AAPLc", address: "0xb200000000000000000000C2e324d24d7eEcd1fb", decimals: 8, poolFee: 3000, logo: xstockLogo("AAPLx") },
+  { symbol: "NVDA", name: "NVIDIA", tokenSymbol: "NVDAc", address: "0xb20000000000000000000078ee7ce2fE4908108C", decimals: 8, poolFee: 3000, logo: xstockLogo("NVDAx") },
+  { symbol: "META", name: "Meta", tokenSymbol: "METAc", address: "0xb2000000000000000000008bC8786B856E61707C", decimals: 8, poolFee: 3000, logo: xstockLogo("METAx") },
+  { symbol: "GOOGL", name: "Alphabet", tokenSymbol: "GOOGLc", address: "0xb2000000000000000000002D0BA3164cc74f58B7", decimals: 8, poolFee: 3000, logo: xstockLogo("GOOGLx") },
+  { symbol: "MSFT", name: "Microsoft", tokenSymbol: "MSFTc", address: "0xB200000000000000000000Ab99cFa739E253872B", decimals: 8, poolFee: 10000, logo: xstockLogo("MSFTx") },
+  { symbol: "AMZN", name: "Amazon", tokenSymbol: "AMZNc", address: "0xb200000000000000000000d9192b6B456483C2E8", decimals: 8, poolFee: 10000, logo: xstockLogo("AMZNx") },
 ];
 
 /**

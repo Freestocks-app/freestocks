@@ -30,7 +30,7 @@ export async function GET() {
 }
 
 const VALID_STOCK_SYMBOLS = allPriceSymbols;
-const VALID_ISSUERS: Issuer[] = ["xstocks", "prestocks"];
+const VALID_ISSUERS: Issuer[] = ["xstocks", "prestocks", "coinbase"];
 
 export async function POST(request: NextRequest) {
   await ensureDbInitialized();
@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Wallet address is required" }, { status: 400 });
   }
 
-  // TODO(privy): Update validation to accept Solana base58 addresses
   if (!fomoAddress.match(/^0x[a-fA-F0-9]{40}$/) && !fomoAddress.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
     return NextResponse.json({ error: "Invalid wallet address format" }, { status: 400 });
   }
@@ -103,6 +102,6 @@ export async function POST(request: NextRequest) {
     success: true,
     requestId,
     stockSymbol,
-    message: "Redemption request submitted. Your tokenized stock will be sent to your Solana wallet.",
+    message: "Redemption request submitted. Your tokenized stock will be sent to your wallet.",
   });
 }

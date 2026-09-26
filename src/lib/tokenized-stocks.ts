@@ -13,7 +13,7 @@
  * @see https://prestocks.com/api/prestocks
  */
 
-export type Issuer = "xstocks" | "prestocks";
+export type Issuer = "xstocks" | "prestocks" | "coinbase";
 
 export interface TokenizedStock {
   symbol: string;
@@ -27,7 +27,7 @@ export interface TokenizedStock {
   decimals: number;
 }
 
-function xstockLogo(tokenSymbol: string): string {
+export function xstockLogo(tokenSymbol: string): string {
   return `https://xstocks-metadata.backed.fi/logos/tokens/${tokenSymbol}.png`;
 }
 
@@ -92,6 +92,9 @@ export const allPriceSymbols = allCashoutStocks.map(s => s.symbol);
 export function getIssuerBadge(issuer: Issuer): { name: string; color: string } {
   if (issuer === "prestocks") {
     return { name: "Pre-IPO", color: "bg-purple-500/20 text-purple-300" };
+  }
+  if (issuer === "coinbase") {
+    return { name: "Coinbase", color: "bg-blue-500/20 text-blue-300" };
   }
   return { name: "xStocks", color: "bg-cta/20 text-cta" };
 }

@@ -6,9 +6,18 @@ import { Copy, Check, ArrowLeft } from "lucide-react";
 interface ReceiveViewProps {
   address: string;
   onBack: () => void;
+  /** Defaults to "Solana" - pass "Base" for the EVM/ETHGlobal demo flow. */
+  chainLabel?: string;
+  /** Defaults to today's Solana copy - pass a Base-specific asset hint for the EVM flow. */
+  assetHint?: string;
 }
 
-export function ReceiveView({ address, onBack }: ReceiveViewProps) {
+export function ReceiveView({
+  address,
+  onBack,
+  chainLabel = "Solana",
+  assetHint = "SOL, USDC, or any xStock",
+}: ReceiveViewProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -30,8 +39,8 @@ export function ReceiveView({ address, onBack }: ReceiveViewProps) {
       </button>
 
       <div className="text-center space-y-1">
-        <p className="text-sm font-semibold">Your Solana address</p>
-        <p className="text-xs text-muted">Send SOL, USDC, or any xStock to this address.</p>
+        <p className="text-sm font-semibold">Your {chainLabel} address</p>
+        <p className="text-xs text-muted">Send {assetHint} to this address.</p>
       </div>
 
       <div className="bg-elevated border border-border rounded-lg p-3">

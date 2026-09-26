@@ -33,7 +33,8 @@ export const ERC20_ABI = [
 ];
 
 let provider: JsonRpcProvider | null = null;
-function getProvider(): JsonRpcProvider {
+/** Shared singleton provider - reused by evm-wallet-balances.ts too, don't construct a second instance. */
+export function getProvider(): JsonRpcProvider {
   if (!provider) {
     provider = new JsonRpcProvider(BASE_RPC_URL, undefined, { staticNetwork: true });
   }

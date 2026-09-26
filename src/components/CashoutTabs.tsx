@@ -4,7 +4,9 @@ import { Suspense, useState, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SegmentedTabs } from "./SegmentedTabs";
 import { CashoutFlow } from "./CashoutFlow";
+import { EvmCashoutFlow } from "./EvmCashoutFlow";
 import { WalletBalances } from "./WalletBalances";
+import { EvmWalletBalances } from "./EvmWalletBalances";
 import { PrivyProvider } from "./PrivyProvider";
 import { persistWalletAddress } from "@/lib/persist-wallet-address";
 import type { RedeemRequest } from "@/lib/db/schema";
@@ -16,11 +18,21 @@ interface CashoutTabsProps {
   sessionEmail: string;
   privyAppId?: string;
   minCashoutCents: number;
+  /** True only on the ETHGlobal demo domain - see TradeScreen.tsx for the pattern this mirrors. */
+  ethGlobalDemo?: boolean;
 }
 
 type TabId = "cashout" | "wallet";
 
-function MyWalletTabContent({ sessionEmail, privyAppId }: { sessionEmail: string; privyAppId?: string }) {
+function MyWalletTabContent({
+  sessionEmail,
+  privyAppId,
+  ethGlobalDemo,
+}: {
+  sessionEmail: string;
+  privyAppId?: string;
+  ethGlobalDemo?: boolean;
+}) {
   const [address, setAddress] = useState<string | undefined>(undefined);
   const handleWalletReady = useCallback((addr: string) => {
     setAddress(addr);
@@ -37,7 +49,11 @@ function MyWalletTabContent({ sessionEmail, privyAppId }: { sessionEmail: string
 
   return (
     <PrivyProvider appId={privyAppId}>
-      <WalletBalances address={address} sessionEmail={sessionEmail} onWalletReady={handleWalletReady} />
+      {ethGlobalDemo ? (
+        <EvmWalletBalances />
+      ) : (
+        <WalletBalances address={address} sessionEmail={sessionEmail} onWalletReady={handleWalletReady} />
+      )}
     </PrivyProvider>
   );
 }
@@ -82,16 +98,30 @@ function CashoutTabsInner(props: CashoutTabsProps) {
       </div>
 
       {activeTab === "cashout" ? (
-        <CashoutFlow
-          balanceCents={props.balanceCents}
-          availableBalanceCents={props.availableBalanceCents}
-          pendingRequests={props.pendingRequests}
+        props.ethGlobalDemo ? (
+          <EvmCashoutFlow
+            balanceCents={props.balanceCents}
+            availableBalanceCents={props.availableBalanceCents}
+            pendingRequests={props.pendingRequests}
+            privyAppId={props.privyAppId}
+            minCashoutCents={props.minCashoutCents}
+          />
+        ) : (
+          <CashoutFlow
+            balanceCents={props.balanceCents}
+            availableBalanceCents={props.availableBalanceCents}
+            pendingRequests={props.pendingRequests}
+            sessionEmail={props.sessionEmail}
+            privyAppId={props.privyAppId}
+            minCashoutCents={props.minCashoutCents}
+          />
+        )
+      ) : (
+        <MyWalletTabContent
           sessionEmail={props.sessionEmail}
           privyAppId={props.privyAppId}
-          minCashoutCents={props.minCashoutCents}
+          ethGlobalDemo={props.ethGlobalDemo}
         />
-      ) : (
-        <MyWalletTabContent sessionEmail={props.sessionEmail} privyAppId={props.privyAppId} />
       )}
     </div>
   );
