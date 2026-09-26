@@ -59,6 +59,22 @@ export const QA_BYPASS_COOKIE = "fs_qa_bypass";
 export const COMING_SOON_HOSTS = new Set(["freestocks.app", "www.freestocks.app"]);
 
 /**
+ * The ETHGlobal Tokyo demo domain - a separate alias on the same
+ * Production deployment (same DB, same everything) as www/demo, kept
+ * distinct only so the two hackathon submissions don't visibly share a
+ * demo link. On this host only, the Trade screen defaults to/leads with
+ * the Ethereum (Base/Uniswap) side rather than Solana - everywhere else
+ * (www.freestocks.app, demo.freestocks.app, local dev) stays Solana-first
+ * for the Stocklana submission.
+ */
+export const ETHGLOBAL_DEMO_HOST = "demo-hack.freestocks.app";
+
+export function isEthGlobalDemoHost(hostname: string): boolean {
+  const host = hostname.split(":")[0]?.toLowerCase() ?? "";
+  return host === ETHGLOBAL_DEMO_HOST;
+}
+
+/**
  * True when this hostname should show the Coming Soon LP.
  * demo.freestocks.app, *.vercel.app, localhost stay full-app even if
  * NEXT_PUBLIC_COMING_SOON=true on Production.

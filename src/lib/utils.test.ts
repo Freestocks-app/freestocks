@@ -8,6 +8,7 @@ import {
   isValidWalletAddress,
   isComingSoonHost,
   isComingSoon,
+  isEthGlobalDemoHost,
   QA_BYPASS_COOKIE,
 } from "./utils";
 
@@ -223,5 +224,20 @@ describe("Coming Soon host gate", () => {
       vi.stubEnv("NEXT_PUBLIC_COMING_SOON", "false");
       expect(isComingSoon("www.freestocks.app")).toBe(false);
     });
+  });
+});
+
+describe("ETHGlobal demo host", () => {
+  it("recognizes the ETHGlobal demo domain", () => {
+    expect(isEthGlobalDemoHost("demo-hack.freestocks.app")).toBe(true);
+    expect(isEthGlobalDemoHost("DEMO-HACK.FREESTOCKS.APP")).toBe(true);
+    expect(isEthGlobalDemoHost("demo-hack.freestocks.app:443")).toBe(true);
+  });
+
+  it("treats every other host as the Stocklana (Solana-only) submission", () => {
+    expect(isEthGlobalDemoHost("www.freestocks.app")).toBe(false);
+    expect(isEthGlobalDemoHost("demo.freestocks.app")).toBe(false);
+    expect(isEthGlobalDemoHost("freestocks.app")).toBe(false);
+    expect(isEthGlobalDemoHost("localhost")).toBe(false);
   });
 });

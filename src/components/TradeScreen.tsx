@@ -23,6 +23,14 @@ import { EvmTradeScreen } from "./EvmTradeScreen";
 interface TradeScreenProps {
   sessionEmail: string;
   privyAppId?: string;
+  /**
+   * True only on the ETHGlobal demo domain (demo-hack.freestocks.app) -
+   * same deployment/DB as everywhere else, just a different host. When
+   * true, the screen is Ethereum(Base)-only with no chain toggle; when
+   * false (every other host - www, demo, local, previews), it's
+   * Solana-only with no chain toggle, matching the Stocklana submission.
+   */
+  ethGlobalDemo?: boolean;
 }
 
 type Side = "buy" | "sell";
@@ -468,11 +476,7 @@ function TradeScreenInner({ sessionEmail }: { sessionEmail: string }) {
   );
 }
 
-type Chain = "solana" | "ethereum";
-
-export function TradeScreen({ sessionEmail, privyAppId }: TradeScreenProps) {
-  const [chain, setChain] = useState<Chain>("solana");
-
+export function TradeScreen({ sessionEmail, privyAppId, ethGlobalDemo }: TradeScreenProps) {
   if (!privyAppId) {
     return (
       <div className="text-center py-8">
@@ -483,17 +487,7 @@ export function TradeScreen({ sessionEmail, privyAppId }: TradeScreenProps) {
 
   return (
     <PrivyProvider appId={privyAppId}>
-      <div className="max-w-md mx-auto mb-4 flex justify-center">
-        <SegmentedTabs
-          tabs={[
-            { id: "solana", label: "Solana" },
-            { id: "ethereum", label: "Ethereum" },
-          ]}
-          activeId={chain}
-          onChange={(id) => setChain(id as Chain)}
-        />
-      </div>
-      {chain === "solana" ? <TradeScreenInner sessionEmail={sessionEmail} /> : <EvmTradeScreen />}
+      {ethGlobalDemo ? <EvmTradeScreen /> : <TradeScreenInner sessionEmail={sessionEmail} />}
     </PrivyProvider>
   );
 }
