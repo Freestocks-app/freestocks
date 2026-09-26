@@ -16,6 +16,12 @@ import { usePrivy, useCreateWallet } from "@privy-io/react-auth";
  * hook covers that gap by calling createWallet() once, client-side, if
  * the user is authenticated but has no EVM wallet yet.
  */
+// TEMP-DEMO-RECORDING-MOCK: hardcoded fake address so the Base cashout UI
+// can be screen-recorded while Privy's demo-hack.freestocks.app origin
+// approval is still propagating. MUST be reverted to `null` (or the whole
+// block removed) before this file is ever committed/pushed again.
+const RECORDING_MOCK_ADDRESS: string | null = "0x000000000000000000000000000000000000dEaD";
+
 export function useEvmWalletAddress(): string | undefined {
   const { user, ready, authenticated } = usePrivy();
   const { createWallet } = useCreateWallet();
@@ -42,6 +48,10 @@ export function useEvmWalletAddress(): string | undefined {
       // up your Base wallet…" state and can retry by reloading.
     });
   }, [ready, authenticated, address, createWallet]);
+
+  if (RECORDING_MOCK_ADDRESS) {
+    return RECORDING_MOCK_ADDRESS;
+  }
 
   return address;
 }

@@ -69,7 +69,17 @@ export const COMING_SOON_HOSTS = new Set(["freestocks.app", "www.freestocks.app"
  */
 export const ETHGLOBAL_DEMO_HOST = "demo-hack.freestocks.app";
 
+// TEMP-DEMO-RECORDING-MOCK: force every host to render as the ETHGlobal
+// demo (Base) screen, for recording on a Vercel Preview URL while
+// demo-hack.freestocks.app's Privy origin approval is still propagating.
+// MUST be reverted to `false` (or the whole block removed) before this
+// file is ever committed/pushed again.
+const FORCE_ETHGLOBAL_DEMO_FOR_RECORDING = true;
+
 export function isEthGlobalDemoHost(hostname: string): boolean {
+  if (FORCE_ETHGLOBAL_DEMO_FOR_RECORDING) {
+    return true;
+  }
   const host = hostname.split(":")[0]?.toLowerCase() ?? "";
   return host === ETHGLOBAL_DEMO_HOST;
 }
